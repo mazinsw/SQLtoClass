@@ -1,4 +1,4 @@
-// Generated from D:\Estudos\Java\Desktop\SQLParser\SQL.g4 by ANTLR 4.1
+// Generated from D:\Estudos\Java\Desktop\SQLtoClass\SQL.g4 by ANTLR 4.1
 package parser;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
@@ -394,17 +394,6 @@ public interface SQLListener extends ParseTreeListener {
 	void exitTypeTimeStampStmt(@NotNull SQLParser.TypeTimeStampStmtContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link SQLParser#typeBigIntStmt}.
-	 * @param ctx the parse tree
-	 */
-	void enterTypeBigIntStmt(@NotNull SQLParser.TypeBigIntStmtContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SQLParser#typeBigIntStmt}.
-	 * @param ctx the parse tree
-	 */
-	void exitTypeBigIntStmt(@NotNull SQLParser.TypeBigIntStmtContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link SQLParser#typeBinaryStmt}.
 	 * @param ctx the parse tree
 	 */
@@ -414,6 +403,17 @@ public interface SQLListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTypeBinaryStmt(@NotNull SQLParser.TypeBinaryStmtContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#typeBigIntStmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterTypeBigIntStmt(@NotNull SQLParser.TypeBigIntStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#typeBigIntStmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitTypeBigIntStmt(@NotNull SQLParser.TypeBigIntStmtContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link SQLParser#typeTinyTextStmt}.
@@ -744,4 +744,15 @@ public interface SQLListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTypeVarBinaryStmt(@NotNull SQLParser.TypeVarBinaryStmtContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#dropSchema}.
+	 * @param ctx the parse tree
+	 */
+	void enterDropSchema(@NotNull SQLParser.DropSchemaContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#dropSchema}.
+	 * @param ctx the parse tree
+	 */
+	void exitDropSchema(@NotNull SQLParser.DropSchemaContext ctx);
 }

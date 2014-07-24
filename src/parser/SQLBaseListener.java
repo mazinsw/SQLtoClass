@@ -1,4 +1,4 @@
-// Generated from D:\Estudos\Java\Desktop\SQLParser\SQL.g4 by ANTLR 4.1
+// Generated from D:\Estudos\Java\Desktop\SQLtoClass\SQL.g4 by ANTLR 4.1
 package parser;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -472,19 +472,6 @@ public class SQLBaseListener implements SQLListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterTypeBigIntStmt(@NotNull SQLParser.TypeBigIntStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitTypeBigIntStmt(@NotNull SQLParser.TypeBigIntStmtContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
 	@Override public void enterTypeBinaryStmt(@NotNull SQLParser.TypeBinaryStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -492,6 +479,19 @@ public class SQLBaseListener implements SQLListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitTypeBinaryStmt(@NotNull SQLParser.TypeBinaryStmtContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterTypeBigIntStmt(@NotNull SQLParser.TypeBigIntStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitTypeBigIntStmt(@NotNull SQLParser.TypeBigIntStmtContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -882,6 +882,19 @@ public class SQLBaseListener implements SQLListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitTypeVarBinaryStmt(@NotNull SQLParser.TypeVarBinaryStmtContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterDropSchema(@NotNull SQLParser.DropSchemaContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitDropSchema(@NotNull SQLParser.DropSchemaContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

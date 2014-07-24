@@ -37,6 +37,7 @@ Icon
 
 *.class
 
-bin/parser/SQL.tokens
-bin/parser/SQLLexer.tokens
-.settings/org.eclipse.jdt.core.prefs
+bin/parser/*.tokens
+.settings
+outdir/*
+config.properties

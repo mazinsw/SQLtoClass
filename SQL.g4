@@ -9,11 +9,14 @@ grammar SQL;
 script: stmt*;
 
 stmt:  createSchema ';'
+    | dropSchema ';'
     | createTable ';'
     | dropTable ';'
     | useStmt ';'
     | setStmt ';';
 
+
+dropSchema: 'DROP' ('DATABASE' | 'SCHEMA') ('IF' 'EXISTS')? idName;
 
 createSchema: 'CREATE' ('DATABASE' | 'SCHEMA') ('IF' 'NOT' 'EXISTS')? idName
     createSpecification*;

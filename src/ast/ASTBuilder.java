@@ -26,6 +26,7 @@ import parser.SQLParser.CreateTableContext;
 import parser.SQLParser.DefaultNotNullContext;
 import parser.SQLParser.DefaultNullContext;
 import parser.SQLParser.DefaultValueContext;
+import parser.SQLParser.DropSchemaContext;
 import parser.SQLParser.DropTableNameContext;
 import parser.SQLParser.FieldStmtContext;
 import parser.SQLParser.ForeignStmtContext;
@@ -455,6 +456,13 @@ public class ASTBuilder extends SQLBaseListener {
 	@Override
 	public void exitUseStmt(UseStmtContext ctx) {
 		super.exitUseStmt(ctx);
+		discard(stack.pop()); // pop Name
+	}
+	
+	@Override
+	public void exitDropSchema(DropSchemaContext ctx) {
+		// TODO Auto-generated method stub
+		super.exitDropSchema(ctx);
 		discard(stack.pop()); // pop Name
 	}
 
