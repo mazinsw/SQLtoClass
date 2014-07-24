@@ -34,3 +34,9 @@ Icon
 # Files that might appear on external disk
 .Spotlight-V100
 .Trashes
+
+*.class
+
+bin/parser/SQL.tokens
+bin/parser/SQLLexer.tokens
+.settings/org.eclipse.jdt.core.prefs
