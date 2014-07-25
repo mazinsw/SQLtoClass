@@ -164,7 +164,7 @@ public class PHPGenerator extends CodeGenerator {
 		}
 		if (enumFields.size() > 0)
 			out.println();
-		out.println("class Z" + name + " {");
+		out.println("class " + getClassName(name) + " {");
 	}
 
 	private String genEnum(String name, Field field) {
@@ -253,7 +253,7 @@ public class PHPGenerator extends CodeGenerator {
 						+ "[" + data + "]");
 			} else
 				out.println("\t\t\t$this->set" + varName + "($" + unixName
-						+ "['" + field.getName() + "']);");
+						+ "['" + field.getName().toLowerCase() + "']);");
 		}
 		out.println("\t\t}");
 		out.println("\t}");
@@ -335,7 +335,6 @@ public class PHPGenerator extends CodeGenerator {
 		usedFields.clear();
 		for (Field field : table.getFields()) {
 			String varName = normalize(field.getName(), false);
-			String unixVarName = unixTransform(varName);
 			if (indexedFields.containsKey(varName))
 				continue;
 			if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
@@ -348,7 +347,7 @@ public class PHPGenerator extends CodeGenerator {
 				out.println("\t\t// TODO: assign array field " + varName + "["
 						+ data + "]");
 			} else
-				out.println("\t\t$" + unixName + "['" + unixVarName
+				out.println("\t\t$" + unixName + "['" + field.getName().toLowerCase()
 						+ "'] = $this->get" + varName + "();");
 		}
 		out.println("\t\treturn array_filter($" + unixName + ");");
@@ -398,18 +397,18 @@ public class PHPGenerator extends CodeGenerator {
 						+ catFieldName + "(" + paramIndexStr + paramsFieldName
 						+ ", $igonore_id = null) {");
 				out.println("\t\tif ( " + ifFields + " )");
-				out.println("\t\t\treturn new Z" + name + "();");
+				out.println("\t\t\treturn new " + getClassName(name) + "();");
 				out.println("\t\t$condition = array(" + arrElem + ");");
 				out.println("\t\tif(!is_null($igonore_id))");
 				out.println("\t\t\t$condition[] = '" + idName
 						+ " <> '.intval($igonore_id);");
-				out.println("\t\treturn new Z" + name + "(DB::GetTableRow('"
+				out.println("\t\treturn new " + getClassName(name) + "(DB::GetTableRow('"
 						+ tblname + "'" + indexStr + ", $condition));");
 			} else {
 				out.println("\tpublic static function getPel" + gch
 						+ catFieldName + "(" + paramIndexStr + paramsFieldName
 						+ ") {");
-				out.println("\t\treturn new Z" + name + "(DB::GetTableRow('"
+				out.println("\t\treturn new " + getClassName(name) + "(DB::GetTableRow('"
 						+ tblname + "'" + indexStr + ", array(" + arrElem
 						+ ")));");
 			}
@@ -435,6 +434,7 @@ public class PHPGenerator extends CodeGenerator {
 		for (Field field : table.getFields()) {
 			String varName = normalize(field.getName(), false);
 			String unixVarName = unixTransform(varName);
+			String fieldName = field.getName().toLowerCase();
 			if (indexedFields.containsKey(varName))
 				continue;
 			if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
@@ -454,13 +454,13 @@ public class PHPGenerator extends CodeGenerator {
 					if (!field.isNotNull() || field.getValue() == null) {
 						if (canTrimField(unixVarName)
 								&& field.getType().getType() != DataType.ENUM) {
-							out.println("\t\t$" + unixName + "['" + unixVarName
+							out.println("\t\t$" + unixName + "['" + fieldName
 									+ "'] = trim($" + unixName + "['"
-									+ unixVarName + "']);");
+									+ fieldName + "']);");
 						} else {
-							out.println("\t\t$" + unixName + "['" + unixVarName
+							out.println("\t\t$" + unixName + "['" + fieldName
 									+ "'] = strval($" + unixName + "['"
-									+ unixVarName + "']);");
+									+ fieldName + "']);");
 						}
 					}
 					if (skipTestField(unixVarName))
@@ -469,31 +469,31 @@ public class PHPGenerator extends CodeGenerator {
 						if (field.getValue() == null) {
 							if (field.getType().getType() == DataType.ENUM) {
 								out.println("\t\tif(!in_array($" + unixName
-										+ "['" + unixVarName + "'], array("
+										+ "['" + fieldName + "'], array("
 										+ genEnumArray(field) + ")))");
 							} else if (isFunctionChecker(unixVarName)) {
 								out.println("\t\tif(!check_" + unixVarName
-										+ "($" + unixName + "['" + unixVarName
+										+ "($" + unixName + "['" + fieldName
 										+ "']))");
 							} else {
 								out.println("\t\tif(strlen($" + unixName + "['"
-										+ unixVarName + "']) == 0)");
+										+ fieldName + "']) == 0)");
 							}
 							out.println("\t\t\treturn false;");
 						}
 					} else {
 						out.println("\t\tif(strlen($" + unixName + "['"
-								+ unixVarName + "']) == 0)");
-						out.println("\t\t\t$" + unixName + "['" + unixVarName
+								+ fieldName + "']) == 0)");
+						out.println("\t\t\t$" + unixName + "['" + fieldName
 								+ "'] = null;");
 						if (field.getType().getType() == DataType.ENUM) {
 							out.println("\t\telse if(!in_array($" + unixName
-									+ "['" + unixVarName + "'], array("
+									+ "['" + fieldName + "'], array("
 									+ genEnumArray(field) + ")))");
 							out.println("\t\t\treturn false;");
 						} else if (isFunctionChecker(unixVarName)) {
 							out.println("\t\telse if(!check_" + unixVarName
-									+ "($" + unixName + "['" + unixVarName
+									+ "($" + unixName + "['" + fieldName
 									+ "']))");
 							out.println("\t\t\treturn false;");
 						}
@@ -509,46 +509,46 @@ public class PHPGenerator extends CodeGenerator {
 							out.println("\t\tif(array_key_exists('"
 									+ unixVarName + "', $" + unixName + ")) {");
 							out.println("\t\t\tif(!is_numeric($" + unixName
-									+ "['" + unixVarName + "']))");
+									+ "['" + fieldName + "']))");
 							out.println("\t\t\t\treturn false;");
 							out.println("\t\t\telse");
 							if (field.getType().getType() == DataType.INTEGER) {
 								out.println("\t\t\t\t$" + unixName + "['"
-										+ unixVarName + "'] = intval($"
-										+ unixName + "['" + unixVarName
+										+ fieldName + "'] = intval($"
+										+ unixName + "['" + fieldName
 										+ "']);");
 							} else {
 								out.println("\t\t\t\t$" + unixName + "['"
-										+ unixVarName + "'] = floatval($"
-										+ unixName + "['" + unixVarName
+										+ fieldName + "'] = floatval($"
+										+ unixName + "['" + fieldName
 										+ "']);");
 							}
 							out.println("\t\t}");
 						} else {
 							out.println("\t\tif(!is_numeric($" + unixName
-									+ "['" + unixVarName + "']))");
+									+ "['" + fieldName + "']))");
 							out.println("\t\t\treturn false;");
 						}
 					} else {
-						out.println("\t\t$" + unixName + "['" + unixVarName
-								+ "'] = trim($" + unixName + "['" + unixVarName
+						out.println("\t\t$" + unixName + "['" + fieldName
+								+ "'] = trim($" + unixName + "['" + fieldName
 								+ "']);");
 						out.println("\t\tif(strlen($" + unixName + "['"
-								+ unixVarName + "']) == 0)");
-						out.println("\t\t\t$" + unixName + "['" + unixVarName
+								+ fieldName + "']) == 0)");
+						out.println("\t\t\t$" + unixName + "['" + fieldName
 								+ "'] = null;");
 						out.println("\t\telse if(!is_numeric($" + unixName
-								+ "['" + unixVarName + "']))");
+								+ "['" + fieldName + "']))");
 						out.println("\t\t\treturn false;");
 					}
 				} else if (field.getType().getType() == DataType.DATETIME) {
-					out.println("\t\t$" + unixName + "['" + unixVarName
+					out.println("\t\t$" + unixName + "['" + fieldName
 							+ "'] = date('Y-m-d H:i:s');");
 				} else if (field.getType().getType() == DataType.DATE) {
-					out.println("\t\t$" + unixName + "['" + unixVarName
+					out.println("\t\t$" + unixName + "['" + fieldName
 							+ "'] = date('Y-m-d');");
 				} else if (field.getType().getType() == DataType.TIME) {
-					out.println("\t\t$" + unixName + "['" + unixVarName
+					out.println("\t\t$" + unixName + "['" + fieldName
 							+ "'] = date('H:i:s');");
 				}
 			}
@@ -564,12 +564,12 @@ public class PHPGenerator extends CodeGenerator {
 			out.println("\t\t$_" + unixName + " = $" + unixName
 					+ "->toArray();");
 			out.println("\t\tif(!self::validarCampos($_" + unixName + "))");
-			out.println("\t\t\treturn new Z" + name + "();");
-			out.println("\t\t$_" + unixName + "['" + idName
+			out.println("\t\t\treturn new " + getClassName(name) + "();");
+			out.println("\t\t$_" + unixName + "['" + idName.toLowerCase()
 					+ "'] = DB::Insert('" + tblname + "'" + indexStr + ", $_"
 					+ unixName + ");");
 			out.println("\t\treturn self::getPel" + gch + "Id($_" + unixName
-					+ "['" + idName + "']);");
+					+ "['" + idName.toLowerCase() + "']);");
 			out.println("\t}");
 			// atualizar
 			out.println();
@@ -577,7 +577,7 @@ public class PHPGenerator extends CodeGenerator {
 					+ ") {");
 			out.println("\t\t$_" + unixName + " = $" + unixName
 					+ "->toArray();");
-			out.println("\t\tif(!$_" + unixName + "['" + idName + "'])");
+			out.println("\t\tif(!$_" + unixName + "['" + idName.toLowerCase() + "'])");
 			out.println("\t\t\treturn false;");
 			out.println("\t\tif(!self::validarCampos($_" + unixName + "))");
 			out.println("\t\t\treturn false;");
@@ -602,14 +602,14 @@ public class PHPGenerator extends CodeGenerator {
 					if (field.isAutoIncrement()
 							|| (idName != null && idName.equals(unixVarName)))
 						continue;
-					out.println("\t\t\t'" + unixVarName + "',");
+					out.println("\t\t\t'" + field.getName().toLowerCase() + "',");
 				}
 			}
 			out.println("\t\t);");
 			out.println("\t\t$table = new Table('" + tblname + "'" + indexStr
 					+ ", $_" + unixName + ");");
-			out.println("\t\t$table->SetPk('" + idName + "', $_" + unixName
-					+ "['" + idName + "']);");
+			out.println("\t\t$table->SetPk('" + idName.toLowerCase() + "', $_" + unixName
+					+ "['" + idName.toLowerCase() + "']);");
 			out.println("\t\treturn $table->Update($campos);");
 			out.println("\t}");
 		}
@@ -635,7 +635,7 @@ public class PHPGenerator extends CodeGenerator {
 					+ "'" + indexStr + ", $condition);");
 			out.println("\t\t$" + unixName + "s = array();");
 			out.println("\t\tforeach($_" + unixName + "s as $" + unixName + ")");
-			out.println("\t\t\t$" + unixName + "s[] = new Z" + name + "($"
+			out.println("\t\t\t$" + unixName + "s[] = new " + getClassName(name) + "($"
 					+ unixName + ");");
 			out.println("\t\treturn $" + unixName + "s;");
 			out.println("\t}");
@@ -652,7 +652,11 @@ public class PHPGenerator extends CodeGenerator {
 
 	@Override
 	public String getNameWithExtension(String name) {
-		return "Z" + name + ".class.php";
+		return getClassName(name) + ".class.php";
+	}
+	
+	protected String getClassName(String name) {
+		return getClassPrefix() + name + getClassSuffix();
 	}
 
 }
