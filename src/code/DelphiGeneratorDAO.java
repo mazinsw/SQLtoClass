@@ -46,8 +46,11 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 			if (!(constraint instanceof PrimaryKey))
 				continue;
 			PrimaryKey pk = (PrimaryKey) constraint;
-			for (OrderFied field : pk.getFields()) {
-				list.add(table.find(field.getName()));
+			for (OrderFied orderField : pk.getFields()) {
+				Field field = table.find(orderField.getName());
+				if(field == null)
+					throw new RuntimeException("Restrição ou índice inconsistente, a coluna `" + orderField.getName() + "` não faz parte da tabela `" + table.getName() + "`");
+				list.add(field);
 			}
 			break;
 		}
@@ -139,9 +142,7 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 			boolean indexed, List<Field> keyFields) {
 		for (Field field : keyFields) {
 			String varName = normalize(field.getName(), false);
-			out.println("  Qry.ParamByName('" + field.getName() + "')."
-					+ getQueryType(field) + " := " + getBaseClassName(name)
-					+ "." + varName + ";");
+			writeSetParam(out, name, field, varName, "  ");
 		}
 	}
 
@@ -157,6 +158,8 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		String AndStmt = "";
 		for (OrderFied orderField : constraint.getFields()) {
 			Field field = table.find(orderField.getName());
+			if(field == null)
+				throw new RuntimeException("Restrição ou índice inconsistente, a coluna `" + orderField.getName() + "` não faz parte da tabela `" + table.getName() + "`");
 			if (!AndStmt.equals(""))
 				out.println(AndStmt);
 			out.print("      '" + field.getName() + " = :" + field.getName());
@@ -178,18 +181,16 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 			List<Field> keyFields, boolean update) {
 		for (OrderFied orderField : constraint.getFields()) {
 			Field field = table.find(orderField.getName());
+			if(field == null)
+				throw new RuntimeException("Restrição ou índice inconsistente, a coluna `" + orderField.getName() + "` não faz parte da tabela `" + table.getName() + "`");
 			String varName = normalize(field.getName(), false);
-			out.println("    Qry.ParamByName('" + field.getName() + "')."
-					+ getQueryType(field) + " := " + getBaseClassName(name)
-					+ "." + varName + ";");
+			writeSetParam(out, name, field, varName, "    ");
 		}
 		if(!update)
 			return;
 		for (Field field : keyFields) {
 			String varName = normalize(field.getName(), false);
-			out.println("    Qry.ParamByName('" + field.getName() + "')."
-					+ getQueryType(field) + " := " + getBaseClassName(name)
-					+ "." + varName + ";");
+			writeSetParam(out, name, field, varName, "    ");
 		}
 	}
 
@@ -251,6 +252,9 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 			out.println("      Qry.Close;");
 			Field field = table.find(constraint.getFields()
 					.get(constraint.getFields().size() - 1).getName());
+			if(field == null)
+				throw new RuntimeException("Restrição ou índice inconsistente, a coluna `" + constraint.getFields()
+						.get(constraint.getFields().size() - 1).getName() + "` não faz parte da tabela `" + table.getName() + "`");
 			String uniqueFieldName = field.getName();
 			String varName = normalize(uniqueFieldName, false);
 			String action;
@@ -262,9 +266,20 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 					+ ".CreateFmt('Não foi possível " + action + " "
 					+ getGenderChar(name) + " " + normalize(name).toLowerCase()
 					+ ", " + getGenderChar(uniqueFieldName) + " "
-					+ uniqueFieldName.toLowerCase() + " \"%s\" já existe', ["
+					+ uniqueFieldName.toLowerCase() + " \"" + getFormatFromType(field) + "\" já existe', ["
 					+ getBaseClassName(name) + "." + varName + "]);");
 			out.println("    end;");
+		}
+	}
+
+	private String getFormatFromType(Field field) {
+		switch (field.getType().getType()) {
+		case DataType.STRING:
+		case DataType.CHAR:
+		case DataType.TEXT:
+			return "%s";
+		default:
+			return "%d";
 		}
 	}
 
@@ -276,7 +291,7 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println("implementation");
 		out.println();
 		out.println("uses");
-		out.println("  Variants;");
+		out.println("  Variants, DBUtils;");
 		out.println();
 		out.println("class procedure T" + getClassName(name)
 				+ ".Carregar(Qry: TZQuery; " + getBaseClassName(name) + ": T"
@@ -309,6 +324,7 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println("    raise Exception.Create('Não foi possível inserir "
 				+ getGenderChar(name) + " " + normalize(name).toLowerCase() + "');");
 		out.println("  end;");
+		genGetInsertID(out, name, table, keyFields);
 		out.println("end;");
 		out.println();
 		out.println("class procedure T" + getClassName(name)
@@ -356,7 +372,7 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println("  Qry.ExecSQL;");
 		out.println("end;");
 		out.println();
-		out.println("procedure T" + getClassName(name) + ".ListarTod"
+		out.println("class procedure T" + getClassName(name) + ".ListarTod"
 				+ getGenderChar(name) + "s(Qry: TZQuery" + indexField + "; Metodo: TListar"
 				+ name + "; Inicio, Tamanho: Integer);");
 		out.println("var");
@@ -404,9 +420,7 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 			if (field.getType().getType() == DataType.BLOB)
 				continue;
 			String varName = genArrayAccess(normalize(field.getName(), false));
-			String enumItems = genEnum(name, field);
-			if ((!field.isNotNull() || field.isAutoIncrement() || field
-					.getValue() != null) && !getNullValue(field).equals("?")) {
+			if ((!field.isNotNull() || field.isAutoIncrement()) && !getNullValue(field).equals("?")) {
 				out.println("  if (" + getBaseClassName(name) + "." + varName
 						+ " = " + getNullValue(field) + ") then");
 				out.println("    Qry.ParamByName('" + field.getName()
@@ -414,15 +428,7 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 				out.println("  else");
 				out.print("  ");
 			}
-			String funcPrefix = "";
-			String funcSuffix = "";
-			if (enumItems != null) {
-				funcPrefix = convertType(name, field, false) + "ToString[";
-				funcSuffix = "]";
-			}
-			out.println("  Qry.ParamByName('" + field.getName() + "')."
-					+ getQueryType(field) + " := " + funcPrefix
-					+ getBaseClassName(name) + "." + varName + funcSuffix + ";");
+			writeSetParam(out, name, field, varName, "  ");
 		}
 		out.println("end;");
 		out.println();
@@ -443,6 +449,17 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println("  end;");
 		out.println("  Qry.Close;");
 		out.println("end;");
+	}
+
+	private void genGetInsertID(PrintWriter out, String name, Table table, List<Field> keyFields) {
+		if(keyFields.size() != 1)
+			return;
+		Field pkField = keyFields.get(0);
+		if(!pkField.isAutoIncrement())
+			return;
+		String varName = genArrayAccess(normalize(pkField.getName(), false));
+		out.println("  if " + getBaseClassName(name) + "." + varName + " = 0 then");
+		out.println("    " + getBaseClassName(name) + "." + varName + " := TDBUtil.GetLastInsertedID(Qry);");
 	}
 
 	private String getNullValue(Field field) {
@@ -470,14 +487,22 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		return "?";
 	}
 
+	private String getParamType(Field field) {
+		switch (field.getType().getType()) {
+		case DataType.DATE:
+			return "AsDate";
+		case DataType.TIME:
+			return "AsTime";
+		default:
+			return getQueryType(field);
+		}
+	}
 	private String getQueryType(Field field) {
 		switch (field.getType().getType()) {
 		case DataType.BOOLEAN:
 			return "AsBoolean";
 		case DataType.DATE:
-			return "AsDate";
 		case DataType.TIME:
-			return "AsTime";
 		case DataType.DATETIME:
 			return "AsDateTime";
 		case DataType.FLOAT:
@@ -515,6 +540,19 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println();
 		out.println("end.");
 
+	}
+	
+	private void writeSetParam(PrintWriter out, String name, Field field, String varName, String indent) {
+		String enumItems = genEnum(name, field);
+		String funcPrefix = "";
+		String funcSuffix = "";
+		if (enumItems != null) {
+			funcPrefix = convertType(name, field, false) + "ToString[";
+			funcSuffix = "]";
+		}
+		out.println(indent + "Qry.ParamByName('" + field.getName() + "')."
+				+ getParamType(field) + " := " + funcPrefix
+				+ getBaseClassName(name) + "." + varName + funcSuffix + ";");
 	}
 
 	private String getBaseClassName(String name) {

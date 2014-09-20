@@ -230,8 +230,8 @@ public abstract class CodeGenerator {
 	
 	public String getGenderChar(String name) {
 		String nlc = name.toLowerCase();
-		if (nlc.endsWith("or") || nlc.endsWith("o") || nlc.equals("id") || nlc.endsWith("oid") || nlc.endsWith("il")
-				|| nlc.endsWith("cnpj") || nlc.endsWith("cpf") || nlc.endsWith("me")|| nlc.endsWith("in")|| nlc.endsWith("tema"))
+		if (nlc.endsWith("e") || nlc.endsWith("or") || nlc.endsWith("o") || nlc.equals("id") || nlc.endsWith("oid") || nlc.endsWith("il")
+				|| nlc.endsWith("cnpj") || nlc.endsWith("cpf") || nlc.endsWith("in")|| nlc.endsWith("tema"))
 			return "o";
 		return "a";
 	}

@@ -461,7 +461,6 @@ public class ASTBuilder extends SQLBaseListener {
 	
 	@Override
 	public void exitDropSchema(DropSchemaContext ctx) {
-		// TODO Auto-generated method stub
 		super.exitDropSchema(ctx);
 		discard(stack.pop()); // pop Name
 	}

@@ -1,15 +1,16 @@
 package main;
 
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileNotFoundException;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -27,15 +28,11 @@ import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import util.Configuration;
+import ast.ASTBuilder;
 import code.CodeGenerator;
 import code.DelphiGenerator;
 import code.DelphiGeneratorDAO;
 import code.PHPGenerator;
-import ast.ASTBuilder;
-
-import java.awt.Color;
-
-import javax.swing.JCheckBox;
 
 public class MainWindow extends JFrame {
 
@@ -391,8 +388,9 @@ public class MainWindow extends JFrame {
 			configuration.setPrefixDAO(textFieldPrefixoDAO.getText());
 			configuration.setSuffixDAO(textFieldSufixoDAO.getText());
 			configuration.save();
-		} catch (FileNotFoundException e) {
+		} catch (Exception e) {
 			addLog(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
