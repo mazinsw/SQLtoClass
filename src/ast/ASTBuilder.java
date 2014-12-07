@@ -54,6 +54,7 @@ import parser.SQLParser.TypeLongBlobStmtContext;
 import parser.SQLParser.TypeLongTextStmtContext;
 import parser.SQLParser.TypeMediumBlobStmtContext;
 import parser.SQLParser.TypeMediumTextStmtContext;
+import parser.SQLParser.TypeNumericStmtContext;
 import parser.SQLParser.TypeTextStmtContext;
 import parser.SQLParser.TypeTimeStmtContext;
 import parser.SQLParser.TypeTinyBlobStmtContext;
@@ -210,7 +211,15 @@ public class ASTBuilder extends SQLBaseListener {
 	public void enterTypeDecimalStmt(TypeDecimalStmtContext ctx) {
 		super.enterTypeDecimalStmt(ctx);
 		Field field = (Field) stack.peek();
-		DataType type = new DataType(DataType.FLOAT);
+		DataType type = new DataType(DataType.DECIMAL);
+		field.setType(type);
+	}
+	
+	@Override
+	public void enterTypeNumericStmt(TypeNumericStmtContext ctx) {
+		super.enterTypeNumericStmt(ctx);
+		Field field = (Field) stack.peek();
+		DataType type = new DataType(DataType.DECIMAL);
 		field.setType(type);
 	}
 

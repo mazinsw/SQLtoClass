@@ -32,7 +32,8 @@ import ast.ASTBuilder;
 import code.CodeGenerator;
 import code.DelphiGenerator;
 import code.DelphiGeneratorDAO;
-import code.PHPGenerator;
+import code.PHPGeneratorDB;
+import code.PHPGeneratorFluentPDO;
 
 public class MainWindow extends JFrame {
 
@@ -57,6 +58,7 @@ public class MainWindow extends JFrame {
 	private JTextField textFieldPastaSaidaDAO;
 	private JTextField textFieldPrefixoDAO;
 	private JTextField textFieldSufixoDAO;
+	private JCheckBox chckbxUsarFluentPDO;
 	
 	/**
 	 * Launch the application.
@@ -131,7 +133,7 @@ public class MainWindow extends JFrame {
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Linguagem", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(10, 62, 87, 80);
+		panel.setBounds(10, 62, 104, 80);
 		contentPane.add(panel);
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		
@@ -178,7 +180,7 @@ public class MainWindow extends JFrame {
 		
 		JPanel panel_1 = new JPanel();
 		panel_1.setBorder(new TitledBorder(null, "Classes", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel_1.setBounds(107, 62, 512, 91);
+		panel_1.setBounds(124, 62, 495, 91);
 		contentPane.add(panel_1);
 		panel_1.setLayout(null);
 		
@@ -187,7 +189,7 @@ public class MainWindow extends JFrame {
 		panel_1.add(label);
 		
 		textFieldPastaSaida = new JTextField();
-		textFieldPastaSaida.setBounds(89, 17, 324, 20);
+		textFieldPastaSaida.setBounds(89, 17, 306, 20);
 		textFieldPastaSaida.setText((String) null);
 		textFieldPastaSaida.setColumns(10);
 		panel_1.add(textFieldPastaSaida);
@@ -235,18 +237,18 @@ public class MainWindow extends JFrame {
 				actionAbrirPasta();
 			}
 		});
-		btnAbrirPasta.setBounds(422, 11, 80, 32);
+		btnAbrirPasta.setBounds(405, 11, 80, 32);
 		panel_1.add(btnAbrirPasta);
 		
 		labelPastaSaidaMsg = new JLabel("");
 		labelPastaSaidaMsg.setForeground(Color.RED);
-		labelPastaSaidaMsg.setBounds(89, 37, 324, 14);
+		labelPastaSaidaMsg.setBounds(89, 37, 306, 14);
 		panel_1.add(labelPastaSaidaMsg);
 		
 		JPanel panel_2 = new JPanel();
 		panel_2.setLayout(null);
 		panel_2.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Classes DAO", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel_2.setBounds(107, 160, 512, 91);
+		panel_2.setBounds(124, 164, 495, 91);
 		contentPane.add(panel_2);
 		
 		JLabel label_3 = new JLabel("Pasta de saida:");
@@ -256,7 +258,7 @@ public class MainWindow extends JFrame {
 		textFieldPastaSaidaDAO = new JTextField();
 		textFieldPastaSaidaDAO.setText((String) null);
 		textFieldPastaSaidaDAO.setColumns(10);
-		textFieldPastaSaidaDAO.setBounds(89, 17, 324, 20);
+		textFieldPastaSaidaDAO.setBounds(89, 17, 306, 20);
 		panel_2.add(textFieldPastaSaidaDAO);
 		
 		JLabel label_4 = new JLabel("Prefixo");
@@ -285,13 +287,18 @@ public class MainWindow extends JFrame {
 				actionAbrirPastaDAO();
 			}
 		});
-		btnAbrirPastaDAO.setBounds(422, 11, 80, 32);
+		btnAbrirPastaDAO.setBounds(405, 11, 80, 32);
 		panel_2.add(btnAbrirPastaDAO);
 		
 		labelPastaSaidaMsgDAO = new JLabel("");
 		labelPastaSaidaMsgDAO.setForeground(Color.RED);
-		labelPastaSaidaMsgDAO.setBounds(89, 37, 324, 14);
+		labelPastaSaidaMsgDAO.setBounds(89, 37, 306, 14);
 		panel_2.add(labelPastaSaidaMsgDAO);
+		
+		chckbxUsarFluentPDO = new JCheckBox("Usar FluentPDO");
+		chckbxUsarFluentPDO.setSelected(true);
+		chckbxUsarFluentPDO.setBounds(10, 186, 104, 23);
+		contentPane.add(chckbxUsarFluentPDO);
 		initForm();
 	}
 
@@ -313,6 +320,7 @@ public class MainWindow extends JFrame {
 		textFieldPrefixoDAO.setText(configuration.getPrefixDAO());
 		textFieldSufixoDAO.setText(configuration.getSuffixDAO());
 		chckbxGerarDao.setSelected(configuration.isGenerateDAO());
+		chckbxUsarFluentPDO.setSelected(configuration.getPHPPDO() == Configuration.PHP_FLUENT_PDO);
 	}
 
 	private void optionsChanged() {
@@ -357,8 +365,12 @@ public class MainWindow extends JFrame {
 		CodeGenerator gen;
 		if(rdbtnDelphi.isSelected())
 			gen = new DelphiGenerator(textFieldPastaSaida.getText(), builder.getScript());
-		else
-			gen = new PHPGenerator(textFieldPastaSaida.getText(), builder.getScript());
+		else {
+			if(chckbxUsarFluentPDO.isSelected())
+				gen = new PHPGeneratorFluentPDO(textFieldPastaSaida.getText(), builder.getScript());
+			else
+				gen = new PHPGeneratorDB(textFieldPastaSaida.getText(), builder.getScript());
+		}
 		gen.setClassPrefix(textFieldPrefixo.getText());
 		gen.setClassSuffix(textFieldSufixo.getText());
 		try {
@@ -369,8 +381,12 @@ public class MainWindow extends JFrame {
 					genDAO.setClassBasePrefix(textFieldPrefixo.getText());
 					genDAO.setClassBaseSuffix(textFieldSufixo.getText());
 					gen = genDAO;
-				} else
-					gen = new PHPGenerator(textFieldPastaSaida.getText(), builder.getScript()); // TODO create DAO for PHP
+				} else {
+					if(chckbxUsarFluentPDO.isSelected())
+						gen = new PHPGeneratorFluentPDO(textFieldPastaSaida.getText(), builder.getScript()); // TODO create DAO for PHP
+					else
+						gen = new PHPGeneratorDB(textFieldPastaSaida.getText(), builder.getScript()); // TODO create DAO for PHP
+				}
 				gen.setClassPrefix(textFieldPrefixoDAO.getText());
 				gen.setClassSuffix(textFieldSufixoDAO.getText());
 				gen.start();
@@ -384,6 +400,10 @@ public class MainWindow extends JFrame {
 			else
 				configuration.setGenerator(Configuration.GENERATE_PHP);
 			configuration.setGenerateDAO(chckbxGerarDao.isSelected());
+			if(chckbxUsarFluentPDO.isSelected())
+				configuration.setPHPPDO(Configuration.PHP_FLUENT_PDO);
+			else
+				configuration.setPHPPDO(Configuration.PHP_DB_PDO);
 			configuration.setPathDAO(textFieldPastaSaidaDAO.getText());
 			configuration.setPrefixDAO(textFieldPrefixoDAO.getText());
 			configuration.setSuffixDAO(textFieldSufixoDAO.getText());

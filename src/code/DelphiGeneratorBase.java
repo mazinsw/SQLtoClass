@@ -44,6 +44,8 @@ public abstract class DelphiGeneratorBase extends CodeGenerator {
 			return "Single";
 		case DataType.DOUBLE:
 			return "Double";
+		case DataType.DECIMAL:
+			return "Currency";
 		case DataType.BIGINT:
 			return "Int64";
 		case DataType.INTEGER:

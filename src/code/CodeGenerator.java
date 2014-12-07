@@ -154,6 +154,8 @@ public abstract class CodeGenerator {
 	public static String despluralize(String word) {
 		if (word.endsWith("oes"))
 			word = word.substring(0, word.length() - 3) + "ao";
+		else if (word.endsWith("is"))
+			word = word.substring(0, word.length() - 2) + "l";
 		else if (word.endsWith("res"))
 			word = word.substring(0, word.length() - 2);
 		else if (word.endsWith("es") || word.endsWith("as")
@@ -228,10 +230,24 @@ public abstract class CodeGenerator {
 		return false;
 	}
 	
+	public static boolean skipUpdateField(String field) {
+		if(field.contains("cadastro") && field.contains("data"))
+			return true;
+		if(field.contains("inicio") && field.contains("data"))
+			return true;
+		if(field.contains("abertura") && field.contains("data"))
+			return true;
+		if(field.contains("criacao") && field.contains("data"))
+			return true;
+		return false;
+	}
+	
 	public String getGenderChar(String name) {
 		String nlc = name.toLowerCase();
-		if (nlc.endsWith("e") || nlc.endsWith("or") || nlc.endsWith("o") || nlc.equals("id") || nlc.endsWith("oid") || nlc.endsWith("il")
-				|| nlc.endsWith("cnpj") || nlc.endsWith("cpf") || nlc.endsWith("in")|| nlc.endsWith("tema"))
+		if (nlc.endsWith("de"))
+			return "a";
+		if (nlc.endsWith("e") || nlc.endsWith("or") || nlc.endsWith("o") || nlc.equals("id") || nlc.endsWith("oid") || nlc.endsWith("el") || nlc.endsWith("il")
+				|| nlc.endsWith("cnpj") || nlc.endsWith("cpf") || nlc.endsWith("in")|| nlc.endsWith("tema")|| nlc.endsWith("p"))
 			return "o";
 		return "a";
 	}

@@ -15,6 +15,7 @@ public class DataType extends Node {
 	public static final int CHAR = 11;
 	public static final int TINYINT = 12;
 	public static final int BLOB = 13;
+	public static final int DECIMAL = 14;
 	private int type;
 	
 	public DataType(int type) {

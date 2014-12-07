@@ -10,6 +10,9 @@ import java.util.Properties;
 public class Configuration {
 	public static final int GENERATE_PHP = 0;
 	public static final int GENERATE_DELPHI = 1;
+	public static final int PHP_DB_PDO = 0;
+	public static final int PHP_FLUENT_PDO = 1;
+	
 	private String file;
 	private String path;
 	private String pathDAO;
@@ -19,6 +22,7 @@ public class Configuration {
 	private String prefixDAO;
 	private boolean generateDAO;
 	private int generator;
+	private int phpPDO;
 
 	public Configuration() {
 		load();
@@ -96,6 +100,14 @@ public class Configuration {
 		this.generateDAO = generateDAO;
 	}
 
+	public int getPHPPDO() {
+		return phpPDO;
+	}
+
+	public void setPHPPDO(int phpDB) {
+		this.phpPDO = phpDB;
+	}
+
 	public void load() {
 		File configFile = new File("config.properties");
 
@@ -119,6 +131,11 @@ public class Configuration {
 				generator = Integer.valueOf(props.getProperty("generator"));
 			else
 				generator = GENERATE_PHP;
+			phpPDO = PHP_DB_PDO;
+			if (props.containsKey("phpPDO")) {
+				if(props.getProperty("phpPDO").equals(String.valueOf(PHP_FLUENT_PDO)))
+					phpPDO = PHP_FLUENT_PDO;
+			}
 			reader.close();
 		} catch (FileNotFoundException ex) {
 			// file does not exist
@@ -141,6 +158,7 @@ public class Configuration {
 			props.setProperty("prefixDAO", prefixDAO);
 			props.setProperty("generateDAO", String.valueOf(generateDAO));
 			props.setProperty("generator", String.valueOf(generator));
+			props.setProperty("phpPDO", String.valueOf(phpPDO));
 			FileWriter writer = new FileWriter(configFile);
 			props.store(writer, "generator");
 			writer.close();

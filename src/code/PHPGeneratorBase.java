@@ -2,11 +2,13 @@ package code;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import util.Pair;
 import ast.Constraint;
 import ast.DataType;
 import ast.EnumType;
@@ -16,11 +18,11 @@ import ast.OrderFied;
 import ast.ScriptNode;
 import ast.Table;
 
-public class PHPGenerator extends CodeGenerator {
+public abstract class PHPGeneratorBase extends CodeGenerator {
 
 	private static final String[] indexNames = { "$linha", "$coluna" };
 
-	public PHPGenerator(String outDir, ScriptNode script) {
+	public PHPGeneratorBase(String outDir, ScriptNode script) {
 		super(outDir, script);
 	}
 
@@ -204,7 +206,7 @@ public class PHPGenerator extends CodeGenerator {
 	public void genClass(PrintWriter out, Table table, String name,
 			boolean indexed) {
 		Hashtable<String, String> indexedFields = new Hashtable<>();
-		Hashtable<String, String> usedFields = new Hashtable<>();
+		Hashtable<String, Pair<String, Field>> usedFields = new Hashtable<>();
 		String unixName = unixTransform(name);
 
 		processArray(table, indexedFields);
@@ -224,7 +226,7 @@ public class PHPGenerator extends CodeGenerator {
 				String varDecl = "\tprivate $" + unixTransform(varName)
 						+ " = array();";
 				out.println(varDecl);
-				usedFields.put(varName, data);
+				usedFields.put(varName, new Pair<String, Field>(data, field));
 			} else
 				out.println("\tprivate $" + unixTransform(varName) + ";");
 		}
@@ -248,9 +250,42 @@ public class PHPGenerator extends CodeGenerator {
 				if (usedFields.containsKey(varName))
 					continue;
 				String data = indexedFields.get(varName);
-				usedFields.put(varName, data);
-				out.println("\t\t\t// TODO: assign array field " + varName
-						+ "[" + data + "]");
+				usedFields.put(varName, new Pair<String, Field>(data, field));
+				String[] values = data.split(";");
+				String spacing = "\t\t\t";
+				char ch = 'i';
+				String openBraces = "";
+				for (int i = 0; i < values.length; i++) {
+					String[] interval = values[i].split(":");
+					int minIndex = Integer.valueOf(interval[0]);
+					int maxIndex = Integer.valueOf(interval[1]);
+					if (i < values.length - 1)
+						openBraces = " {";
+					else
+						openBraces = "";
+					out.println(spacing + "for($" + ch + " = " + minIndex
+							+ "; $" + ch + " <= " + maxIndex + "; $" + ch + "++)" + openBraces);
+					spacing += "\t";
+					ch++;
+				}
+				ch = 'i';
+				String sep = "";
+				String varList = "";
+				String strName = "'" + field.getName().toLowerCase();
+				strName = strName.replaceAll("[0-9]+", "?");
+				for (int i = 0; i < values.length; i++) {
+					varList += sep + "$" + ch;
+					sep = ", ";
+					strName = strName.replaceFirst("\\?", "'.\\$" + ch);
+					ch++;
+				}
+				out.println(spacing + "$this->set" + varName + "(" + varList + ", $" + unixName
+						+ "[" + strName + "]);");
+				for (int i = values.length - 1; i >= 0; i--) {
+					spacing = spacing.substring(2);
+					if (i < values.length - 1)
+						out.println(spacing + "}");
+				}
 			} else
 				out.println("\t\t\t$this->set" + varName + "($" + unixName
 						+ "['" + field.getName().toLowerCase() + "']);");
@@ -280,7 +315,7 @@ public class PHPGenerator extends CodeGenerator {
 					continue;
 				String unixVarName = unixTransform(varName);
 				String data = indexedFields.get(varName);
-				usedFields.put(varName, data);
+				usedFields.put(varName, new Pair<String, Field>(data, field));
 				String[] values = data.split(";");
 
 				out.println();
@@ -343,12 +378,51 @@ public class PHPGenerator extends CodeGenerator {
 				if (usedFields.containsKey(varName))
 					continue;
 				String data = indexedFields.get(varName);
-				usedFields.put(varName, data);
-				out.println("\t\t// TODO: assign array field " + varName + "["
-						+ data + "]");
+				usedFields.put(varName, new Pair<String, Field>(data, field));
 			} else
 				out.println("\t\t$" + unixName + "['" + field.getName().toLowerCase()
 						+ "'] = $this->get" + varName + "();");
+		}
+		Enumeration<String> enumKey = usedFields.keys();
+		while(enumKey.hasMoreElements()) {
+		    String varName = enumKey.nextElement();
+		    Pair<String, Field> pair = usedFields.get(varName);
+		    String data = pair.getFirst();
+		    Field field = pair.getSecond();
+			String[] values = data.split(";");
+			String spacing = "\t\t";
+			char ch = 'i';
+			String openBraces = "";
+			for (int i = 0; i < values.length; i++) {
+				String[] interval = values[i].split(":");
+				int minIndex = Integer.valueOf(interval[0]);
+				int maxIndex = Integer.valueOf(interval[1]);
+				if (i < values.length - 1)
+					openBraces = " {";
+				else
+					openBraces = "";
+				out.println(spacing + "for($" + ch + " = " + minIndex
+						+ "; $" + ch + " <= " + maxIndex + "; $" + ch + "++)" + openBraces);
+				spacing += "\t";
+				ch++;
+			}
+			ch = 'i';
+			String sep = "";
+			String varList = "";
+			String strName = "'" + field.getName().toLowerCase();
+			strName = strName.replaceAll("[0-9]+", "?");
+			for (int i = 0; i < values.length; i++) {
+				varList += sep + "$" + ch;
+				sep = ", ";
+				strName = strName.replaceFirst("\\?", "'.\\$" + ch);
+				ch++;
+			}
+			out.println(spacing + "$" + unixName + "[" + strName + "] = $this->get" + varName + "(" + varList + ");");
+			for (int i = values.length - 1; i >= 0; i--) {
+				spacing = spacing.substring(2);
+				if (i < values.length - 1)
+					out.println(spacing + "}");
+			}		    
 		}
 		out.println("\t\treturn array_filter($" + unixName + ");");
 		out.println("\t}");
@@ -395,22 +469,16 @@ public class PHPGenerator extends CodeGenerator {
 			if (idName != null) {
 				out.println("\tpublic static function getPel" + gch
 						+ catFieldName + "(" + paramIndexStr + paramsFieldName
-						+ ", $igonore_id = null) {");
+						+ ", $ignore_id = null) {");
 				out.println("\t\tif ( " + ifFields + " )");
 				out.println("\t\t\treturn new " + getClassName(name) + "();");
-				out.println("\t\t$condition = array(" + arrElem + ");");
-				out.println("\t\tif(!is_null($igonore_id))");
-				out.println("\t\t\t$condition[] = '" + idName
-						+ " <> '.intval($igonore_id);");
-				out.println("\t\treturn new " + getClassName(name) + "(DB::GetTableRow('"
-						+ tblname + "'" + indexStr + ", $condition));");
+				genSQLGet(out, getClassName(name), tblname, indexStr, idName, arrElem);
+				
 			} else {
 				out.println("\tpublic static function getPel" + gch
 						+ catFieldName + "(" + paramIndexStr + paramsFieldName
 						+ ") {");
-				out.println("\t\treturn new " + getClassName(name) + "(DB::GetTableRow('"
-						+ tblname + "'" + indexStr + ", array(" + arrElem
-						+ ")));");
+				genSQLGetNoID(out, getClassName(name), tblname, indexStr, arrElem);
 			}
 			out.println("\t}");
 			if (idName != null
@@ -421,8 +489,7 @@ public class PHPGenerator extends CodeGenerator {
 						+ paramsFieldName + ") {");
 				out.println("\t\tif ( " + ifFields + " )");
 				out.println("\t\t\treturn false;");
-				out.println("\t\treturn DB::Delete('" + tblname + "'"
-						+ indexStr + ", array(" + arrElem + "));");
+				genSQLDelete(out, tblname, indexStr, arrElem);
 				out.println("\t}");
 			}
 		}
@@ -435,6 +502,9 @@ public class PHPGenerator extends CodeGenerator {
 			String varName = normalize(field.getName(), false);
 			String unixVarName = unixTransform(varName);
 			String fieldName = field.getName().toLowerCase();
+			String fieldNameStr = "'" + fieldName + "'";
+			String spacing = "\t\t";
+			String[] values = new String[0];
 			if (indexedFields.containsKey(varName))
 				continue;
 			if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
@@ -442,115 +512,150 @@ public class PHPGenerator extends CodeGenerator {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
+				unixVarName = unixTransform(varName);
 				String data = indexedFields.get(varName);
-				usedFields.put(varName, data);
-				out.println("\t\t// TODO: assign array field " + varName + "["
-						+ data + "]");
-			} else {
-				if (field.getType().getType() == DataType.STRING
-						|| field.getType().getType() == DataType.ENUM) {
-					if (skipFixField(unixVarName))
-						continue;
-					if (!field.isNotNull() || field.getValue() == null) {
-						if (canTrimField(unixVarName)
-								&& field.getType().getType() != DataType.ENUM) {
-							out.println("\t\t$" + unixName + "['" + fieldName
-									+ "'] = trim($" + unixName + "['"
-									+ fieldName + "']);");
-						} else {
-							out.println("\t\t$" + unixName + "['" + fieldName
-									+ "'] = strval($" + unixName + "['"
-									+ fieldName + "']);");
-						}
-					}
-					if (skipTestField(unixVarName))
-						continue;
-					if (field.isNotNull()) {
-						if (field.getValue() == null) {
-							if (field.getType().getType() == DataType.ENUM) {
-								out.println("\t\tif(!in_array($" + unixName
-										+ "['" + fieldName + "'], array("
-										+ genEnumArray(field) + ")))");
-							} else if (isFunctionChecker(unixVarName)) {
-								out.println("\t\tif(!check_" + unixVarName
-										+ "($" + unixName + "['" + fieldName
-										+ "']))");
-							} else {
-								out.println("\t\tif(strlen($" + unixName + "['"
-										+ fieldName + "']) == 0)");
-							}
-							out.println("\t\t\treturn false;");
-						}
-					} else {
-						out.println("\t\tif(strlen($" + unixName + "['"
-								+ fieldName + "']) == 0)");
-						out.println("\t\t\t$" + unixName + "['" + fieldName
-								+ "'] = null;");
-						if (field.getType().getType() == DataType.ENUM) {
-							out.println("\t\telse if(!in_array($" + unixName
-									+ "['" + fieldName + "'], array("
-									+ genEnumArray(field) + ")))");
-							out.println("\t\t\treturn false;");
-						} else if (isFunctionChecker(unixVarName)) {
-							out.println("\t\telse if(!check_" + unixVarName
-									+ "($" + unixName + "['" + fieldName
-									+ "']))");
-							out.println("\t\t\treturn false;");
-						}
-					}
-				} else if (field.getType().getType() == DataType.INTEGER
-						|| field.getType().getType() == DataType.DOUBLE
-						|| field.getType().getType() == DataType.FLOAT) {
-					if (field.isAutoIncrement()
-							|| (idName != null && idName.equals(unixVarName)))
-						continue;
-					if (field.isNotNull()) {
-						if (field.getValue() != null) {
-							out.println("\t\tif(array_key_exists('"
-									+ unixVarName + "', $" + unixName + ")) {");
-							out.println("\t\t\tif(!is_numeric($" + unixName
-									+ "['" + fieldName + "']))");
-							out.println("\t\t\t\treturn false;");
-							out.println("\t\t\telse");
-							if (field.getType().getType() == DataType.INTEGER) {
-								out.println("\t\t\t\t$" + unixName + "['"
-										+ fieldName + "'] = intval($"
-										+ unixName + "['" + fieldName
-										+ "']);");
-							} else {
-								out.println("\t\t\t\t$" + unixName + "['"
-										+ fieldName + "'] = floatval($"
-										+ unixName + "['" + fieldName
-										+ "']);");
-							}
-							out.println("\t\t}");
-						} else {
-							out.println("\t\tif(!is_numeric($" + unixName
-									+ "['" + fieldName + "']))");
-							out.println("\t\t\treturn false;");
-						}
-					} else {
-						out.println("\t\t$" + unixName + "['" + fieldName
-								+ "'] = trim($" + unixName + "['" + fieldName
-								+ "']);");
-						out.println("\t\tif(strlen($" + unixName + "['"
-								+ fieldName + "']) == 0)");
-						out.println("\t\t\t$" + unixName + "['" + fieldName
-								+ "'] = null;");
-						out.println("\t\telse if(!is_numeric($" + unixName
-								+ "['" + fieldName + "']))");
-						out.println("\t\t\treturn false;");
-					}
-				} else if (field.getType().getType() == DataType.DATETIME) {
-					out.println("\t\t$" + unixName + "['" + fieldName
-							+ "'] = date('Y-m-d H:i:s');");
-				} else if (field.getType().getType() == DataType.DATE) {
-					out.println("\t\t$" + unixName + "['" + fieldName
-							+ "'] = date('Y-m-d');");
-				} else if (field.getType().getType() == DataType.TIME) {
-					out.println("\t\t$" + unixName + "['" + fieldName
-							+ "'] = date('H:i:s');");
+				usedFields.put(varName, new Pair<String, Field>(data, field));
+				values = data.split(";");
+				char ch = 'i';
+				String openBraces = "";
+				for (int i = 0; i < values.length; i++) {
+					String[] interval = values[i].split(":");
+					int minIndex = Integer.valueOf(interval[0]);
+					int maxIndex = Integer.valueOf(interval[1]);
+					openBraces = " {";
+					out.println(spacing + "for($" + ch + " = " + minIndex
+							+ "; $" + ch + " <= " + maxIndex + "; $" + ch + "++)" + openBraces);
+					spacing += "\t";
+					ch++;
 				}
+				ch = 'i';
+				fieldNameStr = "'" + field.getName().toLowerCase();
+				fieldNameStr = fieldNameStr.replaceAll("[0-9]+", "?");
+				for (int i = 0; i < values.length; i++) {
+					fieldNameStr = fieldNameStr.replaceFirst("\\?", "'.\\$" + ch);
+					ch++;
+				}
+			}
+			if (field.getType().getType() == DataType.STRING
+					|| field.getType().getType() == DataType.ENUM) {
+				if (skipFixField(unixVarName))
+					continue;
+				if (!field.isNotNull() || field.getValue() == null) {
+					if (canTrimField(unixVarName)
+							&& field.getType().getType() != DataType.ENUM) {
+						out.println(spacing + "$" + unixName + "[" + fieldNameStr
+								+ "] = trim($" + unixName + "["
+								+ fieldNameStr + "]);");
+					} else {
+						out.println(spacing + "$" + unixName + "[" + fieldNameStr
+								+ "] = strval($" + unixName + "["
+								+ fieldNameStr + "]);");
+					}
+				}
+				if (skipTestField(unixVarName))
+					continue;
+				if (field.isNotNull()) {
+					if (field.getValue() == null) {
+						if (field.getType().getType() == DataType.ENUM) {
+							out.println(spacing + "if(!in_array($" + unixName
+									+ "[" + fieldNameStr + "], array("
+									+ genEnumArray(field) + ")))");
+						} else if (isFunctionChecker(unixVarName)) {
+							out.println(spacing + "if(!check_" + unixVarName
+									+ "($" + unixName + "[" + fieldNameStr
+									+ "]))");
+						} else {
+							out.println(spacing + "if(strlen($" + unixName + "["
+									+ fieldNameStr + "]) == 0)");
+						}
+						out.println(spacing + "\treturn false;");
+					} else {
+						out.println(spacing + "$" + unixName + "[" + fieldNameStr
+								+ "] = trim($" + unixName + "[" + fieldNameStr
+								+ "]);");
+						out.println(spacing + "if(strlen($" + unixName + "["
+								+ fieldNameStr + "]) == 0)");
+						out.println(spacing + "\t$" + unixName + "[" + fieldNameStr
+								+ "] = null;");
+						out.println(spacing + "else if(!in_array($" + unixName
+								+ "[" + fieldNameStr + "], array("
+								+ genEnumArray(field) + ")))");
+						out.println(spacing + "\treturn false;");
+					}
+				} else {
+					out.println(spacing + "if(strlen($" + unixName + "["
+							+ fieldNameStr + "]) == 0)");
+					out.println(spacing + "\t$" + unixName + "[" + fieldNameStr
+							+ "] = null;");
+					if (field.getType().getType() == DataType.ENUM) {
+						out.println(spacing + "else if(!in_array($" + unixName
+								+ "[" + fieldNameStr + "], array("
+								+ genEnumArray(field) + ")))");
+						out.println(spacing + "\treturn false;");
+					} else if (isFunctionChecker(unixVarName)) {
+						out.println(spacing + "else if(!check_" + unixVarName
+								+ "($" + unixName + "[" + fieldNameStr
+								+ "]))");
+						out.println(spacing + "\treturn false;");
+					}
+				}
+			} else if (field.getType().getType() == DataType.INTEGER
+					|| field.getType().getType() == DataType.DOUBLE
+					|| field.getType().getType() == DataType.DECIMAL
+					|| field.getType().getType() == DataType.FLOAT) {
+				if (field.isAutoIncrement()
+						|| (idName != null && idName.equals(unixVarName)))
+					continue;
+				if (field.isNotNull()) {
+					if (field.getValue() != null) {
+						out.println(spacing + "if(array_key_exists('"
+								+ unixVarName + "', $" + unixName + ")) {");
+						out.println(spacing + "\tif(!is_numeric($" + unixName
+								+ "[" + fieldNameStr + "]))");
+						out.println(spacing + "\t\treturn false;");
+						out.println(spacing + "\telse");
+						if (field.getType().getType() == DataType.INTEGER) {
+							out.println(spacing + "\t\t$" + unixName + "["
+									+ fieldNameStr + "] = intval($"
+									+ unixName + "[" + fieldNameStr
+									+ "]);");
+						} else {
+							out.println(spacing + "\t\t$" + unixName + "["
+									+ fieldNameStr + "] = floatval($"
+									+ unixName + "[" + fieldNameStr
+									+ "]);");
+						}
+						out.println(spacing + "}");
+					} else {
+						out.println(spacing + "if(!is_numeric($" + unixName
+								+ "[" + fieldNameStr + "]))");
+						out.println(spacing + "\treturn false;");
+					}
+				} else {
+					out.println(spacing + "$" + unixName + "[" + fieldNameStr
+							+ "] = trim($" + unixName + "[" + fieldNameStr
+							+ "]);");
+					out.println(spacing + "if(strlen($" + unixName + "["
+							+ fieldNameStr + "]) == 0)");
+					out.println(spacing + "\t$" + unixName + "[" + fieldNameStr
+							+ "] = null;");
+					out.println(spacing + "else if(!is_numeric($" + unixName
+							+ "[" + fieldNameStr + "]))");
+					out.println(spacing + "\treturn false;");
+				}
+			} else if (field.getType().getType() == DataType.DATETIME) {
+				out.println(spacing + "$" + unixName + "[" + fieldNameStr
+						+ "] = date('Y-m-d H:i:s');");
+			} else if (field.getType().getType() == DataType.DATE) {
+				out.println(spacing + "$" + unixName + "[" + fieldNameStr
+						+ "] = date('Y-m-d');");
+			} else if (field.getType().getType() == DataType.TIME) {
+				out.println(spacing + "$" + unixName + "[" + fieldNameStr
+						+ "] = date('H:i:s');");
+			}
+			for (int i = values.length - 1; i >= 0; i--) {
+				spacing = spacing.substring(1);
+				out.println(spacing + "}");
 			}
 		}
 		out.println("\t\treturn true;");
@@ -565,9 +670,7 @@ public class PHPGenerator extends CodeGenerator {
 					+ "->toArray();");
 			out.println("\t\tif(!self::validarCampos($_" + unixName + "))");
 			out.println("\t\t\treturn new " + getClassName(name) + "();");
-			out.println("\t\t$_" + unixName + "['" + idName.toLowerCase()
-					+ "'] = DB::Insert('" + tblname + "'" + indexStr + ", $_"
-					+ unixName + ");");
+			genSQLInsert(out, unixName, idName, tblname, indexStr);
 			out.println("\t\treturn self::getPel" + gch + "Id($_" + unixName
 					+ "['" + idName.toLowerCase() + "']);");
 			out.println("\t}");
@@ -586,6 +689,8 @@ public class PHPGenerator extends CodeGenerator {
 			for (Field field : table.getFields()) {
 				String varName = normalize(field.getName(), false);
 				String unixVarName = unixTransform(varName);
+				if (skipUpdateField(unixVarName))
+					continue;
 				if (indexedFields.containsKey(varName))
 					continue;
 				if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
@@ -595,9 +700,7 @@ public class PHPGenerator extends CodeGenerator {
 					if (usedFields.containsKey(varName))
 						continue;
 					String data = indexedFields.get(varName);
-					usedFields.put(varName, data);
-					out.println("\t\t\t// TODO: assign array field " + varName
-							+ "[" + data + "]");
+					usedFields.put(varName, new Pair<String, Field>(data, field));
 				} else {
 					if (field.isAutoIncrement()
 							|| (idName != null && idName.equals(unixVarName)))
@@ -606,33 +709,59 @@ public class PHPGenerator extends CodeGenerator {
 				}
 			}
 			out.println("\t\t);");
-			out.println("\t\t$table = new Table('" + tblname + "'" + indexStr
-					+ ", $_" + unixName + ");");
-			out.println("\t\t$table->SetPk('" + idName.toLowerCase() + "', $_" + unixName
-					+ "['" + idName.toLowerCase() + "']);");
-			out.println("\t\treturn $table->Update($campos);");
+			enumKey = usedFields.keys();
+			while(enumKey.hasMoreElements()) {
+			    String varName = enumKey.nextElement();
+			    Pair<String, Field> pair = usedFields.get(varName);
+			    String data = pair.getFirst();
+			    Field field = pair.getSecond();
+				String[] values = data.split(";");
+				String spacing = "\t\t";
+				char ch = 'i';
+				String openBraces = "";
+				for (int i = 0; i < values.length; i++) {
+					String[] interval = values[i].split(":");
+					int minIndex = Integer.valueOf(interval[0]);
+					int maxIndex = Integer.valueOf(interval[1]);
+					if (i < values.length - 1)
+						openBraces = " {";
+					else
+						openBraces = "";
+					out.println(spacing + "for($" + ch + " = " + minIndex
+							+ "; $" + ch + " <= " + maxIndex + "; $" + ch + "++)" + openBraces);
+					spacing += "\t";
+					ch++;
+				}
+				ch = 'i';
+				String strName = "'" + field.getName().toLowerCase();
+				strName = strName.replaceAll("[0-9]+", "?");
+				for (int i = 0; i < values.length; i++) {
+					strName = strName.replaceFirst("\\?", "'.\\$" + ch);
+					ch++;
+				}
+				out.println(spacing + "$campos[] = " + strName + ";");
+				for (int i = values.length - 1; i >= 0; i--) {
+					spacing = spacing.substring(2);
+					if (i < values.length - 1)
+						out.println(spacing + "}");
+				}		    
+			}
+			genSQLUpdate(out, tblname, indexStr, unixName, idName);			
 			out.println("\t}");
 		}
-		boolean uniqueId = false;
+		boolean oneId = false;
 		// get all data from table
 		if (idName != null) {
 			DataType dataType = table.find(idName).getType();
 			if (dataType instanceof EnumType
 					&& ((EnumType) dataType).getElements().size() == 1)
-				uniqueId = true;
+				oneId = true;
 		}
-		if (!uniqueId) {
+		if (!oneId) {
 			out.println();
 			out.println("\tpublic static function getTod" + getGenderChar(name) + "s("
 					+ paramIndexStr + "$inicio = null, $quantidade = null) {");
-			out.println("\t\t$condition = array();");
-			out.println("\t\tif(!is_null($inicio) && !is_null($quantidade)) {");
-			out.println("\t\t\t$condition['order'] = 'ORDER BY id DESC';");
-			out.println("\t\t\t$condition['size'] = $quantidade;");
-			out.println("\t\t\t$condition['offset'] = $inicio;");
-			out.println("\t\t}");
-			out.println("\t\t$_" + unixName + "s = DB::LimitQuery('" + tblname
-					+ "'" + indexStr + ", $condition);");
+			genSQLGetTodos(out, tblname, indexStr, unixName);
 			out.println("\t\t$" + unixName + "s = array();");
 			out.println("\t\tforeach($_" + unixName + "s as $" + unixName + ")");
 			out.println("\t\t\t$" + unixName + "s[] = new " + getClassName(name) + "($"
@@ -643,11 +772,28 @@ public class PHPGenerator extends CodeGenerator {
 		out.println();
 	}
 
+	protected abstract void genSQLGetTodos(PrintWriter out, String tblname,
+			String indexStr, String unixName);
+
+	protected abstract void genSQLUpdate(PrintWriter out, String tblname, String indexStr,
+			String unixName, String idName);
+
+	protected abstract void genSQLInsert(PrintWriter out, String unixName, String idName,
+			String tblname, String indexStr);
+
+	protected abstract void genSQLDelete(PrintWriter out, String tblname, String indexStr,
+			String arrElem);
+	
+	protected abstract void genSQLGetNoID(PrintWriter out, String className,
+			String tblname, String indexStr, String arrElem);
+
+	protected abstract void genSQLGet(PrintWriter out, String className, String tblname, String indexStr,
+			String idName, String arrElem);
+
 	@Override
 	public void genFooter(PrintWriter out, Table table, String name,
 			boolean indexed) {
 		out.println("}");
-
 	}
 
 	@Override

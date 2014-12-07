@@ -468,6 +468,7 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		case DataType.TIME:
 		case DataType.DATETIME:
 		case DataType.FLOAT:
+		case DataType.DECIMAL:
 		case DataType.DOUBLE:
 		case DataType.BIGINT:
 		case DataType.INTEGER:
@@ -509,6 +510,8 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 			return "AsSingle";
 		case DataType.DOUBLE:
 			return "AsFloat";
+		case DataType.DECIMAL:
+			return "AsCurrency";
 		case DataType.BIGINT:
 			return "AsLargeInt";
 		case DataType.INTEGER:
