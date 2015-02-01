@@ -14,7 +14,7 @@ import ast.DataType;
 import ast.EnumType;
 import ast.Field;
 import ast.Foreign;
-import ast.OrderFied;
+import ast.OrderField;
 import ast.ScriptNode;
 import ast.Table;
 
@@ -208,7 +208,7 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 		Hashtable<String, String> indexedFields = new Hashtable<>();
 		Hashtable<String, Pair<String, Field>> usedFields = new Hashtable<>();
 		String unixName = unixTransform(name);
-
+		String className = getClassName(name);
 		processArray(table, indexedFields);
 		// generate variables
 		if (indexed)
@@ -330,7 +330,7 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 					int maxIndex = Integer.valueOf(interval[1]);
 					out.println("\t\tif (" + paramNames[i] + " < " + minIndex
 							+ " || " + paramNames[i] + " > " + maxIndex + ")");
-					out.println("\t\t\treturn null;");
+					out.println("\t\t\tthrow new Exception('Índice '." + paramNames[i] + ".' inválido, aceito somente de " + minIndex + " até " + maxIndex + "');");
 				}
 				out.println("\t\treturn $this->" + unixVarName + genArray(data)
 						+ ";");
@@ -344,7 +344,7 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 					int maxIndex = Integer.valueOf(interval[1]);
 					out.println("\t\tif (" + paramNames[i] + " < " + minIndex
 							+ " || " + paramNames[i] + " > " + maxIndex + ")");
-					out.println("\t\t\treturn;");
+					out.println("\t\t\tthrow new Exception('Índice '." + paramNames[i] + ".' inválido, aceito somente de " + minIndex + " até " + maxIndex + "');");
 				}
 				out.println("\t\t$this->" + unixVarName + genArray(data)
 						+ " = $value;");
@@ -355,6 +355,12 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 				out.println("\tpublic function get" + varName + "() {");
 				out.println("\t\treturn $this->" + unixVarName + ";");
 				out.println("\t}");
+				if(isBooleanField(field)) {
+					out.println();
+					out.println("\tpublic function is" + varName + "() {");
+					out.println("\t\treturn $this->" + unixVarName + " == 'Y';");
+					out.println("\t}");
+				}
 				out.println();
 				out.println("\tpublic function set" + varName + "($"
 						+ unixVarName + ") {");
@@ -422,12 +428,14 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 				spacing = spacing.substring(2);
 				if (i < values.length - 1)
 					out.println(spacing + "}");
-			}		    
+			}
 		}
-		out.println("\t\treturn array_filter($" + unixName + ");");
+		out.println("\t\treturn $" + unixName + ";");
 		out.println("\t}");
 		String tblname = table.getName();
 		tblname = tblname.replaceAll("[0-9]+", "");
+		String tblOneName = despluralize(name).toLowerCase();
+		String tblgc = getGenderChar(tblOneName);
 		// access indexed table
 		String paramIndexStr = "";
 		if (indexed)
@@ -453,56 +461,36 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 				continue;
 			String gch = getGenderChar(normalize(constraint.getFields().get(0)
 					.getName(), false));
-			String arrElem = "", sep = "", orSep = "", catFieldName = "", paramsFieldName = "", ifFields = "";
-			for (OrderFied ofield : constraint.getFields()) {
-				String fieldName = ofield.getName();
+			String arrElem = "", sep = "", catFieldName = "", paramsFieldName = "";
+			for (OrderField ofield : constraint.getFields()) {
+				String fieldName = ofield.getName().toLowerCase();
 				String norField = normalize(fieldName, false);
 				String unixField = unixTransform(norField);
 				arrElem += sep + "'" + fieldName + "' => $" + unixField;
 				paramsFieldName += sep + "$" + unixField;
 				sep = ", ";
-				ifFields += orSep + "!$" + unixField;
-				orSep = " || ";
 				catFieldName += norField;
 			}
 			out.println();
-			if (idName != null) {
-				out.println("\tpublic static function getPel" + gch
-						+ catFieldName + "(" + paramIndexStr + paramsFieldName
-						+ ", $ignore_id = null) {");
-				out.println("\t\tif ( " + ifFields + " )");
-				out.println("\t\t\treturn new " + getClassName(name) + "();");
-				genSQLGet(out, getClassName(name), tblname, indexStr, idName, arrElem);
-				
-			} else {
-				out.println("\tpublic static function getPel" + gch
-						+ catFieldName + "(" + paramIndexStr + paramsFieldName
-						+ ") {");
-				genSQLGetNoID(out, getClassName(name), tblname, indexStr, arrElem);
-			}
+			out.println("\tpublic static function getPel" + gch
+					+ catFieldName + "(" + paramIndexStr + paramsFieldName
+					+ ") {");
+			genSQLGetFromPrimaryKey(out, className, tblname, indexStr, arrElem);
 			out.println("\t}");
-			if (idName != null
-					&& idName.equals(constraint.getFields().get(0).getName())
-					&& constraint.getFields().size() == 1) {
-				out.println();
-				out.println("\tpublic static function excluir(" + paramIndexStr
-						+ paramsFieldName + ") {");
-				out.println("\t\tif ( " + ifFields + " )");
-				out.println("\t\t\treturn false;");
-				genSQLDelete(out, tblname, indexStr, arrElem);
-				out.println("\t}");
-			}
 		}
 		// insert into table
 		out.println();
-		out.println("\tpublic static function validarCampos(&$" + unixName
+		out.println("\tprivate static function validarCampos(&$" + unixName
 				+ ") {");
+		out.println("\t\t$erros = array();");
 		usedFields.clear();
 		for (Field field : table.getFields()) {
 			String varName = normalize(field.getName(), false);
 			String unixVarName = unixTransform(varName);
 			String fieldName = field.getName().toLowerCase();
 			String fieldNameStr = "'" + fieldName + "'";
+			String ugc = getGenderChar(fieldName).toUpperCase();
+			String lgc = getGenderChar(fieldName).toLowerCase();
 			String spacing = "\t\t";
 			String[] values = new String[0];
 			if (indexedFields.containsKey(varName))
@@ -537,14 +525,19 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 				}
 			}
 			if (field.getType().getType() == DataType.STRING
+					|| field.getType().getType() == DataType.TEXT
 					|| field.getType().getType() == DataType.ENUM) {
 				if (skipFixField(unixVarName))
 					continue;
 				if (!field.isNotNull() || field.getValue() == null) {
-					if (canTrimField(unixVarName)
-							&& field.getType().getType() != DataType.ENUM) {
+					if (!numberOnlyField(unixVarName) && canTrimField(unixVarName)
+							&& field.getType().getType() != DataType.ENUM && field.getType().getType() != DataType.TEXT) {
 						out.println(spacing + "$" + unixName + "[" + fieldNameStr
-								+ "] = trim($" + unixName + "["
+								+ "] = strip_tags(trim($" + unixName + "["
+								+ fieldNameStr + "]));");
+					} else if(numberOnlyField(unixVarName)) {
+						out.println(spacing + "$" + unixName + "[" + fieldNameStr
+								+ "] = number_only($" + unixName + "["
 								+ fieldNameStr + "]);");
 					} else {
 						out.println(spacing + "$" + unixName + "[" + fieldNameStr
@@ -560,15 +553,17 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 							out.println(spacing + "if(!in_array($" + unixName
 									+ "[" + fieldNameStr + "], array("
 									+ genEnumArray(field) + ")))");
+							out.println(spacing + "\t$erros[" + fieldNameStr + " = '" + ugc + " " + field.getName() + " informado não é válid" + lgc + "';");
 						} else if (isFunctionChecker(unixVarName)) {
 							out.println(spacing + "if(!check_" + unixVarName
 									+ "($" + unixName + "[" + fieldNameStr
 									+ "]))");
+							out.println(spacing + "\t$erros[" + fieldNameStr + "] = '" + field.getName() + " inválid" + lgc + "';");
 						} else {
 							out.println(spacing + "if(strlen($" + unixName + "["
 									+ fieldNameStr + "]) == 0)");
+							out.println(spacing + "\t$erros[" + fieldNameStr + "] = '" + ugc + " " + field.getName() + " não pode ser vazi" + lgc + "';");
 						}
-						out.println(spacing + "\treturn false;");
 					} else {
 						out.println(spacing + "$" + unixName + "[" + fieldNameStr
 								+ "] = trim($" + unixName + "[" + fieldNameStr
@@ -580,7 +575,7 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 						out.println(spacing + "else if(!in_array($" + unixName
 								+ "[" + fieldNameStr + "], array("
 								+ genEnumArray(field) + ")))");
-						out.println(spacing + "\treturn false;");
+						out.println(spacing + "\t$erros[" + fieldNameStr + "] = '" + ugc + " " + field.getName() + " informado não é válid" + lgc + "';");
 					}
 				} else {
 					out.println(spacing + "if(strlen($" + unixName + "["
@@ -591,12 +586,12 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 						out.println(spacing + "else if(!in_array($" + unixName
 								+ "[" + fieldNameStr + "], array("
 								+ genEnumArray(field) + ")))");
-						out.println(spacing + "\treturn false;");
+						out.println(spacing + "\t$erros[" + fieldNameStr + "] = '" + ugc + " " + field.getName() + " informado não é válid" + lgc + "';");
 					} else if (isFunctionChecker(unixVarName)) {
 						out.println(spacing + "else if(!check_" + unixVarName
 								+ "($" + unixName + "[" + fieldNameStr
 								+ "]))");
-						out.println(spacing + "\treturn false;");
+						out.println(spacing + "\t$erros[" + fieldNameStr + "] = '" + field.getName() + " inválid" + lgc + "';");
 					}
 				}
 			} else if (field.getType().getType() == DataType.INTEGER
@@ -608,28 +603,25 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 					continue;
 				if (field.isNotNull()) {
 					if (field.getValue() != null) {
-						out.println(spacing + "if(array_key_exists('"
-								+ unixVarName + "', $" + unixName + ")) {");
-						out.println(spacing + "\tif(!is_numeric($" + unixName
+						out.println(spacing + "if(!is_numeric($" + unixName
 								+ "[" + fieldNameStr + "]))");
-						out.println(spacing + "\t\treturn false;");
-						out.println(spacing + "\telse");
+						out.println(spacing + "\t$erros[" + fieldNameStr + "] = '" + ugc + " " + field.getName() + " não é um número';");
+						out.println(spacing + "else");
 						if (field.getType().getType() == DataType.INTEGER) {
-							out.println(spacing + "\t\t$" + unixName + "["
+							out.println(spacing + "\t$" + unixName + "["
 									+ fieldNameStr + "] = intval($"
 									+ unixName + "[" + fieldNameStr
 									+ "]);");
 						} else {
-							out.println(spacing + "\t\t$" + unixName + "["
+							out.println(spacing + "\t$" + unixName + "["
 									+ fieldNameStr + "] = floatval($"
 									+ unixName + "[" + fieldNameStr
 									+ "]);");
 						}
-						out.println(spacing + "}");
 					} else {
 						out.println(spacing + "if(!is_numeric($" + unixName
 								+ "[" + fieldNameStr + "]))");
-						out.println(spacing + "\treturn false;");
+						out.println(spacing + "\t$erros[" + fieldNameStr + "] = '" + ugc + " " + field.getName() + " não é um número';");
 					}
 				} else {
 					out.println(spacing + "$" + unixName + "[" + fieldNameStr
@@ -641,7 +633,7 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 							+ "] = null;");
 					out.println(spacing + "else if(!is_numeric($" + unixName
 							+ "[" + fieldNameStr + "]))");
-					out.println(spacing + "\treturn false;");
+					out.println(spacing + "\t$erros[" + fieldNameStr + "] = '" + ugc + " " + field.getName() + " não é um número';");
 				}
 			} else if (field.getType().getType() == DataType.DATETIME) {
 				out.println(spacing + "$" + unixName + "[" + fieldNameStr
@@ -658,19 +650,38 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 				out.println(spacing + "}");
 			}
 		}
-		out.println("\t\treturn true;");
+		out.println("\t\tif(!empty($erros))");
+		out.println("\t\t\tthrow new ValidationException($erros);");
 		out.println("\t}");
 		if (idName != null) {
 			String gch = getGenderChar(normalize(idName, false));
+			// handle exception
+			out.println();
+			out.println("\tprivate static function handleException(&$e) {");
+			// get from primary key or unique key
+			for (Constraint constraint : table.getConstraints()) {
+				if (constraint instanceof Foreign)
+					continue;
+				OrderField orderField = constraint.getFields().get(constraint.getFields().size() - 1);
+				String normf =  despluralize(normalize(orderField.getName(), false));
+				String gchk = getGenderChar(normf);
+				out.println("\t\tif(stripos($e->getMessage(), '" + constraint.getName() + "') !== false)");
+				out.println("\t\t\tthrow new ValidationException(array('" + orderField.getName() + "' => '" + gchk.toUpperCase() + " " + normf + " informad" + gchk + " já está cadastrad" + gchk + "'));");
+			}
+			out.println("\t}");
 			// cadastrar
 			out.println();
 			out.println("\tpublic static function cadastrar($" + unixName
 					+ ") {");
 			out.println("\t\t$_" + unixName + " = $" + unixName
 					+ "->toArray();");
-			out.println("\t\tif(!self::validarCampos($_" + unixName + "))");
-			out.println("\t\t\treturn new " + getClassName(name) + "();");
+			out.println("\t\tself::validarCampos($_" + unixName + ");");
+			out.println("\t\ttry {");
 			genSQLInsert(out, unixName, idName, tblname, indexStr);
+			out.println("\t\t} catch (Exception $e) {");
+			out.println("\t\t\tself::handleException($e);");
+			out.println("\t\t\tthrow $e;");			
+			out.println("\t\t}");
 			out.println("\t\treturn self::getPel" + gch + "Id($_" + unixName
 					+ "['" + idName.toLowerCase() + "']);");
 			out.println("\t}");
@@ -681,9 +692,8 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 			out.println("\t\t$_" + unixName + " = $" + unixName
 					+ "->toArray();");
 			out.println("\t\tif(!$_" + unixName + "['" + idName.toLowerCase() + "'])");
-			out.println("\t\t\treturn false;");
-			out.println("\t\tif(!self::validarCampos($_" + unixName + "))");
-			out.println("\t\t\treturn false;");
+			out.println("\t\t\tthrow new ValidationException(array('" + idName.toLowerCase() + "' => 'O id d" + tblgc + " " + tblOneName + " não foi informado'));");
+			out.println("\t\tself::validarCampos($_" + unixName + ");");
 			usedFields.clear();
 			out.println("\t\t$campos = array(");
 			for (Field field : table.getFields()) {
@@ -746,7 +756,23 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 						out.println(spacing + "}");
 				}		    
 			}
-			genSQLUpdate(out, tblname, indexStr, unixName, idName);			
+			out.println("\t\ttry {");
+			genSQLUpdate(out, tblname, indexStr, unixName, idName);	
+			out.println("\t\t} catch (Exception $e) {");
+			out.println("\t\t\tself::handleException($e);");
+			out.println("\t\t\tthrow $e;");			
+			out.println("\t\t}");
+			out.println("\t\treturn self::getPel" + gch + "Id($_" + unixName
+					+ "['" + idName.toLowerCase() + "']);");		
+			out.println("\t}");
+			String fieldName = idName.toLowerCase();
+			String norField = normalize(fieldName, false);
+			String unixField = unixTransform(norField);
+			out.println();
+			out.println("\tpublic static function excluir(" + paramIndexStr + "$" + unixField + ") {");
+			out.println("\t\tif(!$" + unixField + ")");
+			out.println("\t\t\tthrow new Exception('Não foi possível excluir " + tblgc + " " + tblOneName + ", o id d" + tblgc + " " + tblOneName + " não foi informado');");
+			genSQLDelete(out, tblname, indexStr, "'" + fieldName + "' => $" + unixField);
 			out.println("\t}");
 		}
 		boolean oneId = false;
@@ -759,21 +785,85 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 		}
 		if (!oneId) {
 			out.println();
-			out.println("\tpublic static function getTod" + getGenderChar(name) + "s("
-					+ paramIndexStr + "$inicio = null, $quantidade = null) {");
+			out.println("\tprivate static function initSearch("
+					+ paramIndexStr + ") {");
 			genSQLGetTodos(out, tblname, indexStr, unixName);
+			out.println("\t}");
+			out.println();
+			out.println("\tpublic static function getTod" + tblgc + "s("
+					+ paramIndexStr + "$inicio = null, $quantidade = null) {");
+			out.println("\t\t$query = self::initSearch(" + paramIndexStr + ");");
+			genSQLLimit(out, tblname, indexStr, unixName);
 			out.println("\t\t$" + unixName + "s = array();");
 			out.println("\t\tforeach($_" + unixName + "s as $" + unixName + ")");
-			out.println("\t\t\t$" + unixName + "s[] = new " + getClassName(name) + "($"
+			out.println("\t\t\t$" + unixName + "s[] = new " + className + "($"
 					+ unixName + ");");
 			out.println("\t\treturn $" + unixName + "s;");
+			out.println("\t}");
+			out.println();
+			out.println("\tpublic static function getCount("
+					+ paramIndexStr + ") {");
+			out.println("\t\t$query = self::initSearch(" + paramIndexStr + ");");
+			genSQLgetCount(out, tblname, indexStr, unixName);
+			out.println("\t}");
+		}
+
+		// get from primary key or unique key
+		for (Constraint constraint : table.getConstraints()) {
+			if (!(constraint instanceof Foreign))
+				continue;
+			String gch = getGenderChar(normalize(constraint.getFields().get(0)
+					.getName(), false));
+			String arrElem = "", sep = "", catFieldName = "", paramsFieldName = "";
+			for (OrderField ofield : constraint.getFields()) {
+				String fieldName = ofield.getName();
+				String norField = normalize(fieldName, false);
+				String unixField = unixTransform(norField);
+				arrElem += sep + "'" + fieldName + "' => $" + unixField;
+				paramsFieldName += sep + "$" + unixField;
+				sep = ", ";
+				catFieldName += norField;
+			}
+			out.println();
+			out.println("\tprivate static function initSearchD" + gch
+					+ catFieldName + "(" + paramIndexStr + paramsFieldName + ") {");
+			genSQLGetTodosFk(out, tblname, indexStr, unixName, arrElem);
+			out.println("\t}");
+			out.println();
+			out.println("\tpublic static function getTod" + tblgc + "sD" + gch
+					+ catFieldName + "(" + paramIndexStr + paramsFieldName
+					+ ", $inicio = null, $quantidade = null) {");
+			out.println("\t\t$query = self::initSearchD" + gch
+					+ catFieldName + "(" + paramIndexStr + paramsFieldName + ");");
+			genSQLLimit(out, tblname, indexStr, unixName);
+			out.println("\t\t$" + unixName + "s = array();");
+			out.println("\t\tforeach($_" + unixName + "s as $" + unixName + ")");
+			out.println("\t\t\t$" + unixName + "s[] = new " + className + "($"
+					+ unixName + ");");
+			out.println("\t\treturn $" + unixName + "s;");
+			out.println("\t}");
+			out.println();
+			out.println("\tpublic static function getCountD" + gch
+					+ catFieldName + "(" + paramIndexStr + paramsFieldName + ") {");
+			out.println("\t\t$query = self::initSearchD" + gch
+					+ catFieldName + "(" + paramIndexStr + paramsFieldName + ");");
+			genSQLgetCount(out, tblname, indexStr, unixName);
 			out.println("\t}");
 		}
 		out.println();
 	}
 
+	protected abstract void genSQLgetCount(PrintWriter out, String tblname,
+			String indexStr, String unixName);
+
+	protected abstract void genSQLLimit(PrintWriter out, String tblname, String indexStr,
+			String unixName);
+
 	protected abstract void genSQLGetTodos(PrintWriter out, String tblname,
 			String indexStr, String unixName);
+	
+	protected abstract void genSQLGetTodosFk(PrintWriter out, 
+			String tblname, String indexStr, String unixName, String arrElem);
 
 	protected abstract void genSQLUpdate(PrintWriter out, String tblname, String indexStr,
 			String unixName, String idName);
@@ -784,11 +874,8 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 	protected abstract void genSQLDelete(PrintWriter out, String tblname, String indexStr,
 			String arrElem);
 	
-	protected abstract void genSQLGetNoID(PrintWriter out, String className,
+	protected abstract void genSQLGetFromPrimaryKey(PrintWriter out, String className,
 			String tblname, String indexStr, String arrElem);
-
-	protected abstract void genSQLGet(PrintWriter out, String className, String tblname, String indexStr,
-			String idName, String arrElem);
 
 	@Override
 	public void genFooter(PrintWriter out, Table table, String name,
@@ -803,6 +890,19 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 	
 	protected String getClassName(String name) {
 		return getClassPrefix() + name + getClassSuffix();
+	}
+	
+	private boolean isBooleanField(Field field) {
+		if(field.getType().getType() != DataType.ENUM)
+			return false;
+		EnumType type = (EnumType) field.getType();
+		if (type.getElements().size() == 2
+				&& ((type.getElements().get(0).equals("Y") && type
+						.getElements().get(1).equals("N")) || (type
+						.getElements().get(0).equals("N") && type
+						.getElements().get(1).equals("Y"))))
+			return true;
+		return false;
 	}
 
 }

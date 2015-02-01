@@ -10,7 +10,7 @@ import ast.Constraint;
 import ast.DataType;
 import ast.EnumType;
 import ast.Field;
-import ast.OrderFied;
+import ast.OrderField;
 import ast.PrimaryKey;
 import ast.ScriptNode;
 import ast.Table;
@@ -46,7 +46,7 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 			if (!(constraint instanceof PrimaryKey))
 				continue;
 			PrimaryKey pk = (PrimaryKey) constraint;
-			for (OrderFied orderField : pk.getFields()) {
+			for (OrderField orderField : pk.getFields()) {
 				Field field = table.find(orderField.getName());
 				if(field == null)
 					throw new RuntimeException("Restrição ou índice inconsistente, a coluna `" + orderField.getName() + "` não faz parte da tabela `" + table.getName() + "`");
@@ -88,6 +88,17 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println("    class procedure Carregar(Qry: TZQuery; "
 				+ getBaseClassName(name) + ": T" + getBaseClassName(name)
 				+ ");");
+		for (Field field : table.getFields()) {
+			if (field.getType().getType() != DataType.BLOB)
+				continue;
+			String varName = genArrayAccess(normalize(field.getName(), false));
+			out.println("    class procedure Carregar" + varName + "(Qry: TZQuery; "
+					+ getBaseClassName(name) + ": T" + getBaseClassName(name)
+					+ ");");
+			out.println("    class procedure Atualizar" + varName + "(Qry: TZQuery; "
+					+ getBaseClassName(name) + ": T" + getBaseClassName(name)
+					+ ");");
+		}
 		out.println("    class procedure Inserir(Qry: TZQuery; "
 				+ getBaseClassName(name) + ": T" + getBaseClassName(name)
 				+ ");");
@@ -156,7 +167,7 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 			return;
 		}
 		String AndStmt = "";
-		for (OrderFied orderField : constraint.getFields()) {
+		for (OrderField orderField : constraint.getFields()) {
 			Field field = table.find(orderField.getName());
 			if(field == null)
 				throw new RuntimeException("Restrição ou índice inconsistente, a coluna `" + orderField.getName() + "` não faz parte da tabela `" + table.getName() + "`");
@@ -179,7 +190,7 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 	private void genKeySelectParams(PrintWriter out, Table table,
 			Constraint constraint, String name, boolean indexed,
 			List<Field> keyFields, boolean update) {
-		for (OrderFied orderField : constraint.getFields()) {
+		for (OrderField orderField : constraint.getFields()) {
 			Field field = table.find(orderField.getName());
 			if(field == null)
 				throw new RuntimeException("Restrição ou índice inconsistente, a coluna `" + orderField.getName() + "` não faz parte da tabela `" + table.getName() + "`");
@@ -210,6 +221,18 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 			String name, boolean indexed) {
 		String AndStmt = "";
 		for (Field field : table.getFields()) {
+			if (field.getType().getType() == DataType.BLOB) {
+				out.println("' +");
+				out.println(" // '" + field.getName() + " = :" + field.getName() + " ' + ");
+				out.print("    '");
+				continue;
+			}
+			if (field.getType().getType() == DataType.DATETIME && getDateFromDB(field)) {
+				out.println("' +");
+				out.println(" // '" + field.getName() + " = :" + field.getName() + " ' + ");
+				out.print("    '");
+				continue;
+			}
 			if (!AndStmt.equals(""))
 				out.println(AndStmt);
 			out.print("    '" + field.getName() + " = :" + field.getName());
@@ -224,6 +247,10 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		for (Field field : table.getFields()) {
 			if (!AndStmt.equals(""))
 				out.println(AndStmt);
+			if (field.getType().getType() == DataType.DATETIME && getDateFromDB(field)) {
+				out.print(" {* " + field.getName() + " *} 'NOW()");
+				continue;
+			}
 			out.print("    ':" + field.getName());
 			AndStmt = ", ' + ";
 		}
@@ -291,7 +318,9 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println("implementation");
 		out.println();
 		out.println("uses");
-		out.println("  Variants, DBUtils;");
+		out.println("  Variants, DBUtils, DB, Classes;");
+		out.println();
+		out.println("{ T" + getClassName(name) + " }");
 		out.println();
 		out.println("class procedure T" + getClassName(name)
 				+ ".Carregar(Qry: TZQuery; " + getBaseClassName(name) + ": T"
@@ -308,6 +337,37 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println("  Qry.Close;");
 		out.println("end;");
 		out.println();
+		// generate procedure to load a blob field
+		for (Field field : table.getFields()) {
+			if (field.getType().getType() != DataType.BLOB)
+				continue;
+			String varName = genArrayAccess(normalize(field.getName(), false));
+			out.println("class procedure T" + getClassName(name)
+				+ ".Carregar" + varName + "(Qry: TZQuery; "
+					+ getBaseClassName(name) + ": T" + getBaseClassName(name)
+					+ ");");
+			out.println("var");
+			out.println("  FStream: TStream;");
+			out.println("begin");
+			out.print  ("  Qry.SQL.Text := 'SELECT Imagem FROM " + getTableName(table, name, indexed));
+			genKeyWhereParams(out, table, name, indexed, keyFields);
+			genKeyParams(out, table, name, indexed, keyFields);
+			out.println("  Qry.Open;");
+			out.println("  if Qry.Eof then");
+			out.println("    Exit;");
+			out.println("  if Qry.FieldByName('" + field.getName() + "').IsNull then");
+			out.println("    " + getBaseClassName(name) + "." + varName + " := nil");
+			out.println("  else");
+			out.println("  begin");
+			out.println("    FStream := TMemoryStream.Create;");
+			out.println("    TBlobField(Qry.FieldByName('" + field.getName() + "')).SaveToStream(FStream);");
+			out.println("    " + getBaseClassName(name) + "." + varName + " := FStream;");
+			out.println("    FStream.Free;");
+			out.println("  end;");
+			out.println("  Qry.Close;");
+			out.println("end;");
+			out.println();
+		}
 		out.println("class procedure T" + getClassName(name)
 				+ ".Inserir(Qry: TZQuery; " + getBaseClassName(name) + ": T"
 				+ getBaseClassName(name) + ");");
@@ -317,6 +377,23 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		genInsertAssignFields(out, table, name, indexed);
 		out.println("  PreencheParametros(Qry, " + getBaseClassName(name)
 				+ ");");
+		// generate fill blob field on insert
+		for (Field field : table.getFields()) {
+			if (field.getType().getType() != DataType.BLOB)
+				continue;
+			String varName = genArrayAccess(normalize(field.getName(), false));
+			if (!field.isNotNull()) {
+				out.println("  if (" + getBaseClassName(name) + "." + varName
+						+ " <> nil) then");
+				out.println("  begin");
+				out.println("    " + getBaseClassName(name) + "." + varName + ".Position := 0;");
+				out.println("    Qry.ParamByName('" + field.getName()
+						+ "').LoadFromStream(" + getBaseClassName(name) + "." + varName + ", ftBlob);");
+				out.println("  end");
+				out.println("  else");
+				out.println("    Qry.ParamByName('" + field.getName() + "').Value := Null;");
+			}
+		}
 		out.println("  try");
 		out.println("    Qry.ExecSQL;");
 		out.println("  except");
@@ -347,6 +424,36 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println("  end;");
 		out.println("end;");
 		out.println();
+		// generate procedure to update a blob field
+		for (Field field : table.getFields()) {
+			if (field.getType().getType() != DataType.BLOB)
+				continue;
+			String varName = genArrayAccess(normalize(field.getName(), false));
+			out.println("class procedure T" + getClassName(name)
+				+ ".Atualizar" + varName + "(Qry: TZQuery; "
+					+ getBaseClassName(name) + ": T" + getBaseClassName(name)
+					+ ");");
+			out.println("begin");
+			out.print("  Qry.SQL.Text := 'UPDATE " + getTableName(table, name, indexed) + " SET " + field.getName() + " = :" + field.getName() + "");
+			genKeyWhereParams(out, table, name, indexed, keyFields);
+			genKeyParams(out, table, name, indexed, keyFields);
+			out.println("  if " + getBaseClassName(name) + "." + varName + " <> nil then");
+			out.println("  begin");
+			out.println("    " + getBaseClassName(name) + "." + varName + ".Position := 0;");
+			out.println("    Qry.ParamByName('" + field.getName() + "').LoadFromStream(" + getBaseClassName(name) + "." + varName + ", ftBlob);");
+			out.println("  end");
+			out.println("  else");
+			out.println("    Qry.ParamByName('" + field.getName() + "').Value := Null;");
+			out.println("  try");
+			out.println("    Qry.ExecSQL;");
+			out.println("  except");
+			out.println("    raise Exception.Create('Não foi possível atualizar " + getGenderChar(varName) + " " + 
+					normalize(varName).toLowerCase() + " d" + getGenderChar(table.getName()) + " " + 
+					normalize(table.getName()).toLowerCase() + "');");
+			out.println("  end;");
+			out.println("end;");
+			out.println();
+		}
 		out.println("class procedure T" + getClassName(name)
 				+ ".Excluir(Qry: TZQuery; " + getBaseClassName(name) + ": T"
 				+ getBaseClassName(name) + ");");
@@ -398,12 +505,21 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println("begin");
 		for (Field field : table.getFields()) {
 			String varName = genArrayAccess(normalize(field.getName(), false));
+			if (field.getType().getType() == DataType.BLOB) {
+				out.println("  // Usar função Carregar" + varName + "()");
+				continue;
+			}
 			String enumItems = genEnum(name, field);
 			String funcPrefix = "";
 			String funcSuffix = "";
 			if (enumItems != null) {
 				funcPrefix = "T" + getBaseClassName(name) + ".StringTo" + convertType(name, field, false) + "(";
 				funcSuffix = ")";
+				if(!field.isNotNull()) {
+					out.println("  if not Qry.FieldByName('" + field.getName()
+					+ "').IsNull then");
+					out.print("  ");
+				}
 			}
 			out.println("  " + getBaseClassName(name) + "." + varName + " := "
 					+ funcPrefix + "Qry.FieldByName('" + field.getName()
@@ -417,9 +533,15 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 				+ ": T" + getBaseClassName(name) + ");");
 		out.println("begin");
 		for (Field field : table.getFields()) {
-			if (field.getType().getType() == DataType.BLOB)
-				continue;
 			String varName = genArrayAccess(normalize(field.getName(), false));
+			if (field.getType().getType() == DataType.BLOB){
+				out.println("  // Usar função Atualizar" + varName + "()");
+				continue;
+			}
+			if (field.getType().getType() == DataType.DATETIME && getDateFromDB(field)) {
+				out.println("  // Usando NOW() em vez de " + field.getName());
+				continue;
+			}
 			if ((!field.isNotNull() || field.isAutoIncrement()) && !getNullValue(field).equals("?")) {
 				out.println("  if (" + getBaseClassName(name) + "." + varName
 						+ " = " + getNullValue(field) + ") then");
@@ -449,6 +571,10 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println("  end;");
 		out.println("  Qry.Close;");
 		out.println("end;");
+	}
+
+	private boolean getDateFromDB(Field field) {
+		return field.getName().contains("DataHora") || field.getName().contains("DataCadastro") || field.getName().contains("DataAtualizacao") || field.isNotNull();
 	}
 
 	private void genGetInsertID(PrintWriter out, String name, Table table, List<Field> keyFields) {

@@ -380,6 +380,7 @@ public class ASTBuilder extends SQLBaseListener {
 	public void enterPrimaryKeyStmt(PrimaryKeyStmtContext ctx) {
 		super.enterPrimaryKeyStmt(ctx);
 		PrimaryKey pk = new PrimaryKey();
+		pk.setName("PRIMARY");
 		Table table = (Table) stack.peek();
 		table.addConstraint(pk);
 		stack.push(pk);
@@ -495,13 +496,17 @@ public class ASTBuilder extends SQLBaseListener {
 	@Override
 	public void exitConstraintName(ConstraintNameContext ctx) {
 		super.exitConstraintName(ctx);
-		discard(stack.pop()); // pop Name
+		NamedNode namedNode = (NamedNode) stack.pop();
+		Index index = (Index) stack.peek();
+		index.setName(namedNode.getName());
 	}
 
 	@Override
 	public void exitConstraintTable(ConstraintTableContext ctx) {
 		super.exitConstraintTable(ctx);
-		discard(stack.pop()); // pop Name
+		NamedNode namedNode = (NamedNode) stack.pop();
+		Index index = (Index) stack.peek();
+		index.setName(namedNode.getName());
 	}
 
 	@Override
@@ -509,10 +514,10 @@ public class ASTBuilder extends SQLBaseListener {
 		super.exitIndexColName(ctx);
 		NamedNode namedNode = (NamedNode) stack.pop();
 		Index index = (Index) stack.peek();
-		int type = OrderFied.ASCENDENT;
+		int type = OrderField.ASCENDENT;
 		if (ctx.Type != null && ctx.Type.getText().equals("DESC"))
-			type = OrderFied.DESCENDENT;
-		index.addField(new OrderFied(namedNode.getName(), type));
+			type = OrderField.DESCENDENT;
+		index.addField(new OrderField(namedNode.getName(), type));
 	}
 
 	@Override

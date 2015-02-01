@@ -3,19 +3,20 @@ package ast;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Index extends Node {
+public class Index extends NamedNode {
 
-	private List<OrderFied> fields;
+	private List<OrderField> fields;
 	
 	public Index() {
+		super(null);
 		fields = new ArrayList<>();
 	}
 
-	public List<OrderFied> getFields() {
+	public List<OrderField> getFields() {
 		return fields;
 	}
 
-	public void addField(OrderFied field) {
+	public void addField(OrderField field) {
 		fields.add(field);
 	}
 }

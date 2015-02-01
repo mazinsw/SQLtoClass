@@ -113,15 +113,15 @@ public abstract class CodeGenerator {
 					&& !lastWord.isEmpty()) {
 				if (lastIsVector && !currentIsVector) {
 					if (despluralize)
-						result += despluralize(lastWord) + ".";
+						result += upperFix(despluralize(lastWord)) + ".";
 					else
-						result += lastWord + ".";
+						result += upperFix(lastWord) + ".";
 					lastIsVector = false;
 				} else {
 					if (despluralize)
-						result += despluralize(lastWord);
+						result += upperFix(despluralize(lastWord));
 					else
-						result += lastWord;
+						result += upperFix(lastWord);
 				}
 				lastWord = str;
 				lastCaseIsUpper = true;
@@ -130,7 +130,7 @@ public abstract class CodeGenerator {
 				lastCaseIsUpper = Character.isUpperCase(ch);
 			} else {
 				lastIsVector = false;
-				result += lastWord + ".";
+				result += upperFix(lastWord) + ".";
 				lastWord = str;
 			}
 			i++;
@@ -138,17 +138,42 @@ public abstract class CodeGenerator {
 		if (!lastWord.isEmpty()) {
 			if (!currentIsVector && lastIsVector) {
 				if (despluralize)
-					result += "." + despluralize(lastWord);
+					result += "." + upperFix(despluralize(lastWord));
 				else
-					result += "." + lastWord;
+					result += "." + upperFix(lastWord);
 			} else {
 				if (despluralize)
-					result += despluralize(lastWord);
+					result += upperFix(despluralize(lastWord));
 				else
-					result += lastWord;
+					result += upperFix(lastWord);
 			}
 		}
 		return result;
+	}
+
+	public static String upperFix(String word) {
+		String upr = word.toUpperCase();
+		if (upr.equals("URL"))
+			word = upr;
+		else if (upr.equals("CPF"))
+			word = upr;
+		else if (upr.equals("CNPJ"))
+			word = upr;
+		else if (upr.equals("RG"))
+			word = upr;
+		else if (upr.equals("IE"))
+			word = upr;
+		else if (upr.equals("IM"))
+			word = upr;
+		else if (upr.equals("UF"))
+			word = upr;
+		else if (upr.equals("CEP"))
+			word = upr;
+		else if (upr.equals("GUID"))
+			word = upr;
+		else if (upr.equals("PID"))
+			word = upr;
+		return word;
 	}
 
 	public static String despluralize(String word) {
@@ -201,8 +226,6 @@ public abstract class CodeGenerator {
 	}
 	
 	public static boolean canTrimField(String field) {
-		if(field.compareToIgnoreCase("email") == 0)
-			return false;
 		if(field.compareToIgnoreCase("senha") == 0)
 			return false;
 		if(field.compareToIgnoreCase("cpf") == 0)
@@ -214,9 +237,19 @@ public abstract class CodeGenerator {
 		return true;
 	}
 	
-	public static boolean skipTestField(String field) {
-		if(field.compareToIgnoreCase("secreto") == 0)
+	public static boolean numberOnlyField(String field) {
+		if(field.compareToIgnoreCase("cpf") == 0)
 			return true;
+		if(field.compareToIgnoreCase("cnpj") == 0)
+			return true;
+		if(field.compareToIgnoreCase("fone") == 0)
+			return true;
+		if(field.compareToIgnoreCase("ie") == 0)
+			return true;
+		return false;
+	}
+	
+	public static boolean skipTestField(String field) {
 		if(field.compareToIgnoreCase("senha") == 0)
 			return true;
 		if(field.contains("data"))
@@ -225,8 +258,6 @@ public abstract class CodeGenerator {
 	}
 
 	public static boolean skipFixField(String field) {
-		if(field.compareToIgnoreCase("secreto") == 0)
-			return true;
 		return false;
 	}
 	
@@ -244,10 +275,14 @@ public abstract class CodeGenerator {
 	
 	public String getGenderChar(String name) {
 		String nlc = name.toLowerCase();
-		if (nlc.endsWith("de"))
+		if(!nlc.equals("id") && nlc.endsWith("id"))
+			nlc = nlc.substring(0, nlc.length() - 2);
+		if(nlc.endsWith("_"))
+			nlc = nlc.substring(0, nlc.length() - 1);
+		if (nlc.endsWith("de") || nlc.startsWith("a", 1) || (nlc.startsWith("e", 1) && nlc.endsWith("ao")))
 			return "a";
-		if (nlc.endsWith("e") || nlc.endsWith("or") || nlc.endsWith("o") || nlc.equals("id") || nlc.endsWith("oid") || nlc.endsWith("el") || nlc.endsWith("il")
-				|| nlc.endsWith("cnpj") || nlc.endsWith("cpf") || nlc.endsWith("in")|| nlc.endsWith("tema")|| nlc.endsWith("p"))
+		if (nlc.startsWith("o", 1) || nlc.endsWith("e") || nlc.endsWith("or") || nlc.endsWith("o") || nlc.equals("id") || nlc.endsWith("oid") || nlc.endsWith("el") || nlc.endsWith("il")
+				|| nlc.endsWith("cnpj") || nlc.endsWith("cpf") || nlc.endsWith("in")|| nlc.endsWith("tema")|| nlc.endsWith("p") || nlc.length() == 1)
 			return "o";
 		return "a";
 	}

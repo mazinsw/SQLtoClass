@@ -39,7 +39,6 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 			}
 		}
 		out.println("type");
-		out.println();
 		for (Field field : table.getFields()) {
 			String varName = normalize(field.getName(), false);
 			varName = varName.replaceAll("\\[[0-9]+\\]", "");
@@ -148,10 +147,13 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 			out.println("const");
 			for (Field field : enumFieldList) {
 				String enumAsString = genEnumString(name, field);
+				String enumAsInteger = genEnumInteger(name, field);
 				String typeEnum = convertType(name, field);
 				String enumTypeName = convertType(name, field, false);
 				out.println("  " + enumTypeName + "ToString: array[" + typeEnum
 						+ "] of string = (" + enumAsString + ");");
+				out.println("  " + enumTypeName + "ToIndex: array[" + typeEnum
+						+ "] of Integer = (" + enumAsInteger + ");");
 				EnumType enumType = (EnumType) field.getType();
 				String arrayName = "IndexTo" + enumTypeName;
 				String enumItems = genEnum(name, field);
@@ -161,6 +163,17 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 			}
 			out.println();
 		}
+	}
+
+	private String genEnumInteger(String name, Field field) {
+		EnumType enumType = (EnumType) field.getType();
+		String res = "";
+		if(enumType.getElements().size() > 0)
+			res = "0";
+		for (int i = 1; i < enumType.getElements().size(); i++) {
+			res = res + ", " + i;			
+		}
+		return res;
 	}
 
 	@Override
@@ -193,6 +206,8 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 			out.println("uses");
 			out.println("  SysUtils;");
 		}
+		out.println();
+		out.println("{ T" + getClassName(name) + " }");
 		if (hasStream) {
 			out.println();
 			out.println("destructor T" + getClassName(name) + ".Destroy;");
@@ -327,20 +342,20 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 						+ varName + "(Value: " + convertType(name, field)
 						+ ");");
 				out.println("var");
-				out.println(" Position: Int64;");
+				out.println("  Position: Int64;");
 				out.println("begin");
 				out.println("  if F" + varName + " = Value then");
 				out.println("    Exit;");
 				out.println("  if Value = nil then");
 				out.println("  begin");
 				out.println("    if F" + varName + " <> nil then");
-				out.println("       F" + varName + ".Free;");
+				out.println("      F" + varName + ".Free;");
 				out.println("    F" + varName + " := nil;");
 				out.println("  end");
 				out.println("  else");
 				out.println("  begin");
 				out.println("    if F" + varName + " = nil then");
-				out.println("       F" + varName + " := TMemoryStream.Create;");
+				out.println("      F" + varName + " := TMemoryStream.Create;");
 				out.println("    Position := Value.Position;");
 				out.println("    Value.Position := 0;");
 				out.println("    F" + varName + ".Size := 0;");
