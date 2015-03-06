@@ -1,0 +1,217 @@
+package code;
+
+import java.io.PrintWriter;
+import java.util.Hashtable;
+
+import ast.DataType;
+import ast.EnumType;
+import ast.Field;
+import ast.ScriptNode;
+import ast.Table;
+
+public abstract class JavaGeneratorBase extends CodeGenerator {
+	private String packageName;
+	private static final String[] indexNames = { "linha", "coluna" };
+
+	public JavaGeneratorBase(String outDir, ScriptNode script) {
+		super(outDir, script);
+		// TODO Auto-generated constructor stub
+	}
+	
+	@Override
+	public void genHeader(PrintWriter out, Table table, String name,
+			boolean indexed) {
+		if(packageName != null && !packageName.equals(""))
+			out.println("package " + getPackageName() + ";");
+		Hashtable<String, Integer> types = getTypes(table, name);
+		//boolean outLn = false;
+		if (types.containsKey("Date")) {
+			out.println();
+			out.println("import java.util.Date;");
+			//outLn = true;
+		}
+	}
+
+	private Hashtable<String, Integer> getTypes(Table table, String name) {
+		Hashtable<String, Integer> types = new Hashtable<String, Integer>();
+
+		for (Field field : table.getFields()) {
+			String typeName = convertType(name, field);
+			if (types.containsKey(typeName))
+				continue;
+			types.put(typeName, 1);
+		}
+		return types;
+	}
+
+	protected String genArray(String data) {
+		return genArray(data, false);
+	}
+	
+	protected String genArray(String data, boolean instantiate) {
+		String[] values = data.split(";");
+		String varDecl = "";
+		for (int i = 0; i < values.length; i++) {
+			if(instantiate) {
+				String[] interval = values[i].split(":");
+				int minIndex = Integer.valueOf(interval[0]);
+				int maxIndex = Integer.valueOf(interval[1]);
+				varDecl += "[" + (maxIndex - minIndex + 1) +  "]";
+			} else {
+				varDecl += "[]";
+			}
+		}
+		return varDecl;
+	}
+	protected String genArrayAccess(String data) {
+		String[] values = data.split(";");
+		String indexDecl = "";
+		for (int i = 0; i < values.length; i++) {
+			String paramName;
+			if (values.length == 1)
+				paramName = "[index]";
+			else if (values.length == 2)
+				paramName = "[" + indexNames[i] + "]";
+			else
+				paramName = "[index" + (i + 1) + "]";
+			indexDecl += paramName;
+		}
+		return indexDecl;
+	}
+
+	protected String genParams(String data, String sep) {
+		String[] values = data.split(";");
+		String semicolon = "";
+		String indexDecl = "";
+		for (int i = 0; i < values.length; i++) {
+			String paramName;
+			if (values.length == 1)
+				paramName = "int index";
+			else if (values.length == 2)
+				paramName = "int " + indexNames[i];
+			else
+				paramName = "int index" + (i + 1);
+			indexDecl += semicolon + paramName;
+			semicolon = sep + " ";
+		}
+		return indexDecl;
+	}
+
+	protected String genVarParams(String data, String sep) {
+		String[] values = data.split(";");
+		String semicolon = "";
+		String indexDecl = "";
+		for (int i = 0; i < values.length; i++) {
+			String paramName;
+			if (values.length == 1)
+				paramName = "index";
+			else if (values.length == 2)
+				paramName = indexNames[i];
+			else
+				paramName = "index" + (i + 1);
+			indexDecl += semicolon + paramName;
+			semicolon = sep + " ";
+		}
+		return indexDecl;
+	}
+	
+	protected boolean isObjectType(Field field) {
+		if(!field.isNotNull())
+			return true;
+		switch (field.getType().getType()) {
+		case DataType.DATE:
+		case DataType.TIME:
+		case DataType.DATETIME:
+			return true;
+		case DataType.DECIMAL:
+			return true;
+		case DataType.STRING:
+		case DataType.TEXT:
+		case DataType.CHAR:
+			return true;
+		case DataType.ENUM:
+			EnumType type = (EnumType) field.getType();
+			if (isBooleanField(field)) {
+				return false;
+			}
+			if (type.getElements().size() == 1
+					&& type.getElements().get(0).matches("[0-9]+")) {
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+	
+	protected String convertType(String name, Field field) {
+		switch (field.getType().getType()) {
+		case DataType.BOOLEAN:
+			if(!field.isNotNull())
+				return "Boolean";
+			return "boolean";
+		case DataType.DATE:
+		case DataType.TIME:
+		case DataType.DATETIME:
+			return "Date";
+		case DataType.FLOAT:
+			if(!field.isNotNull())
+				return "Float";
+			return "float";
+		case DataType.DOUBLE:
+			if(!field.isNotNull())
+				return "Double";
+			return "double";
+		case DataType.DECIMAL:
+			return "Currency";
+		case DataType.BIGINT:
+			if(!field.isNotNull())
+				return "Long";
+			return "long";
+		case DataType.INTEGER:
+		case DataType.TINYINT:
+			if(!field.isNotNull())
+				return "Integer";
+			return "int";
+		case DataType.STRING:
+		case DataType.TEXT:
+		case DataType.CHAR:
+			return "String";
+		case DataType.BLOB:
+			return "byte[]";
+		case DataType.ENUM:
+			EnumType type = (EnumType) field.getType();
+			
+			if (isBooleanField(field)) {
+				if(!field.isNotNull())
+					return "Boolean";
+				return "boolean";
+			}
+			if (type.getElements().size() == 1
+					&& type.getElements().get(0).matches("[0-9]+")) {
+				if(!field.isNotNull())
+					return "Integer";
+				return "int";
+			}
+			return "String";
+		}
+		return "[Unknown]";
+	}
+
+	@Override
+	public String getNameWithExtension(String name) {
+		return getClassName(name) + ".java";
+	}
+
+	protected String getClassName(String name) {
+		return getClassPrefix() + name + getClassSuffix();
+	}
+
+	public String getPackageName() {
+		return packageName;
+	}
+
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+	}
+
+}

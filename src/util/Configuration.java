@@ -10,6 +10,7 @@ import java.util.Properties;
 public class Configuration {
 	public static final int GENERATE_PHP = 0;
 	public static final int GENERATE_DELPHI = 1;
+	public static final int GENERATE_JAVA = 2;
 	public static final int PHP_DB_PDO = 0;
 	public static final int PHP_FLUENT_PDO = 1;
 	
@@ -23,6 +24,8 @@ public class Configuration {
 	private boolean generateDAO;
 	private int generator;
 	private int phpPDO;
+	private String packageName;
+	private String packageNameDAO;
 
 	public Configuration() {
 		load();
@@ -123,6 +126,8 @@ public class Configuration {
 			pathDAO = props.getProperty("pathDAO");
 			suffixDAO = props.getProperty("suffixDAO");
 			prefixDAO = props.getProperty("prefixDAO");
+			packageName = props.getProperty("packageName");
+			packageNameDAO = props.getProperty("packageNameDAO");
 			if (props.containsKey("generateDAO"))
 				generateDAO = props.getProperty("generateDAO").equals(String.valueOf(true));
 			else
@@ -156,6 +161,8 @@ public class Configuration {
 			props.setProperty("pathDAO", pathDAO);
 			props.setProperty("suffixDAO", suffixDAO);
 			props.setProperty("prefixDAO", prefixDAO);
+			props.setProperty("packageName", packageName);
+			props.setProperty("packageNameDAO", packageNameDAO);
 			props.setProperty("generateDAO", String.valueOf(generateDAO));
 			props.setProperty("generator", String.valueOf(generator));
 			props.setProperty("phpPDO", String.valueOf(phpPDO));
@@ -167,6 +174,22 @@ public class Configuration {
 		} catch (IOException ex) {
 			// I/O error
 		}
+	}
+
+	public String getPackageName() {
+		return packageName;
+	}
+
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+	}
+
+	public String getPackageNameDAO() {
+		return packageNameDAO;
+	}
+
+	public void setPackageNameDAO(String packageNameDAO) {
+		this.packageNameDAO = packageNameDAO;
 	}
 
 }

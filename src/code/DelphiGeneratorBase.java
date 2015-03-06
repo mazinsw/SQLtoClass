@@ -1,8 +1,5 @@
 package code;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,7 +7,6 @@ import ast.DataType;
 import ast.EnumType;
 import ast.Field;
 import ast.ScriptNode;
-import ast.Table;
 
 public abstract class DelphiGeneratorBase extends CodeGenerator {
 	private static final String[] indexNames = { "Linha", "Coluna" };
@@ -122,80 +118,6 @@ public abstract class DelphiGeneratorBase extends CodeGenerator {
 			sep = ", ";
 		}
 		return enumItems;
-	}
-
-	protected void processArray(Table table,
-			Hashtable<String, String> indexedFields) {
-		List<Field> normalFields = new ArrayList<>();
-		for (Field field : table.getFields()) {
-			String varName = normalize(field.getName(), false);
-			if (!varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-					&& !varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
-				normalFields.add(field);
-				continue;
-			}
-			Matcher m = Pattern.compile("^[a-zA-Z]+\\[([0-9]+)\\]$").matcher(
-					varName);
-			if (!m.find()) {
-				m = Pattern.compile("^[a-zA-Z]+\\[([0-9]+)\\]\\[([0-9]+)\\]$")
-						.matcher(varName);
-				m.find();
-			}
-			System.out.println(varName + " Match count: " + m.groupCount());
-			varName = varName.replaceAll("\\[[0-9]+\\]", "");
-			String semicolon = "";
-			String newData = "";
-			if (indexedFields.containsKey(varName)) {
-				String data = indexedFields.get(varName);
-				String[] values = data.split(";");
-				for (int i = 0; i < values.length; i++) {
-					String string = values[i];
-					String indexStr = m.group(i + 1);
-					int index = Integer.valueOf(indexStr);
-					String[] interval = string.split(":");
-					int minIndex = Integer.valueOf(interval[0]);
-					int maxIndex = Integer.valueOf(interval[1]);
-					if (minIndex > index || maxIndex < index) {
-						if (minIndex > index)
-							minIndex = index;
-						else
-							maxIndex = index;
-					}
-					newData += semicolon + minIndex + ":" + maxIndex;
-					semicolon = ";";
-				}
-				if (!newData.equals(data))
-					indexedFields.put(varName, newData);
-				continue;
-			}
-			for (int i = 0; i < m.groupCount(); i++) {
-				String indexStr = m.group(i + 1);
-				newData += semicolon + indexStr + ":" + indexStr;
-				semicolon = ";";
-			}
-			indexedFields.put(varName, newData);
-		}
-		// increment array for fields with same name
-		for (Field field : normalFields) {
-			String varName = normalize(field.getName(), false);
-			if (!indexedFields.containsKey(varName))
-				continue;
-			String data = indexedFields.get(varName);
-			String[] values = data.split(";");
-			String semicolon = "";
-			String newData = "";
-			for (int i = 0; i < values.length; i++) {
-				String string = values[i];
-				String[] interval = string.split(":");
-				int minIndex = Integer.valueOf(interval[0]);
-				int maxIndex = Integer.valueOf(interval[1]);
-				if (i == values.length - 1)
-					maxIndex++;
-				newData += semicolon + minIndex + ":" + maxIndex;
-				semicolon = ";";
-			}
-			indexedFields.put(varName, newData);
-		}
 	}
 
 	protected String genParams(String data, String sep) {

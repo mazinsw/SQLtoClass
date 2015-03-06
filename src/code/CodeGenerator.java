@@ -3,8 +3,15 @@ package code;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import ast.DataType;
+import ast.EnumType;
+import ast.Field;
 import ast.Node;
 import ast.ScriptNode;
 import ast.Table;
@@ -64,6 +71,105 @@ public abstract class CodeGenerator {
 	public static String normalize(String name) {
 		return normalize(name, true);
 	}
+	
+	protected boolean isBooleanField(Field field) {
+		if(field.getType().getType() != DataType.ENUM)
+			return false;
+		EnumType type = (EnumType) field.getType();
+		if (type.getElements().size() == 2
+				&& ((type.getElements().get(0).equals("Y") && type
+						.getElements().get(1).equals("N")) || (type
+						.getElements().get(0).equals("N") && type
+						.getElements().get(1).equals("Y"))))
+			return true;
+		return false;
+	}
+	
+
+	/**
+	 * Compact field from Field, Field1, Field2 to Field[1..3]
+	 * 
+	 * @param table
+	 *            table with fields
+	 * @param indexedFields
+	 *            array fields with key as name and value as interval list
+	 *            separated with semicolon, example: 1:2;1:3, multidimensional
+	 *            array with bounds 1 to 2 and 1 to 3
+	 */
+	protected void processArray(Table table,
+			Hashtable<String, String> indexedFields) {
+		List<Field> normalFields = new ArrayList<>();
+		for (Field field : table.getFields()) {
+			String varName = normalize(field.getName(), false);
+			if (!varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
+					&& !varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
+				normalFields.add(field);
+				continue;
+			}
+			Matcher m = Pattern.compile("^[a-zA-Z]+\\[([0-9]+)\\]$").matcher(
+					varName);
+			if (!m.find()) {
+				m = Pattern.compile("^[a-zA-Z]+\\[([0-9]+)\\]\\[([0-9]+)\\]$")
+						.matcher(varName);
+				m.find();
+			}
+			System.out.println(varName + " Match count: " + m.groupCount());
+			varName = varName.replaceAll("\\[[0-9]+\\]", "");
+			String semicolon = "";
+			String newData = "";
+			if (indexedFields.containsKey(varName)) {
+				String data = indexedFields.get(varName);
+				String[] values = data.split(";");
+				for (int i = 0; i < values.length; i++) {
+					String string = values[i];
+					String indexStr = m.group(i + 1);
+					int index = Integer.valueOf(indexStr);
+					String[] interval = string.split(":");
+					int minIndex = Integer.valueOf(interval[0]);
+					int maxIndex = Integer.valueOf(interval[1]);
+					if (minIndex > index || maxIndex < index) {
+						if (minIndex > index)
+							minIndex = index;
+						else
+							maxIndex = index;
+					}
+					newData += semicolon + minIndex + ":" + maxIndex;
+					semicolon = ";";
+				}
+				if (!newData.equals(data))
+					indexedFields.put(varName, newData);
+				continue;
+			}
+			for (int i = 0; i < m.groupCount(); i++) {
+				String indexStr = m.group(i + 1);
+				newData += semicolon + indexStr + ":" + indexStr;
+				semicolon = ";";
+			}
+			indexedFields.put(varName, newData);
+		}
+		// increment array for fields with same name
+		for (Field field : normalFields) {
+			String varName = normalize(field.getName(), false);
+			if (!indexedFields.containsKey(varName))
+				continue;
+			String data = indexedFields.get(varName);
+			String[] values = data.split(";");
+			String semicolon = "";
+			String newData = "";
+			for (int i = 0; i < values.length; i++) {
+				String string = values[i];
+				String[] interval = string.split(":");
+				int minIndex = Integer.valueOf(interval[0]);
+				int maxIndex = Integer.valueOf(interval[1]);
+				if (i == values.length - 1)
+					maxIndex++;
+				newData += semicolon + minIndex + ":" + maxIndex;
+				semicolon = ";";
+			}
+			indexedFields.put(varName, newData);
+		}
+	}
+
 
 	public static String normalize(String name, boolean despluralize) {
 		if (name.matches("T[A-Z].*"))
@@ -285,6 +391,19 @@ public abstract class CodeGenerator {
 				|| nlc.endsWith("cnpj") || nlc.endsWith("cpf") || nlc.endsWith("in")|| nlc.endsWith("tema")|| nlc.endsWith("p") || nlc.length() == 1)
 			return "o";
 		return "a";
+	}
+	
+	public String getCamelCaseName(String name) {
+		String camelCase = "";
+		for (int i = 0; i < name.length(); i++) {
+			if(Character.isUpperCase(name.charAt(i))) {
+				camelCase += Character.toLowerCase(name.charAt(i));
+			} else {
+				camelCase += name.substring(i);
+				break;
+			}
+		}
+		return camelCase;
 	}
 
 	public void setClassPrefix(String classPrefix) {
