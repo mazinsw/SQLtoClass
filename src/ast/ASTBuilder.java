@@ -28,6 +28,7 @@ import parser.SQLParser.DefaultNullContext;
 import parser.SQLParser.DefaultValueContext;
 import parser.SQLParser.DropSchemaContext;
 import parser.SQLParser.DropTableNameContext;
+import parser.SQLParser.FieldCommentContext;
 import parser.SQLParser.FieldStmtContext;
 import parser.SQLParser.ForeignStmtContext;
 import parser.SQLParser.IdNameContext;
@@ -38,6 +39,7 @@ import parser.SQLParser.ReferenceDefinitionContext;
 import parser.SQLParser.ReferenceTableContext;
 import parser.SQLParser.SetDefaultValueContext;
 import parser.SQLParser.StringItemContext;
+import parser.SQLParser.TableCommentContext;
 import parser.SQLParser.TableNameContext;
 import parser.SQLParser.TypeBigIntStmtContext;
 import parser.SQLParser.TypeBlobStmtContext;
@@ -63,6 +65,7 @@ import parser.SQLParser.TypeTinyTextStmtContext;
 import parser.SQLParser.TypeVarCharStmtContext;
 import parser.SQLParser.UniqueStmtContext;
 import parser.SQLParser.UseStmtContext;
+import util.ParseComment;
 
 public class ASTBuilder extends SQLBaseListener {
 	private Stack<Node> stack;
@@ -407,6 +410,13 @@ public class ASTBuilder extends SQLBaseListener {
 		Field field = (Field) stack.peek();
 		field.setAutoIncrement(true);
 	}
+	
+	@Override
+	public void enterFieldComment(FieldCommentContext ctx) {
+		super.enterFieldComment(ctx);
+		Field field = (Field) stack.peek();
+		field.setComment(ParseComment.parse(ctx.STRING().getText()));
+	}
 
 	@Override
 	public void exitIndexStmt(IndexStmtContext ctx) {
@@ -461,6 +471,13 @@ public class ASTBuilder extends SQLBaseListener {
 	public void exitCreateSchema(CreateSchemaContext ctx) {
 		super.exitCreateSchema(ctx);
 		discard(stack.pop()); // pop Name
+	}
+	
+	@Override
+	public void enterTableComment(TableCommentContext ctx) {
+		super.enterTableComment(ctx);
+		Table table = (Table) stack.peek();
+		table.setComment(ParseComment.parse(ctx.STRING().getText()));
 	}
 
 	@Override

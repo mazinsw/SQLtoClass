@@ -1,6 +1,7 @@
 package code;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 import ast.ScriptNode;
 
@@ -30,37 +31,51 @@ public class PHPGeneratorFluentPDO extends PHPGeneratorBase {
 	}
 
 	@Override
-	protected void genSQLInsert(PrintWriter out, String unixName,
-			String idName, String tblname, String indexStr) {
-		out.println("\t\t\t$_" + unixName + "['" + idName.toLowerCase()
-				+ "'] = DB::$pdo->insertInto('" + tblname + "'" + indexStr + ")->values($_"
+	protected void genSQLInsert(PrintWriter out, 
+			String tblname, String indexStr, String pkName, 
+			String unixName) {
+		out.print("\t\t\t");
+		if(pkName != null)
+			out.print("$_" + unixName + "['" + pkName.toLowerCase() + "'] = ");
+		out.println("DB::$pdo->insertInto('" + tblname + "'" + indexStr + ")->values($_"
 				+ unixName + ")->execute();");
 	}
 
 	@Override
 	protected void genSQLUpdate(PrintWriter out, String tblname,
-			String indexStr, String unixName, String idName) {
+			String indexStr, List<String> ukNames, String unixName) {
 		out.println("\t\t\t$query = DB::$pdo->update('" + tblname + "'" + indexStr + ");");
 		out.println("\t\t\t$query = $query->set(array_intersect_key($_" + unixName + ", array_flip($campos)));");
-		out.println("\t\t\t$query->where('" + idName.toLowerCase() + "', $_" + unixName
-				+ "['" + idName.toLowerCase() + "'])->execute();");
+		for (String idName : ukNames) {
+			out.println("\t\t\t$query = $query->where('" + idName + "', $_" + unixName
+					+ "['" + idName.toLowerCase() + "']);");
+		}
+		out.println("\t\t\t$query->execute();");
 	}
 
 	@Override
 	protected void genSQLGetTodos(PrintWriter out, String tblname,
-			String indexStr, String unixName) {
-		out.println("\t\treturn   DB::$pdo->from('"
+			String indexStr, String pkName, String unixName) {
+		out.print("\t\treturn   DB::$pdo->from('"
 				+ tblname + "'" + indexStr + ")");
-		out.println("\t\t                 ->orderBy('id ASC');");		
+		if(pkName != null) {
+			out.println();
+			out.println("\t\t                 ->orderBy('" + pkName + " ASC');");
+		} else 
+			out.println(";");	
 	}
 
 	@Override
 	protected void genSQLGetTodosFk(PrintWriter out, String tblname,
-			String indexStr, String unixName, String arrElem) {
+			String indexStr, String pkName, String unixName, String arrElem) {
 		out.println("\t\treturn   DB::$pdo->from('"
 				+ tblname + "'" + indexStr + ")");
-		out.println("\t\t                 ->where(array(" + arrElem + "))");
-		out.println("\t\t                 ->orderBy('id ASC');");
+		out.print("\t\t                 ->where(array(" + arrElem + "))");
+		if(pkName != null) {
+			out.println();
+			out.println("\t\t                 ->orderBy('" + pkName + " ASC');");
+		} else 
+			out.println(";");
 	}
 
 	@Override

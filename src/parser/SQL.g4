@@ -24,7 +24,9 @@ createSchema: 'CREATE' ('DATABASE' | 'SCHEMA') ('IF' 'NOT' 'EXISTS')? idName
 createSpecification:
     'DEFAULT'? 'CHARACTER' 'SET' '='? charsetName
   | 'DEFAULT'? 'COLLATE' '='? collateName
-  | 'COMMENT' '=' STRING;
+  | 'COMMENT' '=' tableComment;
+
+tableComment: STRING;
 
 setStmt: 'SET' (setOption ',')* setOption;
 
@@ -57,12 +59,13 @@ constraintTable:idName;
 columnDefinition:
     dataType (defaultNull|defaultNotNull)? ('DEFAULT' columnDefaultValue)?
       autoIncrement? (('UNIQUE' 'KEY'?) | ('PRIMARY'? 'KEY'))?
-      ('COMMENT' STRING)?;
+      ('COMMENT' fieldComment)?;
 
 autoIncrement: 'AUTO_INCREMENT';
 columnDefaultValue: defaultValue;
 defaultNull: 'NULL';
 defaultNotNull: 'NOT' 'NULL';
+fieldComment: STRING;
 
 referenceDefinition:
       'REFERENCES' referenceTable '(' (indexColName ',')* indexColName ')'
@@ -115,9 +118,9 @@ dataType:
   | 'SET' '(' (stringItem ',')* stringItem ')'
       ('CHARACTER' 'SET' charsetName)? ('COLLATE' collateName)? #typeSetStmt;
 
-stringItem:STRING;
-charsetName:idName;
-collateName:idName;
+stringItem: STRING;
+charsetName: idName;
+collateName: idName;
 
 referenceOption:
    'RESTRICT' | 'CASCADE' | ('SET' 'NULL') | ('NO' 'ACTION');

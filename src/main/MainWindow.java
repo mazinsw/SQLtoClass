@@ -33,6 +33,7 @@ import code.CodeGenerator;
 import code.DelphiGenerator;
 import code.DelphiGeneratorDAO;
 import code.JavaGenerator;
+import code.JavaGeneratorDAO;
 import code.PHPGeneratorDB;
 import code.PHPGeneratorFluentPDO;
 
@@ -418,19 +419,19 @@ public class MainWindow extends JFrame {
 		gen.setClassSuffix(textFieldSufixo.getText());
 		try {
 			gen.start();
-			if(chckbxGerarDao.isSelected()) {
+			if(chckbxGerarDao.isSelected() && !rdbtnPhp.isSelected()) {
 				if(rdbtnDelphi.isSelected()) {
 					DelphiGeneratorDAO genDAO = new DelphiGeneratorDAO(textFieldPastaSaidaDAO.getText(), builder.getScript());
 					genDAO.setClassBasePrefix(textFieldPrefixo.getText());
 					genDAO.setClassBaseSuffix(textFieldSufixo.getText());
 					gen = genDAO;
-				} else if(rdbtnJava.isSelected()) {
-					if(chckbxUsarFluentPDO.isSelected())
-						gen = new PHPGeneratorFluentPDO(textFieldPastaSaida.getText(), builder.getScript()); // TODO create DAO for PHP
-					else
-						gen = new PHPGeneratorDB(textFieldPastaSaida.getText(), builder.getScript()); // TODO create DAO for PHP
 				} else {
-					throw new Exception("O gerador DAO para java não foi implementado ainda");
+					JavaGeneratorDAO genDAO = new JavaGeneratorDAO(textFieldPastaSaidaDAO.getText(), builder.getScript());
+					genDAO.setClassBasePrefix(textFieldPrefixo.getText());
+					genDAO.setClassBaseSuffix(textFieldSufixo.getText());
+					genDAO.setPackageBaseName(textFieldPacote.getText());
+					genDAO.setPackageName(textFieldPacoteDAO.getText());
+					gen = genDAO;
 				}
 				gen.setClassPrefix(textFieldPrefixoDAO.getText());
 				gen.setClassSuffix(textFieldSufixoDAO.getText());

@@ -1,6 +1,6 @@
 package ast;
 
-public class Field extends NamedNode {
+public class Field extends CommentedNode {
 	
 	private DataType type;
 	private Value value;

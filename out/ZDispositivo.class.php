@@ -86,89 +86,132 @@ class ZDispositivo {
 		$dispositivo['modelo'] = $this->getModelo();
 		$dispositivo['datacadastro'] = $this->getDataCadastro();
 		$dispositivo['dataatualizacao'] = $this->getDataAtualizacao();
-		return array_filter($dispositivo);
+		return $dispositivo;
 	}
 
-	public static function getPeloID($id, $igonore_id = null) {
-		if ( !$id )
-			return new ZDispositivo();
-		$condition = array('ID' => $id);
-		if(!is_null($igonore_id))
-			$condition[] = 'ID <> '.intval($igonore_id);
-		return new ZDispositivo(DB::GetTableRow('TDispositivos', $condition));
+	public static function getPeloID($id) {
+		return new ZDispositivo(DB::GetTableRow('TDispositivos', array('id' => $id)));
 	}
 
-	public static function excluir($id) {
-		if ( !$id )
-			return false;
-		return DB::Delete('TDispositivos', array('ID' => $id));
+	public static function getPelaEmpresaIDDeviceID($empresa_id, $device_id) {
+		return new ZDispositivo(DB::GetTableRow('TDispositivos', array('empresaid' => $empresa_id, 'deviceid' => $device_id)));
 	}
 
-	public static function getPelaEmpresaIDDeviceID($empresa_id, $device_id, $igonore_id = null) {
-		if ( !$empresa_id || !$device_id )
-			return new ZDispositivo();
-		$condition = array('EmpresaID' => $empresa_id, 'DeviceID' => $device_id);
-		if(!is_null($igonore_id))
-			$condition[] = 'ID <> '.intval($igonore_id);
-		return new ZDispositivo(DB::GetTableRow('TDispositivos', $condition));
-	}
-
-	public static function validarCampos(&$dispositivo) {
+	private static function validarCampos(&$dispositivo) {
+		$erros = array();
 		if(!is_numeric($dispositivo['empresaid']))
-			return false;
-		$dispositivo['deviceid'] = trim($dispositivo['deviceid']);
+			$erros['empresaid'] = 'A EmpresaID não é um número';
+		$dispositivo['deviceid'] = strip_tags(trim($dispositivo['deviceid']));
 		if(strlen($dispositivo['deviceid']) == 0)
-			return false;
-		$dispositivo['descricao'] = trim($dispositivo['descricao']);
+			$erros['deviceid'] = 'O DeviceID não pode ser vazio';
+		$dispositivo['descricao'] = strip_tags(trim($dispositivo['descricao']));
 		if(strlen($dispositivo['descricao']) == 0)
-			return false;
-		$dispositivo['modelo'] = trim($dispositivo['modelo']);
+			$erros['descricao'] = 'A Descricao não pode ser vazia';
+		$dispositivo['modelo'] = strip_tags(trim($dispositivo['modelo']));
 		if(strlen($dispositivo['modelo']) == 0)
-			return false;
+			$erros['modelo'] = 'O Modelo não pode ser vazio';
 		$dispositivo['datacadastro'] = date('Y-m-d H:i:s');
 		$dispositivo['dataatualizacao'] = date('Y-m-d H:i:s');
-		return true;
+		if(!empty($erros))
+			throw new ValidationException($erros);
+	}
+
+	private static function handleException(&$e) {
+		if(stripos($e->getMessage(), 'PRIMARY') !== false)
+			throw new ValidationException(array('id' => 'O ID informado já está cadastrado'));
+		if(stripos($e->getMessage(), 'UK_Dispositivo') !== false)
+			throw new ValidationException(array('deviceid' => 'O DeviceID informado já está cadastrado'));
 	}
 
 	public static function cadastrar($dispositivo) {
 		$_dispositivo = $dispositivo->toArray();
-		if(!self::validarCampos($_dispositivo))
-			return new ZDispositivo();
+		self::validarCampos($_dispositivo);
+		try {
 		$_dispositivo['id'] = DB::Insert('TDispositivos', $_dispositivo);
-		return self::getPeloId($_dispositivo['id']);
+		} catch (Exception $e) {
+			self::handleException($e);
+			throw $e;
+		}
+		return self::getPeloID($_dispositivo['id']);
 	}
 
 	public static function atualizar($dispositivo) {
 		$_dispositivo = $dispositivo->toArray();
 		if(!$_dispositivo['id'])
-			return false;
-		if(!self::validarCampos($_dispositivo))
-			return false;
+			throw new ValidationException(array('id' => 'O id do dispositivo não foi informado'));
+		self::validarCampos($_dispositivo);
 		$campos = array(
 			'empresaid',
 			'deviceid',
 			'descricao',
 			'modelo',
-			'datacadastro',
 			'dataatualizacao',
 		);
+		try {
 		$table = new Table('TDispositivos', $_dispositivo);
 		$table->SetPk('id', $_dispositivo['id']);
-		return $table->Update($campos);
+		if(!$table->Update($campos))
+			throw new Exception('Falha ao atualizar a dispositivo');
+		} catch (Exception $e) {
+			self::handleException($e);
+			throw $e;
+		}
+		return self::getPeloID($_dispositivo['id']);
+	}
+
+	public static function excluir($id) {
+		if(!$id)
+			throw new Exception('Não foi possível excluir o dispositivo, o id do dispositivo não foi informado');
+		return DB::Delete('TDispositivos', array('id' => $id));
+	}
+
+	private static function initSearch() {
+		$query = array();
+		$query['order'] = 'ORDER BY id ASC';
+		return $query;
 	}
 
 	public static function getTodos($inicio = null, $quantidade = null) {
-		$condition = array();
+		$query = self::initSearch();
 		if(!is_null($inicio) && !is_null($quantidade)) {
-			$condition['order'] = 'ORDER BY id DESC';
-			$condition['size'] = $quantidade;
-			$condition['offset'] = $inicio;
+			$query['size'] = $quantidade;
+			$query['offset'] = $inicio;
 		}
-		$_dispositivos = DB::LimitQuery('TDispositivos', $condition);
+		$_dispositivos = DB::LimitQuery('TDispositivos', $query);
 		$dispositivos = array();
 		foreach($_dispositivos as $dispositivo)
 			$dispositivos[] = new ZDispositivo($dispositivo);
 		return $dispositivos;
+	}
+
+	public static function getCount() {
+		$query = self::initSearch();
+		return Table::Count('TDispositivos', $query['condition']);
+	}
+
+	private static function initSearchDaEmpresaID($empresa_id) {
+		$query = array();
+		$query['condition'] = array('empresaid' => $empresa_id);
+		$query['order'] = 'ORDER BY id ASC';
+		return $query;
+	}
+
+	public static function getTodosDaEmpresaID($empresa_id, $inicio = null, $quantidade = null) {
+		$query = self::initSearchDaEmpresaID($empresa_id);
+		if(!is_null($inicio) && !is_null($quantidade)) {
+			$query['size'] = $quantidade;
+			$query['offset'] = $inicio;
+		}
+		$_dispositivos = DB::LimitQuery('TDispositivos', $query);
+		$dispositivos = array();
+		foreach($_dispositivos as $dispositivo)
+			$dispositivos[] = new ZDispositivo($dispositivo);
+		return $dispositivos;
+	}
+
+	public static function getCountDaEmpresaID($empresa_id) {
+		$query = self::initSearchDaEmpresaID($empresa_id);
+		return Table::Count('TDispositivos', $query['condition']);
 	}
 
 }

@@ -1,4 +1,4 @@
-// Generated from D:\Estudos\Java\Desktop\SQLtoClass\src\parser\SQL.g4 by ANTLR 4.1
+// Generated from D:\Projetos\SQLtoClass\src\parser\SQL.g4 by ANTLR 4.1
 package parser;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -225,6 +225,19 @@ public class SQLBaseListener implements SQLListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
+	@Override public void enterTableComment(@NotNull SQLParser.TableCommentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitTableComment(@NotNull SQLParser.TableCommentContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
 	@Override public void enterSetOption(@NotNull SQLParser.SetOptionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -381,19 +394,6 @@ public class SQLBaseListener implements SQLListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterTypeTimeStmt(@NotNull SQLParser.TypeTimeStmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitTypeTimeStmt(@NotNull SQLParser.TypeTimeStmtContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
 	@Override public void enterTypeCharStmt(@NotNull SQLParser.TypeCharStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -401,6 +401,19 @@ public class SQLBaseListener implements SQLListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitTypeCharStmt(@NotNull SQLParser.TypeCharStmtContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterTypeTimeStmt(@NotNull SQLParser.TypeTimeStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitTypeTimeStmt(@NotNull SQLParser.TypeTimeStmtContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -433,19 +446,6 @@ public class SQLBaseListener implements SQLListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterColumnDefinition(@NotNull SQLParser.ColumnDefinitionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitColumnDefinition(@NotNull SQLParser.ColumnDefinitionContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
 	@Override public void enterTypeVarCharStmt(@NotNull SQLParser.TypeVarCharStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -453,6 +453,19 @@ public class SQLBaseListener implements SQLListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitTypeVarCharStmt(@NotNull SQLParser.TypeVarCharStmtContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterColumnDefinition(@NotNull SQLParser.ColumnDefinitionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitColumnDefinition(@NotNull SQLParser.ColumnDefinitionContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -804,6 +817,19 @@ public class SQLBaseListener implements SQLListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitColumnDefaultValue(@NotNull SQLParser.ColumnDefaultValueContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterFieldComment(@NotNull SQLParser.FieldCommentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitFieldComment(@NotNull SQLParser.FieldCommentContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

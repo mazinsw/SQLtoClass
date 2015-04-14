@@ -13,7 +13,6 @@ import ast.Table;
 
 public class DelphiGenerator extends DelphiGeneratorBase {
 
-
 	public DelphiGenerator(String outDir, ScriptNode script) {
 		super(outDir, script);
 	}
@@ -54,6 +53,12 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 		}
 		if (enumFields.size() > 0)
 			out.println();
+		if (table.getComment() != null && table.getComment().length() > 0) {
+			out.println("  ///	<summary>");
+			System.out.println(table.getComment());
+			out.println("  ///	  " + table.getComment());
+			out.println("  ///	</summary>");
+		}
 		out.println("  T" + getClassName(name) + " = class");
 		out.println("  private");
 		Hashtable<String, String> indexedFields = new Hashtable<>();
@@ -111,8 +116,7 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 					+ "(const Value: string): " + convertType(name, field)
 					+ ";");
 		}
-		out.println("    procedure Assign(Value: T" + getClassName(name)
-				+ ");");
+		out.println("    procedure Assign(Value: T" + getClassName(name) + ");");
 		if (indexed)
 			out.println("    property " + name + "ID: Integer read F" + name
 					+ "ID write F" + name + "ID;");
@@ -127,19 +131,41 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 					continue;
 				String data = indexedFields.get(varName);
 				usedFields.put(varName, data);
+				if (field.getComment() != null
+						&& field.getComment().length() > 0) {
+					out.println();
+					out.println("    ///	<summary>");
+					out.println("    ///	  " + field.getComment());
+					out.println("    ///	</summary>");
+				}
 				out.println("    property " + varName + "["
 						+ genParams(data, ",") + ": Integer]: "
 						+ convertType(name, field) + " read Get" + varName
 						+ " write Set" + varName + ";");
 			} else if (field.getType().getType() == DataType.BLOB) {
+				if (field.getComment() != null
+						&& field.getComment().length() > 0) {
+					out.println();
+					out.println("    ///	<summary>");
+					out.println("    ///	  " + field.getComment());
+					out.println("    ///	</summary>");
+				}
 				out.println("    property " + varName + ": "
 						+ convertType(name, field) + " read F" + varName
 						+ " write Set" + varName + ";");
 			} else {
+				if (field.getComment() != null
+						&& field.getComment().length() > 0) {
+					out.println();
+					out.println("    ///	<summary>");
+					out.println("    ///	  " + field.getComment());
+					out.println("    ///	</summary>");
+				}
 				out.println("    property " + varName + ": "
 						+ convertType(name, field) + " read F" + varName
 						+ " write F" + varName + ";");
 			}
+			System.out.println(field.getComment());
 		}
 		out.println("  end;");
 		out.println();
@@ -168,10 +194,10 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 	private String genEnumInteger(String name, Field field) {
 		EnumType enumType = (EnumType) field.getType();
 		String res = "";
-		if(enumType.getElements().size() > 0)
+		if (enumType.getElements().size() > 0)
 			res = "0";
 		for (int i = 1; i < enumType.getElements().size(); i++) {
-			res = res + ", " + i;			
+			res = res + ", " + i;
 		}
 		return res;
 	}
@@ -236,8 +262,8 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 				continue;
 			out.println();
 			String enumTypeName = convertType(name, field, false);
-			out.println("class function T" + getClassName(name)
-					+ ".StringTo" + enumTypeName + "(const Value: string): "
+			out.println("class function T" + getClassName(name) + ".StringTo"
+					+ enumTypeName + "(const Value: string): "
 					+ convertType(name, field) + ";");
 			EnumType enumType = (EnumType) field.getType();
 			String arrayName = "IndexTo" + enumTypeName;
@@ -324,7 +350,7 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 					if (i < values.length - 1)
 						out.println(spacing + "end;");
 				}
-			} else if(field.getType().getType() == DataType.BLOB) {
+			} else if (field.getType().getType() == DataType.BLOB) {
 				out.println("  Set" + varName + "(Value.F" + varName + ");");
 			} else {
 				out.println("  F" + varName + " := Value.F" + varName + ";");
@@ -380,9 +406,9 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 
 			out.println();
 			String params = genParams(data, ",");
-			out.println("function T" + getClassName(name) + ".Get"
-					+ varName + "(" + params + ": Integer): "
-					+ convertType(name, field) + ";");
+			out.println("function T" + getClassName(name) + ".Get" + varName
+					+ "(" + params + ": Integer): " + convertType(name, field)
+					+ ";");
 			out.println("begin");
 			String[] paramNames = params.split(", ");
 			for (int i = 0; i < values.length; i++) {
@@ -403,8 +429,8 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 			out.println("  Result := F" + varName + "[" + params + "];");
 			out.println("end;");
 			out.println();
-			out.println("procedure T" + getClassName(name) + ".Set"
-					+ varName + "(" + params + ": Integer; Value: "
+			out.println("procedure T" + getClassName(name) + ".Set" + varName
+					+ "(" + params + ": Integer; Value: "
 					+ convertType(name, field) + ");");
 			out.println("begin");
 			for (int i = 0; i < values.length; i++) {

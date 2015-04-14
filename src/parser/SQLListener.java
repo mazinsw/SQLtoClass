@@ -1,4 +1,4 @@
-// Generated from D:\Estudos\Java\Desktop\SQLtoClass\src\parser\SQL.g4 by ANTLR 4.1
+// Generated from D:\Projetos\SQLtoClass\src\parser\SQL.g4 by ANTLR 4.1
 package parser;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
@@ -185,6 +185,17 @@ public interface SQLListener extends ParseTreeListener {
 	void exitTypeMediumIntStmt(@NotNull SQLParser.TypeMediumIntStmtContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link SQLParser#tableComment}.
+	 * @param ctx the parse tree
+	 */
+	void enterTableComment(@NotNull SQLParser.TableCommentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#tableComment}.
+	 * @param ctx the parse tree
+	 */
+	void exitTableComment(@NotNull SQLParser.TableCommentContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link SQLParser#setOption}.
 	 * @param ctx the parse tree
 	 */
@@ -317,17 +328,6 @@ public interface SQLListener extends ParseTreeListener {
 	void exitScript(@NotNull SQLParser.ScriptContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link SQLParser#typeTimeStmt}.
-	 * @param ctx the parse tree
-	 */
-	void enterTypeTimeStmt(@NotNull SQLParser.TypeTimeStmtContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SQLParser#typeTimeStmt}.
-	 * @param ctx the parse tree
-	 */
-	void exitTypeTimeStmt(@NotNull SQLParser.TypeTimeStmtContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link SQLParser#typeCharStmt}.
 	 * @param ctx the parse tree
 	 */
@@ -337,6 +337,17 @@ public interface SQLListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTypeCharStmt(@NotNull SQLParser.TypeCharStmtContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#typeTimeStmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterTypeTimeStmt(@NotNull SQLParser.TypeTimeStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#typeTimeStmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitTypeTimeStmt(@NotNull SQLParser.TypeTimeStmtContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link SQLParser#dropTable}.
@@ -361,17 +372,6 @@ public interface SQLListener extends ParseTreeListener {
 	void exitTypeDateStmt(@NotNull SQLParser.TypeDateStmtContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link SQLParser#columnDefinition}.
-	 * @param ctx the parse tree
-	 */
-	void enterColumnDefinition(@NotNull SQLParser.ColumnDefinitionContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SQLParser#columnDefinition}.
-	 * @param ctx the parse tree
-	 */
-	void exitColumnDefinition(@NotNull SQLParser.ColumnDefinitionContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link SQLParser#typeVarCharStmt}.
 	 * @param ctx the parse tree
 	 */
@@ -381,6 +381,17 @@ public interface SQLListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTypeVarCharStmt(@NotNull SQLParser.TypeVarCharStmtContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#columnDefinition}.
+	 * @param ctx the parse tree
+	 */
+	void enterColumnDefinition(@NotNull SQLParser.ColumnDefinitionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#columnDefinition}.
+	 * @param ctx the parse tree
+	 */
+	void exitColumnDefinition(@NotNull SQLParser.ColumnDefinitionContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link SQLParser#typeTimeStampStmt}.
@@ -678,6 +689,17 @@ public interface SQLListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitColumnDefaultValue(@NotNull SQLParser.ColumnDefaultValueContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#fieldComment}.
+	 * @param ctx the parse tree
+	 */
+	void enterFieldComment(@NotNull SQLParser.FieldCommentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#fieldComment}.
+	 * @param ctx the parse tree
+	 */
+	void exitFieldComment(@NotNull SQLParser.FieldCommentContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link SQLParser#collateName}.

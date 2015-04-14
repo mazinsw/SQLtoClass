@@ -1,4 +1,4 @@
-// Generated from D:\Estudos\Java\Desktop\SQLtoClass\src\parser\SQL.g4 by ANTLR 4.1
+// Generated from D:\Projetos\SQLtoClass\src\parser\SQL.g4 by ANTLR 4.1
 package parser;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;

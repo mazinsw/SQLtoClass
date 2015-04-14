@@ -2,19 +2,26 @@ package code;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ast.Constraint;
 import ast.DataType;
 import ast.EnumType;
 import ast.Field;
 import ast.Node;
+import ast.PrimaryKey;
 import ast.ScriptNode;
 import ast.Table;
+import ast.UniqueKey;
 
 public abstract class CodeGenerator {
 	private ScriptNode script;
@@ -49,7 +56,8 @@ public abstract class CodeGenerator {
 		String nameWithExt = getNameWithExtension(name);
 		String fileName = outDir + File.separatorChar + nameWithExt;
 		System.out.println("Writting file: " + nameWithExt);
-		PrintWriter out = new PrintWriter(fileName);
+		PrintWriter out = new PrintWriter(new OutputStreamWriter(
+				new FileOutputStream(fileName), getEncoding()), true);
 		genHeader(out, table, name, indexed);
 		genClass(out, table, name, indexed);
 		genFooter(out, table, name, indexed);
@@ -70,6 +78,10 @@ public abstract class CodeGenerator {
 
 	public static String normalize(String name) {
 		return normalize(name, true);
+	}
+	
+	protected Charset getEncoding() {
+		return StandardCharsets.UTF_8;
 	}
 	
 	protected boolean isBooleanField(Field field) {
@@ -385,7 +397,7 @@ public abstract class CodeGenerator {
 			nlc = nlc.substring(0, nlc.length() - 2);
 		if(nlc.endsWith("_"))
 			nlc = nlc.substring(0, nlc.length() - 1);
-		if (nlc.endsWith("de") || nlc.startsWith("a", 1) || (nlc.startsWith("e", 1) && nlc.endsWith("ao")))
+		if (nlc.endsWith("na") || nlc.endsWith("de") || nlc.startsWith("a", 1) || ((nlc.startsWith("e", 1) || nlc.startsWith("i", 0)) && nlc.endsWith("ao")))
 			return "a";
 		if (nlc.startsWith("o", 1) || nlc.endsWith("e") || nlc.endsWith("or") || nlc.endsWith("o") || nlc.equals("id") || nlc.endsWith("oid") || nlc.endsWith("el") || nlc.endsWith("il")
 				|| nlc.endsWith("cnpj") || nlc.endsWith("cpf") || nlc.endsWith("in")|| nlc.endsWith("tema")|| nlc.endsWith("p") || nlc.length() == 1)
@@ -404,6 +416,56 @@ public abstract class CodeGenerator {
 			}
 		}
 		return camelCase;
+	}
+
+	protected String getConstantName(String name) {
+		String cName = "";
+		boolean prevIsUpr = true;
+		for (int i = 0; i < name.length(); i++) {
+			if(Character.isLowerCase(name.charAt(i))) {
+				cName += name.charAt(i);
+				prevIsUpr = false;
+			} else {
+				if(!prevIsUpr) {
+					cName += "_";
+					prevIsUpr = true;
+				}
+				cName += name.charAt(i);
+			}
+		}
+		return cName.toUpperCase();
+	}
+
+	protected List<Constraint> getUniqueKeyList(Table table) {
+		List<Constraint> list = new ArrayList<Constraint>();
+		// get from primary key
+		for (Constraint constraint : table.getConstraints()) {
+			if (constraint instanceof PrimaryKey) {
+				list.add(constraint);
+				break;
+			}
+		}
+		// get from unique key
+		if(list.isEmpty()) {
+			for (Constraint constraint : table.getConstraints()) {
+				if (constraint instanceof UniqueKey) {
+					list.add(constraint);
+					break;
+				}
+			}
+		}
+		return list;
+	}
+
+	protected Field getPkField(Table table) {
+		for (Constraint constraint : table.getConstraints()) {
+			if (constraint instanceof PrimaryKey) {
+				if(constraint.getFields().size() == 1)
+					return table.find(constraint.getFields().get(0).getName());
+				break;
+			}
+		}
+		return null;
 	}
 
 	public void setClassPrefix(String classPrefix) {

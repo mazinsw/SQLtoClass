@@ -1,6 +1,7 @@
 package code;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 import ast.ScriptNode;
 
@@ -26,38 +27,45 @@ public class PHPGeneratorDB extends PHPGeneratorBase {
 	}
 
 	@Override
-	protected void genSQLInsert(PrintWriter out, String unixName,
-			String idName, String tblname, String indexStr) {
-		out.println("\t\t$_" + unixName + "['" + idName.toLowerCase()
-				+ "'] = DB::Insert('" + tblname + "'" + indexStr + ", $_"
+	protected void genSQLInsert(PrintWriter out, String tblname, String indexStr, 
+			String pkName, String unixName) {
+		out.print("\t\t");
+		if(pkName != null)
+			out.print("$_" + unixName + "['" + pkName + "'] = ");
+		out.println("DB::Insert('" + tblname + "'" + indexStr + ", $_"
 				+ unixName + ");");
 	}
 
 	@Override
 	protected void genSQLUpdate(PrintWriter out, String tblname,
-			String indexStr, String unixName, String idName) {
+			String indexStr, List<String> ukNames, String unixName) {
 		out.println("\t\t$table = new Table('" + tblname + "'" + indexStr
 				+ ", $_" + unixName + ");");
-		out.println("\t\t$table->SetPk('" + idName.toLowerCase() + "', $_" + unixName
-				+ "['" + idName.toLowerCase() + "']);");
+		if(ukNames.size() == 1)
+			out.println("\t\t$table->SetPk('" + ukNames.get(0)  + "', $_" + unixName
+				+ "['" + ukNames.get(0) + "']);");
+		else
+			out.println("\t\t// TODO: foreach unique fields");
 		out.println("\t\tif(!$table->Update($campos))");
 		out.println("\t\t\tthrow new Exception('Falha ao atualizar " + getGenderChar(tblname) + " " + unixName +"');");
 	}
 
 	@Override
 	protected void genSQLGetTodos(PrintWriter out, String tblname,
-			String indexStr, String unixName) {
+			String indexStr, String pkName, String unixName) {
 		out.println("\t\t$query = array();");
-		out.println("\t\t$query['order'] = 'ORDER BY id ASC';");
+		if(pkName != null)
+			out.println("\t\t$query['order'] = 'ORDER BY " + pkName + " ASC';");
 		out.println("\t\treturn $query;");
 	}
 
 	@Override
 	protected void genSQLGetTodosFk(PrintWriter out, String tblname,
-			String indexStr, String unixName, String arrElem) {
+			String indexStr, String pkName, String unixName, String arrElem) {
 		out.println("\t\t$query = array();");
 		out.println("\t\t$query['condition'] = array(" + arrElem + ");");
-		out.println("\t\t$query['order'] = 'ORDER BY id ASC';");
+		if(pkName != null)
+			out.println("\t\t$query['order'] = 'ORDER BY " + pkName + " ASC';");
 		out.println("\t\treturn $query;");
 	}
 

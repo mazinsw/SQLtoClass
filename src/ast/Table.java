@@ -3,7 +3,7 @@ package ast;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Table extends NamedNode {
+public class Table extends CommentedNode {
 	private List<Field> fields;
 	private List<Constraint> constraints;
 	private List<Index> indexes;
@@ -41,7 +41,7 @@ public class Table extends NamedNode {
 	
 	public Field find(String name) {
 		for (Field field : fields) {
-			if(field.getName().equals(name))
+			if(field.getName().equalsIgnoreCase(name))
 				return field;
 		}
 		return null;

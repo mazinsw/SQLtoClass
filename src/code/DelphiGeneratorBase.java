@@ -1,5 +1,7 @@
 package code;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -173,6 +175,11 @@ public abstract class DelphiGeneratorBase extends CodeGenerator {
 			return varName + newData;
 		} else
 			return varName;
+	}
+	
+	@Override
+	protected Charset getEncoding() {
+		return  StandardCharsets.ISO_8859_1;
 	}
 
 }
