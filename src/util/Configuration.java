@@ -26,6 +26,7 @@ public class Configuration {
 	private int phpPDO;
 	private String packageName;
 	private String packageNameDAO;
+	private boolean daoHerdado;
 
 	public Configuration() {
 		load();
@@ -111,6 +112,30 @@ public class Configuration {
 		this.phpPDO = phpDB;
 	}
 
+	public String getPackageName() {
+		return packageName;
+	}
+
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+	}
+
+	public String getPackageNameDAO() {
+		return packageNameDAO;
+	}
+
+	public void setPackageNameDAO(String packageNameDAO) {
+		this.packageNameDAO = packageNameDAO;
+	}
+
+	public boolean isDAOHerdado() {
+		return daoHerdado;
+	}
+
+	public void setDAOHerdado(boolean daoHerdado) {
+		this.daoHerdado = daoHerdado;
+	}
+
 	public void load() {
 		File configFile = new File("config.properties");
 
@@ -132,6 +157,10 @@ public class Configuration {
 				generateDAO = props.getProperty("generateDAO").equals(String.valueOf(true));
 			else
 				generateDAO = false;
+			if (props.containsKey("DAOHerdado"))
+				daoHerdado = props.getProperty("DAOHerdado").equals(String.valueOf(true));
+			else
+				daoHerdado = false;
 			if (props.containsKey("generator"))
 				generator = Integer.valueOf(props.getProperty("generator"));
 			else
@@ -164,6 +193,7 @@ public class Configuration {
 			props.setProperty("packageName", packageName);
 			props.setProperty("packageNameDAO", packageNameDAO);
 			props.setProperty("generateDAO", String.valueOf(generateDAO));
+			props.setProperty("DAOHerdado", String.valueOf(daoHerdado));
 			props.setProperty("generator", String.valueOf(generator));
 			props.setProperty("phpPDO", String.valueOf(phpPDO));
 			FileWriter writer = new FileWriter(configFile);
@@ -174,22 +204,6 @@ public class Configuration {
 		} catch (IOException ex) {
 			// I/O error
 		}
-	}
-
-	public String getPackageName() {
-		return packageName;
-	}
-
-	public void setPackageName(String packageName) {
-		this.packageName = packageName;
-	}
-
-	public String getPackageNameDAO() {
-		return packageNameDAO;
-	}
-
-	public void setPackageNameDAO(String packageNameDAO) {
-		this.packageNameDAO = packageNameDAO;
 	}
 
 }

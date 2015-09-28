@@ -18,6 +18,7 @@ import ast.DataType;
 import ast.EnumType;
 import ast.Field;
 import ast.Node;
+import ast.OrderField;
 import ast.PrimaryKey;
 import ast.ScriptNode;
 import ast.Table;
@@ -457,6 +458,38 @@ public abstract class CodeGenerator {
 					break;
 				}
 			}
+		}
+		return list;
+	}
+	
+	public PrimaryKey getPrimaryKey(Table table) {
+		for (Constraint constraint : table.getConstraints()) {
+			if (!(constraint instanceof PrimaryKey))
+				continue;
+			return (PrimaryKey)constraint;
+		}
+		return null;
+	}
+
+	public List<Field> getFields(Table table, Constraint constraint) {
+		List<Field> list = new ArrayList<>();
+		if(constraint == null)
+			return list;
+		for (OrderField orderField : constraint.getFields()) {
+			Field field = table.find(orderField.getName());
+			if(field == null)
+				throw new RuntimeException("Restrição ou índice inconsistente, a coluna `" + orderField.getName() + "` não faz parte da tabela `" + table.getName() + "`");
+			list.add(field);
+		}
+		return list;
+	}
+
+	public List<Constraint> getUniqueConstraints(Table table) {
+		List<Constraint> list = new ArrayList<>();
+		for (Constraint constraint : table.getConstraints()) {
+			if (!(constraint instanceof UniqueKey))
+				continue;
+			list.add(constraint);
 		}
 		return list;
 	}

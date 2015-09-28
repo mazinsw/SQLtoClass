@@ -10,7 +10,6 @@ import ast.Constraint;
 import ast.DataType;
 import ast.EnumType;
 import ast.Field;
-import ast.OrderField;
 import ast.PrimaryKey;
 import ast.ScriptNode;
 import ast.Table;
@@ -19,6 +18,7 @@ import ast.UniqueKey;
 public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 	private String classBasePrefix;
 	private String classBaseSuffix;
+	private boolean inherited;
 
 	public DelphiGeneratorDAO(String outDir, ScriptNode script) {
 		super(outDir, script);
@@ -40,21 +40,11 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		this.classBaseSuffix = classBaseSuffix;
 	}
 
-	public List<Field> getKeyFields(Table table) {
-		List<Field> list = new ArrayList<>();
-		for (Constraint constraint : table.getConstraints()) {
-			if (!(constraint instanceof PrimaryKey))
-				continue;
-			PrimaryKey pk = (PrimaryKey) constraint;
-			for (OrderField orderField : pk.getFields()) {
-				Field field = table.find(orderField.getName());
-				if(field == null)
-					throw new RuntimeException("Restrição ou índice inconsistente, a coluna `" + orderField.getName() + "` não faz parte da tabela `" + table.getName() + "`");
-				list.add(field);
-			}
-			break;
-		}
-		return list;
+	public static String getExceptionName(String name, Constraint constraint) {
+		String uniqueFieldName = constraint.getFields()
+					.get(constraint.getFields().size() - 1).getName();
+		String normalized = normalize(uniqueFieldName, false).replace("][", "_").replace("[", "").replace("]", "");
+		return "E" + name + normalized;
 	}
 
 	@Override
@@ -69,11 +59,21 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println();
 		out.println("type");
 		out.println();
+		String listVarName = getBaseClassName(name);
+		String classParam = "; " + getBaseClassName(name) + ": T" + getBaseClassName(name);
+		String inheritedClass = "", staticMember = "class ";
+		if(isInherited()) {
+			listVarName = getClassName(name);
+			out.println("  T" + getClassName(name) + " = class;");
+			inheritedClass = "(T" + getBaseClassName(name) + ")";
+			staticMember = "";
+			classParam = "";
+		}
 		out.println("  TListar" + name + " = procedure("
-				+ getBaseClassName(name) + ": T" + getBaseClassName(name)
+				+ listVarName + ": T" + listVarName
 				+ ") of object;");
 		out.println();
-		out.println("  T" + getClassName(name) + " = class");
+		out.println("  T" + getClassName(name) + " = class" + inheritedClass);
 		out.println("  private");
 		out.println("    class procedure PreencheParametros(Qry: TZQuery; "
 				+ getBaseClassName(name) + ": T" + getBaseClassName(name)
@@ -84,30 +84,30 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println("    class procedure CarregaCampos(Qry: TZQuery; "
 				+ getBaseClassName(name) + ": T" + getBaseClassName(name)
 				+ ");");
+		if(isInherited()) {
+			out.println("    class procedure CarregaCamposEx(Qry: TZQuery; "
+					+ getClassName(name) + ": T" + getClassName(name)
+					+ ");");
+		}
 		out.println("  public");
-		out.println("    class procedure Carregar(Qry: TZQuery; "
-				+ getBaseClassName(name) + ": T" + getBaseClassName(name)
-				+ ");");
+		List<Constraint> uniqueList = getUniqueConstraints(table);
+		if(uniqueList.size() > 0) {
+			out.println("    " + staticMember + "function Procurar(Qry: TZQuery" + classParam + "): Boolean;");
+		}
+		out.println("    " + staticMember + "procedure Carregar(Qry: TZQuery" + classParam + ");");
 		for (Field field : table.getFields()) {
 			if (field.getType().getType() != DataType.BLOB)
 				continue;
 			String varName = genArrayAccess(normalize(field.getName(), false));
-			out.println("    class procedure Carregar" + varName + "(Qry: TZQuery; "
-					+ getBaseClassName(name) + ": T" + getBaseClassName(name)
-					+ ");");
-			out.println("    class procedure Atualizar" + varName + "(Qry: TZQuery; "
-					+ getBaseClassName(name) + ": T" + getBaseClassName(name)
-					+ ");");
+			out.println("    " + staticMember + "procedure Carregar" + varName + "(Qry: TZQuery" + classParam + ");");
+			out.println("    " + staticMember + "procedure Atualizar" + varName + "(Qry: TZQuery" + classParam + ");");
 		}
-		out.println("    class procedure Inserir(Qry: TZQuery; "
-				+ getBaseClassName(name) + ": T" + getBaseClassName(name)
-				+ ");");
-		out.println("    class procedure Atualizar(Qry: TZQuery; "
-				+ getBaseClassName(name) + ": T" + getBaseClassName(name)
-				+ ");");
-		out.println("    class procedure Excluir(Qry: TZQuery; "
-				+ getBaseClassName(name) + ": T" + getBaseClassName(name)
-				+ ");");
+		out.println("    " + staticMember + "procedure Inserir(Qry: TZQuery" + classParam + ");");
+		out.println("    " + staticMember + "procedure Atualizar(Qry: TZQuery" + classParam + ");");
+		if(uniqueList.size() > 0) {
+			out.println("    " + staticMember + "procedure Substituir(Qry: TZQuery" + classParam + ");");
+		}
+		out.println("    " + staticMember + "procedure Excluir(Qry: TZQuery" + classParam + ");");
 		String indexField = "";
 		if(indexed)
 			indexField = "; " + getBaseClassName(name) + "ID: Integer";
@@ -115,125 +115,44 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 				+ "s(Qry: TZQuery" + indexField + ");");
 		out.println("    class procedure ListarTod" + getGenderChar(name)
 				+ "s(Qry: TZQuery" + indexField + "; Metodo: TListar" + name
-				+ "; Inicio: Integer = 0; Tamanho: Integer = 0);");
+				+ ";");
+		out.println("      Inicio: Integer = 0; Tamanho: Integer = 0);");
 		out.println("  end;");
 		int exceptionCount = 0;
 		for (Constraint constraint : table.getConstraints()) {
-			if (!(constraint instanceof UniqueKey))
+			if (!((constraint instanceof PrimaryKey) || (constraint instanceof UniqueKey)))
 				continue;
-			String uniqueFieldName = "";
-			if (constraint.getFields().size() > 0)
-				uniqueFieldName = constraint.getFields()
-						.get(constraint.getFields().size() - 1).getName();
 			if (exceptionCount == 0)
 				out.println();
-			out.println("  E" + name + uniqueFieldName + " = class(Exception);");
+			out.println("  " + getExceptionName(name, constraint)  + " = class(Exception);");
 			exceptionCount++;
 		}
 	}
 
-	private void genKeyWhereParams(PrintWriter out, Table table, String name,
+	private void genWhereParams(PrintWriter out, Table table, String name,
 			boolean indexed, List<Field> keyFields) {
-		if (keyFields.size() > 0)
-			out.println(" WHERE ' + ");
-		else
+		if (keyFields.size() > 0) {
+			out.println(" ' +");
+			out.print("    'WHERE ");
+		} else
 			out.println("';");
-		String AndStmt = "";
+		String AndStmt = "", space = "";
 		for (Field field : keyFields) {
 			if (!AndStmt.equals(""))
 				out.println(AndStmt);
-			out.print("    '" + field.getName() + " = :" + field.getName());
+			out.print(space + field.getName() + " = :" + field.getName());
+			space = "    '";
 			AndStmt = " AND ' + ";
 		}
 		if (keyFields.size() > 0)
 			out.println("';");
 	}
 
-	private void genKeyParams(PrintWriter out, Table table, String name,
+	private void genSetParams(PrintWriter out, Table table, String name,
 			boolean indexed, List<Field> keyFields) {
 		for (Field field : keyFields) {
 			String varName = normalize(field.getName(), false);
 			writeSetParam(out, name, field, varName, "  ");
-		}
-	}
-
-	private void genKeyWhereSelect(PrintWriter out, Table table,
-			Constraint constraint, String name, boolean indexed,
-			List<Field> keyFields, boolean update) {
-		if (constraint.getFields().size() > 0)
-			out.println(" WHERE ' + ");
-		else {
-			out.println("';");
-			return;
-		}
-		String AndStmt = "", eqOp, diffOp, diffNot;
-		for (OrderField orderField : constraint.getFields()) {
-			Field field = table.find(orderField.getName());
-			if(field == null)
-				throw new RuntimeException("Restrição ou índice inconsistente, a coluna `" + orderField.getName() + "` não faz parte da tabela `" + table.getName() + "`");
-			if (!AndStmt.equals(""))
-				out.println(AndStmt);
-			if(!field.isNotNull())
-				eqOp = "<=>";
-			else
-				eqOp = "=";
-			out.print("      '" + field.getName() + " " + eqOp +" :" + field.getName());
-			AndStmt = " AND ' + ";
-		}
-		if(update) {
-			for (Field field : keyFields) {
-				if (!AndStmt.equals(""))
-					out.println(AndStmt);
-				if(!field.isNotNull()) {
-					diffOp = "<=>";
-					diffNot = "NOT ";
-				} else {
-					diffOp = "<>";
-					diffNot = "";
-				}
-				out.print("      '" + diffNot + "" + field.getName() + " " + diffOp + " :" + field.getName());
-				AndStmt = " AND ' + ";
-			}
-		}
-		out.println("';");
-	}
-
-	private void genKeySelectParams(PrintWriter out, Table table,
-			Constraint constraint, String name, boolean indexed,
-			List<Field> keyFields, boolean update) {
-		for (OrderField orderField : constraint.getFields()) {
-			Field field = table.find(orderField.getName());
-			if(field == null)
-				throw new RuntimeException("Restrição ou índice inconsistente, a coluna `" + orderField.getName() + "` não faz parte da tabela `" + table.getName() + "`");
-			String varName = normalize(field.getName(), false);
-
-			if ((!field.isNotNull() || field.isAutoIncrement()) && !getNullValue(field).equals("?")) {
-				out.println("    if (" + getBaseClassName(name) + "." + varName
-						+ " = " + getNullValue(field) + ") then");
-				out.println("      Qry.ParamByName('" + field.getName()
-						+ "').Value := Null");
-				out.println("    else");
-				out.print("  ");
-			}
-			writeSetParam(out, name, field, varName, "    ");
-		}
-		if(!update)
-			return;
-		for (Field field : keyFields) {
-			String varName = normalize(field.getName(), false);
-			writeSetParam(out, name, field, varName, "    ");
-		}
-	}
-
-	private void genKeySelect(PrintWriter out, Table table,
-			Constraint constraint, String name, boolean indexed,
-			List<Field> keyFields) {
-		String CommaStmt = "";
-		for (Field field : keyFields) {
-			if (!CommaStmt.equals(""))
-				out.print(CommaStmt);
-			out.print(field.getName());
-			CommaStmt = ", ";
 		}
 	}
 
@@ -259,6 +178,16 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 			AndStmt = ", ' + ";
 		}
 	}
+	
+	private List<Field> getAutoFields(Table table) {
+		List<Field> list = new ArrayList<>();
+		for (Field field : table.getFields()) {
+			if (field.getType().getType() == DataType.DATETIME && getDateFromDB(field)) {
+				list.add(field);
+			}
+		}
+		return list;
+	}
 
 	private void genInsertAssignFields(PrintWriter out, Table table,
 			String name, boolean indexed) {
@@ -281,22 +210,11 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 			String name, boolean indexed,
 			List<Field> keyFields, boolean update) {
 		for (Constraint constraint : table.getConstraints()) {
-			if (!(constraint instanceof UniqueKey))
+			if (!((constraint instanceof PrimaryKey) || (constraint instanceof UniqueKey)))
 				continue;
-			if (constraint.getFields().size() == 0)
-				continue;
-			out.print("    Qry.SQL.Text := 'SELECT ");
-			if (keyFields.size() > 0)
-				genKeySelect(out, table, constraint, name, indexed, keyFields);
-			else
-				out.print("*");
-			out.print(" FROM " + getTableName(table, name, indexed));
-			genKeyWhereSelect(out, table, constraint, name, indexed, keyFields, update);
-			genKeySelectParams(out, table, constraint, name, indexed, keyFields, update);
-			out.println("    Qry.Open;");
-			out.println("    if not Qry.Eof then");
-			out.println("    begin");
-			out.println("      Qry.Close;");
+			out.println("      if StrUtils.ContainsText(E.Message, '''"
+						+ constraint.getName() + "''') then");
+			out.println("      begin");
 			Field field = table.find(constraint.getFields()
 					.get(constraint.getFields().size() - 1).getName());
 			if(field == null)
@@ -309,13 +227,16 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 				action = "atualizar";
 			else
 				action = "inserir";
-			out.println("      raise E" + name + uniqueFieldName
+			String ugc = getGenderChar(uniqueFieldName);
+			String lgc = ugc.toLowerCase();
+			out.println("        raise " + getExceptionName(name, constraint)
 					+ ".CreateFmt('Não foi possível " + action + " "
 					+ getGenderChar(name) + " " + normalize(name).toLowerCase()
-					+ ", " + getGenderChar(uniqueFieldName) + " "
-					+ uniqueFieldName.toLowerCase() + " \"" + getFormatFromType(field) + "\" já existe', ["
+					+ ", ' +");
+			out.println("          '" + ugc + " "
+					+ upperFix(uniqueFieldName.toLowerCase()) + " \"" + getFormatFromType(field) + "\" já está cadastrad" + lgc + "', ["
 					+ getGetParam(name, field, varName) + "]);");
-			out.println("    end;");
+			out.println("      end;");
 		}
 	}
 
@@ -338,27 +259,69 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 	@Override
 	public void genClass(PrintWriter out, Table table, String name,
 			boolean indexed) {
-		List<Field> keyFields = getKeyFields(table);
+		PrimaryKey primaryKey = getPrimaryKey(table);
+		List<Field> keyFields = getFields(table, primaryKey);
+		String listVarName = getBaseClassName(name);
+		String loadVarName = listVarName;
+		String classParam = "; " + getBaseClassName(name) + ": T" + getBaseClassName(name);
+		String staticMember = "class ", exLoad = "";
+		if(isInherited()) {
+			listVarName = getClassName(name);
+			staticMember = "";
+			classParam = "";
+			exLoad = "Ex";
+			loadVarName = "Self";
+		}
+		List<Constraint> uniqueList = getUniqueConstraints(table);
 		out.println();
 		out.println("implementation");
 		out.println();
 		out.println("uses");
-		out.println("  Variants, DBUtils, DB, Classes;");
+		out.println("  Variants, StrUtils, DBUtils, DB, Classes;");
 		out.println();
 		out.println("{ T" + getClassName(name) + " }");
+		if(uniqueList.size() > 0) {
+			List<Field> uniqueFields = getFields(table, uniqueList.get(0));
+			out.println();
+			out.println(staticMember + "function T" + getClassName(name)
+					+ ".Procurar(Qry: TZQuery" + classParam + "): Boolean;");
+			if(isInherited()) {
+				out.println("var");
+				out.println("  " + getBaseClassName(name) + ": T" + getBaseClassName(name) + ";");
+			}
+			out.println("begin");
+			if(isInherited()) {
+				out.println("  " + getBaseClassName(name) + " := Self;");
+			}
+			out.print("  Qry.SQL.Text := 'SELECT * FROM " + getTableName(table, name, indexed));
+			genWhereParams(out, table, name, indexed, uniqueFields);
+			genSetParams(out, table, name, indexed, uniqueFields);
+			out.println("  Qry.Open;");
+			out.println("  Result := not Qry.Eof;");
+			out.println("  if Result then");
+			out.println("    CarregaCampos" + exLoad + "(Qry, " + loadVarName + ");");
+			out.println("  Qry.Close;");
+			out.println("end;");
+		}
 		out.println();
-		out.println("class procedure T" + getClassName(name)
-				+ ".Carregar(Qry: TZQuery; " + getBaseClassName(name) + ": T"
-				+ getBaseClassName(name) + ");");
+		out.println(staticMember + "procedure T" + getClassName(name)
+				+ ".Carregar(Qry: TZQuery" + classParam + ");");
+		if(isInherited()) {
+			out.println("var");
+			out.println("  " + getBaseClassName(name) + ": T" + getBaseClassName(name) + ";");
+		}
 		out.println("begin");
+		if(isInherited()) {
+			out.println("  " + getBaseClassName(name) + " := Self;");
+		}
 		out.print("  Qry.SQL.Text := 'SELECT * FROM " + getTableName(table, name, indexed));
-		genKeyWhereParams(out, table, name, indexed, keyFields);
-		genKeyParams(out, table, name, indexed, keyFields);
+		genWhereParams(out, table, name, indexed, keyFields);
+		genSetParams(out, table, name, indexed, keyFields);
 		out.println("  Qry.Open;");
 		out.println("  if Qry.Eof then");
-		out.println("    raise Exception.Create('Não foi possível carregar "
+		out.println("    raise " + getExceptionName(name, primaryKey) +  ".Create('Não foi possível carregar "
 				+ getGenderChar(name) + " " + normalize(name).toLowerCase() + "');");
-		out.println("  CarregaCampos(Qry, " + getBaseClassName(name) + ");");
+		out.println("  CarregaCampos" + exLoad + "(Qry, " + loadVarName + ");");
 		out.println("  Qry.Close;");
 		out.println("end;");
 		out.println();
@@ -367,16 +330,20 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 			if (field.getType().getType() != DataType.BLOB)
 				continue;
 			String varName = genArrayAccess(normalize(field.getName(), false));
-			out.println("class procedure T" + getClassName(name)
-				+ ".Carregar" + varName + "(Qry: TZQuery; "
-					+ getBaseClassName(name) + ": T" + getBaseClassName(name)
-					+ ");");
+			out.println(staticMember + "procedure T" + getClassName(name)
+				+ ".Carregar" + varName + "(Qry: TZQuery" + classParam + ");");
 			out.println("var");
+			if(isInherited()) {
+				out.println("  " + getBaseClassName(name) + ": T" + getBaseClassName(name) + ";");
+			}
 			out.println("  FStream: TStream;");
 			out.println("begin");
+			if(isInherited()) {
+				out.println("  " + getBaseClassName(name) + " := Self;");
+			}
 			out.print  ("  Qry.SQL.Text := 'SELECT Imagem FROM " + getTableName(table, name, indexed));
-			genKeyWhereParams(out, table, name, indexed, keyFields);
-			genKeyParams(out, table, name, indexed, keyFields);
+			genWhereParams(out, table, name, indexed, keyFields);
+			genSetParams(out, table, name, indexed, keyFields);
 			out.println("  Qry.Open;");
 			out.println("  if Qry.Eof then");
 			out.println("    Exit;");
@@ -393,10 +360,16 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 			out.println("end;");
 			out.println();
 		}
-		out.println("class procedure T" + getClassName(name)
-				+ ".Inserir(Qry: TZQuery; " + getBaseClassName(name) + ": T"
-				+ getBaseClassName(name) + ");");
+		out.println(staticMember + "procedure T" + getClassName(name)
+				+ ".Inserir(Qry: TZQuery" + classParam + ");");
+		if(isInherited()) {
+			out.println("var");
+			out.println("  " + getBaseClassName(name) + ": T" + getBaseClassName(name) + ";");
+		}
 		out.println("begin");
+		if(isInherited()) {
+			out.println("  " + getBaseClassName(name) + " := Self;");
+		}
 		out.print("  Qry.SQL.Text := 'INSERT INTO " + getTableName(table, name, indexed)
 				+ " VALUES ");
 		genInsertAssignFields(out, table, name, indexed);
@@ -422,46 +395,111 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println("  try");
 		out.println("    Qry.ExecSQL;");
 		out.println("  except");
+		out.println("    on E: Exception do");
+		out.println("    begin");
 		genCorrectException(out, table, name, indexed, keyFields, false);
-		out.println("    raise Exception.Create('Não foi possível inserir "
+		out.println("      raise Exception.Create('Não foi possível inserir "
 				+ getGenderChar(name) + " " + normalize(name).toLowerCase() + "');");
+		out.println("    end;");
 		out.println("  end;");
 		genGetInsertID(out, name, table, keyFields);
+		List<Field> autoFields = getAutoFields(table);
+		for (Field field : autoFields) {
+			String varName = genArrayAccess(normalize(field.getName(), false));
+			out.println("  " + getBaseClassName(name) + "." + varName + " := Now;");
+		}
 		out.println("end;");
 		out.println();
-		out.println("class procedure T" + getClassName(name)
-				+ ".Atualizar(Qry: TZQuery; " + getBaseClassName(name) + ": T"
-				+ getBaseClassName(name) + ");");
+		out.println(staticMember + "procedure T" + getClassName(name)
+				+ ".Atualizar(Qry: TZQuery" + classParam + ");");
+		if(isInherited()) {
+			out.println("var");
+			out.println("  " + getBaseClassName(name) + ": T" + getBaseClassName(name) + ";");
+		}
 		out.println("begin");
+		if(isInherited()) {
+			out.println("  " + getBaseClassName(name) + " := Self;");
+		}
 		out.println("  Qry.SQL.Text := 'UPDATE " + getTableName(table, name, indexed)
 				+ " SET ' + ");
 		genUpdateAssignFields(out, table, name, indexed);
-		genKeyWhereParams(out, table, name, indexed, keyFields);
+		genWhereParams(out, table, name, indexed, keyFields);
 		out.println("  PreencheParametros(Qry, " + getBaseClassName(name)
 				+ ");");
-		genKeyParams(out, table, name, indexed, keyFields);
+		genSetParams(out, table, name, indexed, keyFields);
 		out.println("  try");
 		out.println("    Qry.ExecSQL;");
 		out.println("  except");
+		out.println("    on E: Exception do");
+		out.println("    begin");
 		genCorrectException(out, table, name, indexed, keyFields, true);
-		out.println("    raise Exception.Create('Não foi possível atualizar "
+		out.println("      raise Exception.Create('Não foi possível atualizar "
 				+ getGenderChar(name) + " " + normalize(name).toLowerCase() + "');");
+		out.println("    end;");
 		out.println("  end;");
 		out.println("end;");
+		if(uniqueList.size() > 0) {
+			out.println();
+			out.println(staticMember + "procedure T" + getClassName(name)
+					+ ".Substituir(Qry: TZQuery" + classParam + ");");
+			out.println("var");
+			if(isInherited()) {
+				out.println("  " + getBaseClassName(name) + ": T" + getBaseClassName(name) + ";");
+			}
+			out.println("  " + getClassName(name) + ": T" + listVarName + ";");
+			out.println("begin");
+			if(isInherited()) {
+				out.println("  " + getBaseClassName(name) + " := Self;");
+			}
+			out.println("  " + getClassName(name) + " := T" + listVarName + ".Create;");
+			out.println("  try");
+			out.println("    T" + getBaseClassName(name) + "(" + getClassName(name) + ").Assign(" + getBaseClassName(name) + ");");
+			if(isInherited()) {
+				out.println("    if " + getClassName(name) + ".Procurar(Qry) then");
+			} else {
+				out.println("    if T" + getClassName(name) + ".Procurar(Qry, " + getClassName(name) + ") then");
+			}
+			out.println("    begin");
+			for (Field field : keyFields) {
+				String varName = normalize(field.getName(), false);
+				out.println("      " + getBaseClassName(name) + "." + varName + " := " + getClassName(name) + "." + varName + ";");
+			}
+			if(isInherited()) {
+				out.println("      Atualizar(Qry);");
+			} else {
+				out.println("      Atualizar(Qry, " + getBaseClassName(name) + ");");
+			}
+			out.println("    end");
+			out.println("    else");
+			if(isInherited()) {
+				out.println("      Inserir(Qry);");
+			} else {
+				out.println("      Inserir(Qry, " + getBaseClassName(name) + ");");
+			}
+			out.println("  finally");
+			out.println("    " + getClassName(name) + ".Free;");
+			out.println("  end;");
+			out.println("end;");
+		}
 		out.println();
 		// generate procedure to update a blob field
 		for (Field field : table.getFields()) {
 			if (field.getType().getType() != DataType.BLOB)
 				continue;
 			String varName = genArrayAccess(normalize(field.getName(), false));
-			out.println("class procedure T" + getClassName(name)
-				+ ".Atualizar" + varName + "(Qry: TZQuery; "
-					+ getBaseClassName(name) + ": T" + getBaseClassName(name)
-					+ ");");
+			out.println(staticMember + "procedure T" + getClassName(name)
+				+ ".Atualizar" + varName + "(Qry: TZQuery" + classParam + ");");
+			if(isInherited()) {
+				out.println("var");
+				out.println("  " + getBaseClassName(name) + ": T" + getBaseClassName(name) + ";");
+			}
 			out.println("begin");
+			if(isInherited()) {
+				out.println("  " + getBaseClassName(name) + " := Self;");
+			}
 			out.print("  Qry.SQL.Text := 'UPDATE " + getTableName(table, name, indexed) + " SET " + field.getName() + " = :" + field.getName() + "");
-			genKeyWhereParams(out, table, name, indexed, keyFields);
-			genKeyParams(out, table, name, indexed, keyFields);
+			genWhereParams(out, table, name, indexed, keyFields);
+			genSetParams(out, table, name, indexed, keyFields);
 			out.println("  if " + getBaseClassName(name) + "." + varName + " <> nil then");
 			out.println("  begin");
 			out.println("    " + getBaseClassName(name) + "." + varName + ".Position := 0;");
@@ -479,17 +517,23 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 			out.println("end;");
 			out.println();
 		}
-		out.println("class procedure T" + getClassName(name)
-				+ ".Excluir(Qry: TZQuery; " + getBaseClassName(name) + ": T"
-				+ getBaseClassName(name) + ");");
+		out.println(staticMember + "procedure T" + getClassName(name)
+				+ ".Excluir(Qry: TZQuery" + classParam + ");");
+		if(isInherited()) {
+			out.println("var");
+			out.println("  " + getBaseClassName(name) + ": T" + getBaseClassName(name) + ";");
+		}
 		out.println("begin");
+		if(isInherited()) {
+			out.println("  " + getBaseClassName(name) + " := Self;");
+		}
 		out.print("  Qry.SQL.Text := 'DELETE FROM " + getTableName(table, name, indexed));
-		genKeyWhereParams(out, table, name, indexed, keyFields);
-		genKeyParams(out, table, name, indexed, keyFields);
+		genWhereParams(out, table, name, indexed, keyFields);
+		genSetParams(out, table, name, indexed, keyFields);
 		out.println("  try");
 		out.println("    Qry.ExecSQL;");
 		out.println("  except");
-		out.println("    raise Exception.Create('Não foi possível excluir "
+		out.println("    raise " + getExceptionName(name, primaryKey) + ".Create('Não foi possível excluir "
 				+ getGenderChar(name) + " " + normalize(name).toLowerCase() + "');");
 		out.println("  end;");
 		out.println("end;");
@@ -506,7 +550,8 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println();
 		out.println("class procedure T" + getClassName(name) + ".ListarTod"
 				+ getGenderChar(name) + "s(Qry: TZQuery" + indexField + "; Metodo: TListar"
-				+ name + "; Inicio, Tamanho: Integer);");
+				+ name + ";");
+		out.println("  Inicio, Tamanho: Integer);");
 		out.println("var");
 		out.println("  LimiteSQL: string;");
 		out.println("begin");
@@ -523,6 +568,16 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println("  Listar(Qry, Metodo);");
 		out.println("end;");
 
+
+		if(isInherited()) {
+			out.println();
+			out.println("class procedure T" + getClassName(name)
+					+ ".CarregaCamposEx(Qry: TZQuery; " + getClassName(name)
+					+ ": T" + getClassName(name) + ");");
+			out.println("begin");
+			out.println("  CarregaCampos(Qry, " + getClassName(name) + ");");
+			out.println("end;");
+		}
 		out.println();
 		out.println("class procedure T" + getClassName(name)
 				+ ".CarregaCampos(Qry: TZQuery; " + getBaseClassName(name)
@@ -582,16 +637,16 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println("class procedure T" + getClassName(name)
 				+ ".Listar(Qry: TZQuery; Metodo: TListar" + name + ");");
 		out.println("var");
-		out.println("  " + getBaseClassName(name) + ": T"
-				+ getBaseClassName(name) + ";");
+		out.println("  " + listVarName + ": T"
+				+ listVarName + ";");
 		out.println("begin");
 		out.println("  Qry.Open;");
 		out.println("  while not Qry.Eof do");
 		out.println("  begin");
-		out.println("    " + getBaseClassName(name) + " := T"
-				+ getBaseClassName(name) + ".Create;");
-		out.println("    CarregaCampos(Qry, " + getBaseClassName(name) + ");");
-		out.println("    Metodo(" + getBaseClassName(name) + ");");
+		out.println("    " + listVarName + " := T"
+				+ listVarName + ".Create;");
+		out.println("    CarregaCampos" + exLoad + "(Qry, " + listVarName + ");");
+		out.println("    Metodo(" + listVarName + ");");
 		out.println("    Qry.Next;");
 		out.println("  end;");
 		out.println("  Qry.Close;");
@@ -729,10 +784,18 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 			m.find();
 			tableName = tableName.replaceAll("[0-9]+", "");
 			if(nobase)
-				return tableName + "' + IntToStr(" + getBaseClassName(name) + "ID) + '";
-			return tableName + "' + IntToStr(" + getBaseClassName(name) + "." + getBaseClassName(name) + "ID) + '";
+				return tableName + "' + IntToStr(" + name + "ID) + '";
+			return tableName + "' + IntToStr(" + getBaseClassName(name) + "." + name + "ID) + '";
 		} else
 			return tableName;
+	}
+
+	public boolean isInherited() {
+		return inherited;
+	}
+
+	public void setInherited(boolean inherited) {
+		this.inherited = inherited;
 	}
 	
 	

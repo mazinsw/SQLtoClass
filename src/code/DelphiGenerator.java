@@ -55,7 +55,6 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 			out.println();
 		if (table.getComment() != null && table.getComment().length() > 0) {
 			out.println("  ///	<summary>");
-			System.out.println(table.getComment());
 			out.println("  ///	  " + table.getComment());
 			out.println("  ///	</summary>");
 		}
@@ -165,7 +164,6 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 						+ convertType(name, field) + " read F" + varName
 						+ " write F" + varName + ";");
 			}
-			System.out.println(field.getComment());
 		}
 		out.println("  end;");
 		out.println();

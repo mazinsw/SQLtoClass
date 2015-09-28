@@ -34,6 +34,12 @@ public abstract class JavaGeneratorBase extends CodeGenerator {
 			out.println("import java.util.Date;");
 			outCount++;
 		}
+		if (types.containsKey("BigDecimal")) {
+			if(outCount == 0)
+				out.println();
+			out.println("import java.math.BigDecimal;");
+			outCount++;
+		}
 		return outCount;
 	}
 
@@ -187,7 +193,7 @@ public abstract class JavaGeneratorBase extends CodeGenerator {
 				return "Double";
 			return "double";
 		case DataType.DECIMAL:
-			return "Currency";
+			return "BigDecimal";
 		case DataType.BIGINT:
 			if(!field.isNotNull() || alwaysClass)
 				return "Long";
@@ -221,7 +227,7 @@ public abstract class JavaGeneratorBase extends CodeGenerator {
 		case DataType.DOUBLE:
 			return "Double";
 		case DataType.DECIMAL:
-			return "Decimal";
+			return "String";
 		case DataType.BIGINT:
 			return "Long";
 		case DataType.BOOLEAN:

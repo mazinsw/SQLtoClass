@@ -63,6 +63,7 @@ public class MainWindow extends JFrame {
 	private JTextField textFieldPrefixoDAO;
 	private JTextField textFieldSufixoDAO;
 	private JCheckBox chckbxUsarFluentPDO;
+	private JCheckBox chckbxDAOHerdado;
 	private JRadioButton rdbtnJava;
 	private JTextField textFieldPacote;
 	private JTextField textFieldPacoteDAO;
@@ -335,6 +336,11 @@ public class MainWindow extends JFrame {
 		chckbxUsarFluentPDO.setSelected(true);
 		chckbxUsarFluentPDO.setBounds(10, 186, 104, 23);
 		contentPane.add(chckbxUsarFluentPDO);
+		
+		chckbxDAOHerdado = new JCheckBox("DAO Herdado");
+		chckbxDAOHerdado.setSelected(false);
+		chckbxDAOHerdado.setBounds(10, 212, 97, 23);
+		contentPane.add(chckbxDAOHerdado);
 		initForm();
 	}
 
@@ -361,6 +367,7 @@ public class MainWindow extends JFrame {
 		textFieldPacoteDAO.setText(configuration.getPackageNameDAO());
 		chckbxGerarDao.setSelected(configuration.isGenerateDAO());
 		chckbxUsarFluentPDO.setSelected(configuration.getPHPPDO() == Configuration.PHP_FLUENT_PDO);
+		chckbxDAOHerdado.setSelected(configuration.isDAOHerdado());
 	}
 
 	private void optionsChanged() {
@@ -422,6 +429,7 @@ public class MainWindow extends JFrame {
 			if(chckbxGerarDao.isSelected() && !rdbtnPhp.isSelected()) {
 				if(rdbtnDelphi.isSelected()) {
 					DelphiGeneratorDAO genDAO = new DelphiGeneratorDAO(textFieldPastaSaidaDAO.getText(), builder.getScript());
+					genDAO.setInherited(chckbxDAOHerdado.isSelected());
 					genDAO.setClassBasePrefix(textFieldPrefixo.getText());
 					genDAO.setClassBaseSuffix(textFieldSufixo.getText());
 					gen = genDAO;
@@ -453,6 +461,7 @@ public class MainWindow extends JFrame {
 				configuration.setPHPPDO(Configuration.PHP_FLUENT_PDO);
 			else
 				configuration.setPHPPDO(Configuration.PHP_DB_PDO);
+			configuration.setDAOHerdado(chckbxDAOHerdado.isSelected());
 			configuration.setPathDAO(textFieldPastaSaidaDAO.getText());
 			configuration.setPrefixDAO(textFieldPrefixoDAO.getText());
 			configuration.setSuffixDAO(textFieldSufixoDAO.getText());

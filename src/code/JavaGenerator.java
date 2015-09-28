@@ -159,7 +159,6 @@ public class JavaGenerator extends JavaGeneratorBase {
 			String spacing = "\t\t";
 			String[] values = new String[0];
 			String sqType = getSQLiteType(name, field);
-			String fieldType = convertType(name, field);
 			if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
 					|| varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
@@ -200,7 +199,7 @@ public class JavaGenerator extends JavaGeneratorBase {
 				javaVarName = getCamelCaseName(varName);
 			}
 			String extraSpc = "";
-			if (!field.isNotNull() && (!sqType.equals("String") || fieldType.equals("Date"))) {
+			if (!field.isNotNull()) {
 				out.println(spacing
 						+ "if (!JSONObject.NULL.equals(" + baseVarName + ".get("+ strName + "))) {");
 				extraSpc = "\t";
@@ -214,7 +213,9 @@ public class JavaGenerator extends JavaGeneratorBase {
 			}
 			String value = baseVarName + ".get" + sqType
 					+ "(" + strName + ")" + convType;
-			if(field.getType().getType() == DataType.DATE || field.getType().getType() == DataType.DATETIME || field.getType().getType() == DataType.TIME) {
+			if(field.getType().getType() == DataType.DECIMAL) {
+				value = "new BigDecimal(" + value + ")";
+			} else if(field.getType().getType() == DataType.DATE || field.getType().getType() == DataType.DATETIME || field.getType().getType() == DataType.TIME) {
 				out.println(spacing + extraSpc + "String " + javaVarName + "String = " + value + ";");
 				switch (field.getType().getType()) {
 				case DataType.DATE:
@@ -231,7 +232,7 @@ public class JavaGenerator extends JavaGeneratorBase {
 			}
 			out.println(spacing + extraSpc + "set"
 					+ varName + "(" + varList + value + ");");
-			if (!field.isNotNull() && (!sqType.equals("String") || fieldType.equals("Date")))
+			if (!field.isNotNull())
 				out.println(spacing + "}");
 			for (int i = values.length - 1; i >= 0; i--) {
 				spacing = spacing.substring(1);

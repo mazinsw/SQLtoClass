@@ -131,6 +131,16 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 			out.println("\t}");
 			break;
 		}
+		// generate order by method
+		out.println();
+		out.println("\t/**");
+		out.println("\t * Get a string that order elemets returned from getAll methods");
+		out.println("\t *");
+		out.println("\t * @return returns string that order elemets returned from getAll methods");
+		out.println("\t */");
+		out.println("\tpublic String getOrderBy() {");
+		out.println("\t\treturn null; // don't order");
+		out.println("\t}");
 		// generate getAll and load methods
 		for (Constraint constraint : list) {
 			String paramList = "", sep = "", whereSQL = "", whereSep = "", cmmStr = "", cmmCont = "", cmmSep = "";
@@ -201,7 +211,7 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 					else
 						out.println("\t\targs[" + j + "] = " + convertType(name, cfield, true) + ".toString(" + cfieldVarName + ");");
 				}
-				out.println("\t\tCursor cursor = db.query(TABLE_NAME, null, where, args, null, null, null);");
+				out.println("\t\tCursor cursor = db.query(TABLE_NAME, null, where, args, null, null, getOrderBy());");
 				if(i == constraint.getFields().size() - 1) {
 					out.println("\t\tif (cursor.moveToNext()) {");
 					out.println("\t\t\tfill(cursor, " + baseVarName  + ");");
@@ -409,7 +419,9 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 			String value = "cursor.get" + sqType
 					+ "(cursor.getColumnIndex(" + strName + "))" + convType;
 			String trySpc = "";
-			if(field.getType().getType() == DataType.DATE || field.getType().getType() == DataType.DATETIME || field.getType().getType() == DataType.TIME) {
+			if(field.getType().getType() == DataType.DECIMAL) {
+				value = "new BigDecimal(" + value + ")";
+			} else if(field.getType().getType() == DataType.DATE || field.getType().getType() == DataType.DATETIME || field.getType().getType() == DataType.TIME) {
 				out.println(spacing + extraSpc + "try {");
 				trySpc = "\t";
 				out.println(spacing + extraSpc + trySpc + "String " + javaVarName + "String = " + value + ";");
@@ -506,7 +518,9 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 			}
 			String valueGet = baseVarName + "." + getMethodPreffix(field) + varName + "(" + varList + ")";
 			String value = valueGet;
-			if(isBooleanField(field)) {
+			if(field.getType().getType() == DataType.DECIMAL) {
+				value = value + ".toPlainString()";
+			} else if(isBooleanField(field)) {
 				if(field.getType().getType() == DataType.ENUM)
 					value = valueGet + " ? \"Y\" : \"N\"";
 			} else if(field.getType().getType() == DataType.DATE || field.getType().getType() == DataType.DATETIME || field.getType().getType() == DataType.TIME) {

@@ -387,7 +387,7 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 			String arrElem = "", sep = "", catFieldName = "", paramsFieldName = "";
 			for (OrderField ofield : constraint.getFields()) {
 				String fieldName = ofield.getName();
-				String norField = normalize(fieldName, false);
+				String norField = normalize(fieldName, false).replace("][", "_").replace("[", "").replace("]", "");
 				String unixField = unixTransform(norField);
 				arrElem += sep + "'" + fieldName.toLowerCase() + "' => $" + unixField;
 				paramsFieldName += sep + "$" + unixField;
@@ -481,7 +481,7 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 									+ genEnumArray(field) + ")))");
 							out.println(spacing + "\t$erros[" + fieldNameStr
 									+ "] = '" + ugc + " " + field.getName()
-									+ " informado não é válid" + lgc + "';");
+									+ " informad" + lgc + " não é válid" + lgc + "';");
 						} else if (isFunctionChecker(unixVarName)) {
 							out.println(spacing + "if(!check_" + unixVarName
 									+ "($" + unixName + "[" + fieldNameStr
@@ -509,7 +509,7 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 								+ genEnumArray(field) + ")))");
 						out.println(spacing + "\t$erros[" + fieldNameStr
 								+ "] = '" + ugc + " " + field.getName()
-								+ " informado não é válid" + lgc + "';");
+								+ " informad" + lgc + " não é válid" + lgc + "';");
 					}
 				} else {
 					out.println(spacing + "if(strlen($" + unixName + "["
@@ -522,7 +522,7 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 								+ genEnumArray(field) + ")))");
 						out.println(spacing + "\t$erros[" + fieldNameStr
 								+ "] = '" + ugc + " " + field.getName()
-								+ " informado não é válid" + lgc + "';");
+								+ " informad" + lgc + " não é válid" + lgc + "';");
 					} else if (isFunctionChecker(unixVarName)) {
 						out.println(spacing + "else if(!check_" + unixVarName
 								+ "($" + unixName + "[" + fieldNameStr + "]))");
@@ -544,7 +544,7 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 								+ "[" + fieldNameStr + "]))");
 						out.println(spacing + "\t$erros[" + fieldNameStr
 								+ "] = '" + ugc + " " + field.getName()
-								+ " não é um número';");
+								+ " não foi informad" + lgc + "';");
 						out.println(spacing + "else");
 						if (field.getType().getType() == DataType.INTEGER) {
 							out.println(spacing + "\t$" + unixName + "["
@@ -560,7 +560,7 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 								+ "[" + fieldNameStr + "]))");
 						out.println(spacing + "\t$erros[" + fieldNameStr
 								+ "] = '" + ugc + " " + field.getName()
-								+ " não é um número';");
+								+ " não foi informad" + lgc + "';");
 					}
 				} else {
 					out.println(spacing + "$" + unixName + "[" + fieldNameStr
@@ -574,7 +574,7 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 							+ "[" + fieldNameStr + "]))");
 					out.println(spacing + "\t$erros[" + fieldNameStr + "] = '"
 							+ ugc + " " + field.getName()
-							+ " não é um número';");
+							+ " não foi informad" + lgc + "';");
 				}
 			} else if (field.getType().getType() == DataType.DATETIME) {
 				out.println(spacing + "$" + unixName + "[" + fieldNameStr
