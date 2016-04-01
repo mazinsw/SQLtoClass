@@ -34,10 +34,12 @@ import code.DelphiGenerator;
 import code.DelphiGeneratorDAO;
 import code.JavaGenerator;
 import code.JavaGeneratorDAO;
+import code.PHPGeneratorBase;
 import code.PHPGeneratorDB;
 import code.PHPGeneratorFluentPDO;
 
 import javax.swing.SwingConstants;
+import util.Messages;
 
 public class MainWindow extends JFrame {
 
@@ -64,6 +66,7 @@ public class MainWindow extends JFrame {
 	private JTextField textFieldSufixoDAO;
 	private JCheckBox chckbxUsarFluentPDO;
 	private JCheckBox chckbxDAOHerdado;
+	private JCheckBox chckbxAcessarComoArray;
 	private JRadioButton rdbtnJava;
 	private JTextField textFieldPacote;
 	private JTextField textFieldPacoteDAO;
@@ -72,6 +75,7 @@ public class MainWindow extends JFrame {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		// Locale.setDefault(new Locale("pt", "BR"));
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -126,11 +130,11 @@ public class MainWindow extends JFrame {
 			}
 		});
 		
-		JLabel lblArquivo = new JLabel("Arquivo:");
+		JLabel lblArquivo = new JLabel(Messages.getString("MainWindow.lblArquivo.text")); //$NON-NLS-1$
 		lblArquivo.setBounds(10, 19, 41, 14);
 		contentPane.add(lblArquivo);
 		
-		JButton btnAbrirArquivo = new JButton("Abrir...");
+		JButton btnAbrirArquivo = new JButton(Messages.getString("MainWindow.btnAbrirArquivo.text")); //$NON-NLS-1$
 		btnAbrirArquivo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				actionAbrirArquivo();
@@ -140,17 +144,17 @@ public class MainWindow extends JFrame {
 		contentPane.add(btnAbrirArquivo);
 		
 		JPanel panel = new JPanel();
-		panel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Linguagem", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), Messages.getString("MainWindow.panel.borderTitle"), TitledBorder.LEADING, TitledBorder.TOP, null, null));  //$NON-NLS-1$//$NON-NLS-2$
 		panel.setBounds(10, 62, 104, 91);
 		contentPane.add(panel);
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		
-		rdbtnPhp = new JRadioButton("PHP");
+		rdbtnPhp = new JRadioButton(Messages.getString("MainWindow.rdbtnPhp.text")); //$NON-NLS-1$
 		rdbtnPhp.setSelected(true);
 		panel.add(rdbtnPhp);
-		rdbtnDelphi = new JRadioButton("Delphi");
+		rdbtnDelphi = new JRadioButton(Messages.getString("MainWindow.rdbtnDelphi.text")); //$NON-NLS-1$
 		panel.add(rdbtnDelphi);
-		rdbtnJava = new JRadioButton("Java");
+		rdbtnJava = new JRadioButton(Messages.getString("MainWindow.rdbtnJava.text")); //$NON-NLS-1$
 		panel.add(rdbtnJava);
 		ButtonGroup buttonGroup = new ButtonGroup();
 		buttonGroup.add(rdbtnPhp);
@@ -165,7 +169,7 @@ public class MainWindow extends JFrame {
 		listLog.setModel(new DefaultListModel<String>());
 		scrollPane.setViewportView(listLog);
 		
-		btnExecutar = new JButton("Executar");
+		btnExecutar = new JButton(Messages.getString("MainWindow.btnExecutar.text")); //$NON-NLS-1$
 		btnExecutar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				actionExecutar();
@@ -175,27 +179,27 @@ public class MainWindow extends JFrame {
 		btnExecutar.setBounds(537, 266, 82, 27);
 		contentPane.add(btnExecutar);
 		
-		JLabel lblLog = new JLabel("Log:");
+		JLabel lblLog = new JLabel(Messages.getString("MainWindow.lblLog.text")); //$NON-NLS-1$
 		lblLog.setBounds(10, 279, 46, 14);
 		contentPane.add(lblLog);
 		
-		labelArquivoMsg = new JLabel("");
+		labelArquivoMsg = new JLabel(""); //$NON-NLS-1$
 		labelArquivoMsg.setForeground(Color.RED);
 		labelArquivoMsg.setBounds(61, 37, 456, 14);
 		contentPane.add(labelArquivoMsg);
 		setLocationRelativeTo(null);
 		
-		chckbxGerarDao = new JCheckBox("Gerar DAO");
+		chckbxGerarDao = new JCheckBox(Messages.getString("MainWindow.chckbxGerarDao.text")); //$NON-NLS-1$
 		chckbxGerarDao.setBounds(10, 160, 97, 23);
 		contentPane.add(chckbxGerarDao);
 		
 		JPanel panel_1 = new JPanel();
-		panel_1.setBorder(new TitledBorder(null, "Classes", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panel_1.setBorder(new TitledBorder(null, Messages.getString("MainWindow.panel_1.borderTitle"), TitledBorder.LEADING, TitledBorder.TOP, null, null)); //$NON-NLS-1$
 		panel_1.setBounds(124, 62, 495, 91);
 		contentPane.add(panel_1);
 		panel_1.setLayout(null);
 		
-		JLabel label = new JLabel("Pasta de saida:");
+		JLabel label = new JLabel(Messages.getString("MainWindow.label.text")); //$NON-NLS-1$
 		label.setBounds(10, 23, 74, 14);
 		panel_1.add(label);
 		
@@ -222,7 +226,7 @@ public class MainWindow extends JFrame {
 			}
 		});
 		
-		JLabel label_1 = new JLabel("Prefixo");
+		JLabel label_1 = new JLabel(Messages.getString("MainWindow.label_1.text")); //$NON-NLS-1$
 		label_1.setHorizontalAlignment(SwingConstants.RIGHT);
 		label_1.setBounds(49, 63, 34, 14);
 		panel_1.add(label_1);
@@ -239,12 +243,12 @@ public class MainWindow extends JFrame {
 		textFieldSufixo.setColumns(10);
 		panel_1.add(textFieldSufixo);
 		
-		JLabel label_2 = new JLabel("Sufixo");
+		JLabel label_2 = new JLabel(Messages.getString("MainWindow.label_2.text")); //$NON-NLS-1$
 		label_2.setHorizontalAlignment(SwingConstants.RIGHT);
 		label_2.setBounds(201, 63, 30, 14);
 		panel_1.add(label_2);
 		
-		JButton btnAbrirPasta = new JButton("Abrir...");
+		JButton btnAbrirPasta = new JButton(Messages.getString("MainWindow.btnAbrirPasta.text")); //$NON-NLS-1$
 		btnAbrirPasta.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				actionAbrirPasta();
@@ -253,12 +257,12 @@ public class MainWindow extends JFrame {
 		btnAbrirPasta.setBounds(405, 14, 80, 32);
 		panel_1.add(btnAbrirPasta);
 		
-		labelPastaSaidaMsg = new JLabel("");
+		labelPastaSaidaMsg = new JLabel(""); //$NON-NLS-1$
 		labelPastaSaidaMsg.setForeground(Color.RED);
 		labelPastaSaidaMsg.setBounds(89, 37, 306, 14);
 		panel_1.add(labelPastaSaidaMsg);
 		
-		JLabel lblPacote = new JLabel("Pacote");
+		JLabel lblPacote = new JLabel(Messages.getString("MainWindow.lblPacote.text")); //$NON-NLS-1$
 		lblPacote.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblPacote.setBounds(349, 63, 42, 14);
 		panel_1.add(lblPacote);
@@ -271,11 +275,11 @@ public class MainWindow extends JFrame {
 		
 		JPanel panel_2 = new JPanel();
 		panel_2.setLayout(null);
-		panel_2.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Classes de acesso a base de dados (DAO)", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panel_2.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), Messages.getString("MainWindow.panel_2.borderTitle"), TitledBorder.LEADING, TitledBorder.TOP, null, null));  //$NON-NLS-1$//$NON-NLS-2$
 		panel_2.setBounds(124, 164, 495, 91);
 		contentPane.add(panel_2);
 		
-		JLabel label_3 = new JLabel("Pasta de saida:");
+		JLabel label_3 = new JLabel(Messages.getString("MainWindow.label_3.text")); //$NON-NLS-1$
 		label_3.setBounds(10, 23, 74, 14);
 		panel_2.add(label_3);
 		
@@ -285,7 +289,7 @@ public class MainWindow extends JFrame {
 		textFieldPastaSaidaDAO.setBounds(89, 20, 306, 20);
 		panel_2.add(textFieldPastaSaidaDAO);
 		
-		JLabel label_4 = new JLabel("Prefixo");
+		JLabel label_4 = new JLabel(Messages.getString("MainWindow.label_4.text")); //$NON-NLS-1$
 		label_4.setHorizontalAlignment(SwingConstants.RIGHT);
 		label_4.setBounds(49, 63, 34, 14);
 		panel_2.add(label_4);
@@ -302,12 +306,12 @@ public class MainWindow extends JFrame {
 		textFieldSufixoDAO.setBounds(239, 60, 86, 20);
 		panel_2.add(textFieldSufixoDAO);
 		
-		JLabel label_5 = new JLabel("Sufixo");
+		JLabel label_5 = new JLabel(Messages.getString("MainWindow.label_5.text")); //$NON-NLS-1$
 		label_5.setHorizontalAlignment(SwingConstants.RIGHT);
 		label_5.setBounds(201, 63, 30, 14);
 		panel_2.add(label_5);
 		
-		JButton btnAbrirPastaDAO = new JButton("Abrir...");
+		JButton btnAbrirPastaDAO = new JButton(Messages.getString("MainWindow.btnAbrirPastaDAO.text")); //$NON-NLS-1$
 		btnAbrirPastaDAO.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				actionAbrirPastaDAO();
@@ -316,12 +320,12 @@ public class MainWindow extends JFrame {
 		btnAbrirPastaDAO.setBounds(405, 14, 80, 32);
 		panel_2.add(btnAbrirPastaDAO);
 		
-		labelPastaSaidaMsgDAO = new JLabel("");
+		labelPastaSaidaMsgDAO = new JLabel(""); //$NON-NLS-1$
 		labelPastaSaidaMsgDAO.setForeground(Color.RED);
 		labelPastaSaidaMsgDAO.setBounds(89, 37, 306, 14);
 		panel_2.add(labelPastaSaidaMsgDAO);
 		
-		JLabel label_6 = new JLabel("Pacote");
+		JLabel label_6 = new JLabel(Messages.getString("MainWindow.label_6.text")); //$NON-NLS-1$
 		label_6.setHorizontalAlignment(SwingConstants.RIGHT);
 		label_6.setBounds(349, 63, 42, 14);
 		panel_2.add(label_6);
@@ -332,24 +336,29 @@ public class MainWindow extends JFrame {
 		textFieldPacoteDAO.setBounds(399, 60, 86, 20);
 		panel_2.add(textFieldPacoteDAO);
 		
-		chckbxUsarFluentPDO = new JCheckBox("Usar FluentPDO");
+		chckbxUsarFluentPDO = new JCheckBox(Messages.getString("MainWindow.chckbxUsarFluentPDO.text")); //$NON-NLS-1$
 		chckbxUsarFluentPDO.setSelected(true);
-		chckbxUsarFluentPDO.setBounds(10, 186, 104, 23);
+		chckbxUsarFluentPDO.setBounds(10, 183, 104, 23);
 		contentPane.add(chckbxUsarFluentPDO);
 		
-		chckbxDAOHerdado = new JCheckBox("DAO Herdado");
+		chckbxDAOHerdado = new JCheckBox(Messages.getString("MainWindow.chckbxDAOHerdado.text")); //$NON-NLS-1$
 		chckbxDAOHerdado.setSelected(false);
-		chckbxDAOHerdado.setBounds(10, 212, 97, 23);
+		chckbxDAOHerdado.setBounds(10, 207, 97, 23);
 		contentPane.add(chckbxDAOHerdado);
+		
+		chckbxAcessarComoArray = new JCheckBox(Messages.getString("MainWindow.chckbxAcessarComoArray.text")); //$NON-NLS-1$
+		chckbxAcessarComoArray.setSelected(false);
+		chckbxAcessarComoArray.setBounds(10, 232, 97, 23);
+		contentPane.add(chckbxAcessarComoArray);
 		initForm();
 	}
 
 	private void initForm() {
 		File file = new File(MainWindow.class.getProtectionDomain().getCodeSource().getLocation().getPath());
 		if(configuration.getFile() == null)
-			configuration.setFile(file.getParent() + File.separator + "sample.sql");
+			configuration.setFile(file.getParent() + File.separator + "sample.sql"); //$NON-NLS-1$
 		if(configuration.getPath() == null)
-			configuration.setPath(file.getParent() + File.separator + "outdir");
+			configuration.setPath(file.getParent() + File.separator + "outdir"); //$NON-NLS-1$
 		textFieldArquivo.setText(configuration.getFile());
 		textFieldPastaSaida.setText(configuration.getPath());
 		textFieldPrefixo.setText(configuration.getPrefix());
@@ -368,6 +377,7 @@ public class MainWindow extends JFrame {
 		chckbxGerarDao.setSelected(configuration.isGenerateDAO());
 		chckbxUsarFluentPDO.setSelected(configuration.getPHPPDO() == Configuration.PHP_FLUENT_PDO);
 		chckbxDAOHerdado.setSelected(configuration.isDAOHerdado());
+		chckbxAcessarComoArray.setSelected(configuration.isArrayAccess());
 	}
 
 	private void optionsChanged() {
@@ -379,17 +389,17 @@ public class MainWindow extends JFrame {
 		boolean dirDAOOk = outDAODir.exists() && outDAODir.isDirectory();
 		btnExecutar.setEnabled(fileOk && dirOk);
 		if(fileOk)
-			labelArquivoMsg.setText("");
+			labelArquivoMsg.setText(""); //$NON-NLS-1$
 		else
-			labelArquivoMsg.setText("Arquivo inválido!");
+			labelArquivoMsg.setText(Messages.getString("MainWindow.string5")); //$NON-NLS-1$
 		if(dirOk)
-			labelPastaSaidaMsg.setText("");
+			labelPastaSaidaMsg.setText(""); //$NON-NLS-1$
 		else
-			labelPastaSaidaMsg.setText("Diretório inválido!");
+			labelPastaSaidaMsg.setText(Messages.getString("MainWindow.string7")); //$NON-NLS-1$
 		if(dirDAOOk || !chckbxGerarDao.isSelected())
-			labelPastaSaidaMsg.setText("");
+			labelPastaSaidaMsg.setText(""); //$NON-NLS-1$
 		else
-			labelPastaSaidaMsg.setText("Diretório inválido!");
+			labelPastaSaidaMsg.setText(Messages.getString("MainWindow.string9")); //$NON-NLS-1$
 	}
 
 	private void changedPastaSaida() {
@@ -417,6 +427,7 @@ public class MainWindow extends JFrame {
 				gen = new PHPGeneratorFluentPDO(textFieldPastaSaida.getText(), builder.getScript());
 			else
 				gen = new PHPGeneratorDB(textFieldPastaSaida.getText(), builder.getScript());
+			((PHPGeneratorBase)gen).setArrayAccess(chckbxAcessarComoArray.isSelected());
 		} else {
 			gen = new JavaGenerator(textFieldPastaSaida.getText(), builder.getScript());
 			JavaGenerator javaGen = (JavaGenerator)gen;
@@ -462,6 +473,7 @@ public class MainWindow extends JFrame {
 			else
 				configuration.setPHPPDO(Configuration.PHP_DB_PDO);
 			configuration.setDAOHerdado(chckbxDAOHerdado.isSelected());
+			configuration.setArrayAccess(chckbxAcessarComoArray.isSelected());
 			configuration.setPathDAO(textFieldPastaSaidaDAO.getText());
 			configuration.setPrefixDAO(textFieldPrefixoDAO.getText());
 			configuration.setSuffixDAO(textFieldSufixoDAO.getText());
@@ -475,7 +487,7 @@ public class MainWindow extends JFrame {
 
 	private void actionAbrirArquivo() {
 		JFileChooser fileChooser = new JFileChooser();
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("Script SQL(.sql)", "sql");
+		FileNameExtensionFilter filter = new FileNameExtensionFilter(Messages.getString("MainWindow.string10"), "sql"); //$NON-NLS-1$ //$NON-NLS-2$
 		fileChooser.addChoosableFileFilter(filter);
 		fileChooser.setFileFilter(filter);
 		if (fileChooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION)

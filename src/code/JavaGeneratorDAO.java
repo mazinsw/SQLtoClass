@@ -362,8 +362,7 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 			String[] values = new String[0];
 			String sqType = getSQLiteType(name, field);
 			String fieldType = convertType(name, field);
-			if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-					|| varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
+			if (isIndexed(varName)) {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
@@ -477,8 +476,7 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 			String varList = "";
 			String spacing = "\t\t";
 			String[] values = new String[0];
-			if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-					|| varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
+			if (isIndexed(varName)) {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;

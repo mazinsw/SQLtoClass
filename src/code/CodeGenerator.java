@@ -23,6 +23,7 @@ import ast.PrimaryKey;
 import ast.ScriptNode;
 import ast.Table;
 import ast.UniqueKey;
+import util.Messages;
 
 public abstract class CodeGenerator {
 	private ScriptNode script;
@@ -56,14 +57,14 @@ public abstract class CodeGenerator {
 		}
 		String nameWithExt = getNameWithExtension(name);
 		String fileName = outDir + File.separatorChar + nameWithExt;
-		System.out.println("Writting file: " + nameWithExt);
+		System.out.println(String.format(Messages.getString("CodeGenerator.string3"), nameWithExt)); //$NON-NLS-1$
 		PrintWriter out = new PrintWriter(new OutputStreamWriter(
 				new FileOutputStream(fileName), getEncoding()), true);
 		genHeader(out, table, name, indexed);
 		genClass(out, table, name, indexed);
 		genFooter(out, table, name, indexed);
 		out.close();
-		System.out.println("Closing file: " + nameWithExt);
+		System.out.println(String.format(Messages.getString("CodeGenerator.string4"), nameWithExt)); //$NON-NLS-1$
 	}
 
 	public abstract void genHeader(PrintWriter out, Table table, String name,
@@ -114,8 +115,7 @@ public abstract class CodeGenerator {
 		List<Field> normalFields = new ArrayList<>();
 		for (Field field : table.getFields()) {
 			String varName = normalize(field.getName(), false);
-			if (!varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-					&& !varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
+			if (!isIndexed(varName)) {
 				normalFields.add(field);
 				continue;
 			}
@@ -126,7 +126,7 @@ public abstract class CodeGenerator {
 						.matcher(varName);
 				m.find();
 			}
-			System.out.println(varName + " Match count: " + m.groupCount());
+			System.out.println(String.format(Messages.getString("CodeGenerator.string13"), varName, m.groupCount())); //$NON-NLS-1$
 			varName = varName.replaceAll("\\[[0-9]+\\]", "");
 			String semicolon = "";
 			String newData = "";
@@ -300,7 +300,7 @@ public abstract class CodeGenerator {
 			word = word.substring(0, word.length() - 3) + "ao";
 		else if (word.endsWith("is"))
 			word = word.substring(0, word.length() - 2) + "l";
-		else if (word.endsWith("res"))
+		else if (word.endsWith("res") || word.endsWith("ses"))
 			word = word.substring(0, word.length() - 2);
 		else if (word.endsWith("es") || word.endsWith("as")
 				|| word.endsWith("os"))
@@ -378,6 +378,19 @@ public abstract class CodeGenerator {
 
 	public static boolean skipFixField(String field) {
 		return false;
+	}
+
+	public static boolean isIndexed(String field) {
+		return field.matches("^[a-zA-Z]+[\\[[0-9]+\\]]+$");
+	}
+
+	public static List<Integer> extractIndex(String field) {
+		Matcher m = Pattern.compile("[([0-9]+)]+").matcher(field);
+		List<Integer> list = new ArrayList<>();
+		while(m.find()) {
+			list.add(Integer.valueOf(m.group(0)));
+		}
+		return list;
 	}
 	
 	public static boolean skipUpdateField(String field) {
@@ -478,7 +491,7 @@ public abstract class CodeGenerator {
 		for (OrderField orderField : constraint.getFields()) {
 			Field field = table.find(orderField.getName());
 			if(field == null)
-				throw new RuntimeException("Restrição ou índice inconsistente, a coluna `" + orderField.getName() + "` não faz parte da tabela `" + table.getName() + "`");
+				throw new RuntimeException(String.format(Messages.getString("CodeGenerator.string0"), orderField.getName(), table.getName())); //$NON-NLS-1$
 			list.add(field);
 		}
 		return list;

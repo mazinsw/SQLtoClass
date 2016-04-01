@@ -27,6 +27,7 @@ public class Configuration {
 	private String packageName;
 	private String packageNameDAO;
 	private boolean daoHerdado;
+	private boolean arrayAccess;
 
 	public Configuration() {
 		load();
@@ -136,6 +137,14 @@ public class Configuration {
 		this.daoHerdado = daoHerdado;
 	}
 
+	public boolean isArrayAccess() {
+		return arrayAccess;
+	}
+
+	public void setArrayAccess(boolean arrayAccess) {
+		this.arrayAccess = arrayAccess;
+	}
+
 	public void load() {
 		File configFile = new File("config.properties");
 
@@ -161,6 +170,10 @@ public class Configuration {
 				daoHerdado = props.getProperty("DAOHerdado").equals(String.valueOf(true));
 			else
 				daoHerdado = false;
+			if (props.containsKey("ArrayAccess"))
+				arrayAccess = props.getProperty("ArrayAccess").equals(String.valueOf(true));
+			else
+				arrayAccess = false;
 			if (props.containsKey("generator"))
 				generator = Integer.valueOf(props.getProperty("generator"));
 			else
@@ -194,6 +207,7 @@ public class Configuration {
 			props.setProperty("packageNameDAO", packageNameDAO);
 			props.setProperty("generateDAO", String.valueOf(generateDAO));
 			props.setProperty("DAOHerdado", String.valueOf(daoHerdado));
+			props.setProperty("ArrayAccess", String.valueOf(arrayAccess));
 			props.setProperty("generator", String.valueOf(generator));
 			props.setProperty("phpPDO", String.valueOf(phpPDO));
 			FileWriter writer = new FileWriter(configFile);

@@ -155,7 +155,7 @@ public abstract class DelphiGeneratorBase extends CodeGenerator {
 	}
 
 	protected String genArrayAccess(String varName) {
-		if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")  || varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
+		if (isIndexed(varName)) {
 			Matcher m = Pattern.compile("^[a-zA-Z]+\\[([0-9]+)\\]$").matcher(
 					varName);
 			if (!m.find()) {

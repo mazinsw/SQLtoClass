@@ -18,10 +18,19 @@ import ast.Table;
 
 public abstract class PHPGeneratorBase extends CodeGenerator {
 
+	private boolean arrayAccess;
 	private static final String[] indexNames = { "$linha", "$coluna" };
 
 	public PHPGeneratorBase(String outDir, ScriptNode script) {
 		super(outDir, script);
+	}
+
+	public boolean isArrayAccess() {
+		return arrayAccess;
+	}
+
+	public void setArrayAccess(boolean arrayAccess) {
+		this.arrayAccess = arrayAccess;
 	}
 
 	private String genParams(String data, String sep) {
@@ -80,7 +89,10 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 		}
 		if (enumFields.size() > 0)
 			out.println();
-		out.println("class " + getClassName(name) + " {");
+		String arrayIntf = "";
+		if(isArrayAccess())
+			arrayIntf = " implements ArrayAccess";
+		out.println("class " + getClassName(name) + arrayIntf + " {");
 	}
 
 	private String genEnum(String name, Field field) {
@@ -144,8 +156,7 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 			String varName = normalize(field.getName(), false);
 			if (indexedFields.containsKey(varName))
 				continue;
-			if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-					|| varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
+			if (isIndexed(varName)) {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
@@ -171,8 +182,7 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 			String varName = normalize(field.getName(), false);
 			if (indexedFields.containsKey(varName))
 				continue;
-			if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-					|| varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
+			if (isIndexed(varName)) {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
@@ -236,8 +246,7 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 		}
 		for (Field field : table.getFields()) {
 			String varName = normalize(field.getName(), false);
-			if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-					|| varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
+			if (isIndexed(varName)) {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
@@ -301,8 +310,8 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 				out.println("\t}");
 			}
 		}
-		out.println();
 		// generate to array function
+		out.println();
 		out.println("\tpublic function toArray() {");
 		out.println("\t\t$" + unixName + " = array();");
 		usedFields.clear();
@@ -310,8 +319,7 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 			String varName = normalize(field.getName(), false);
 			if (indexedFields.containsKey(varName))
 				continue;
-			if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-					|| varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
+			if (isIndexed(varName)) {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
@@ -367,6 +375,66 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 		}
 		out.println("\t\treturn $" + unixName + ";");
 		out.println("\t}");
+		// generate array access interface implementation
+		if(isArrayAccess()) {
+			// array set: $class['offset'] = $value;
+			out.println();
+			out.println("\tpublic function offsetSet($offset, $value) {");
+			out.println("\t\tswitch($offset) {");
+			usedFields.clear();
+			for (Field field : table.getFields()) {
+				String varName = normalize(field.getName(), false);
+				String params = "";
+				if (isIndexed(varName)) {
+					List<Integer> indexes = extractIndex(varName);
+					varName = varName.replaceAll("\\[[0-9]+\\]", "");
+					for (Integer integer : indexes) {
+						params += integer + ", ";					
+					}
+				}
+				out.println("\t\t\tcase \"" + field.getName().toLowerCase() + "\": $this->set" + varName + "(" + params + "$value);");
+				out.println("\t\t\t\tbreak;");
+			}
+			out.println("\t\t\tdefault:");
+			out.println("\t\t\t\tthrow new Exception('O campo \"'.$offset.'\" não existe');");
+			out.println("\t\t}");
+			out.println("\t}");
+			// array get: echo $class['offset'];
+			out.println();
+			out.println("\tpublic function offsetGet($offset) {");
+			out.println("\t\tswitch($offset) {");
+			usedFields.clear();
+			for (Field field : table.getFields()) {
+				String varName = normalize(field.getName(), false);
+				String params = "";
+				if (isIndexed(varName)) {
+					List<Integer> indexes = extractIndex(varName);
+					String sep = "";
+					varName = varName.replaceAll("\\[[0-9]+\\]", "");
+					for (Integer integer : indexes) {
+						params += sep + integer;
+						sep = ", ";
+					}
+				}
+				out.println("\t\t\tcase \"" + field.getName().toLowerCase() + "\":");
+				out.println("\t\t\t\treturn $this->get" + varName + "(" + params + ");");
+			}
+			out.println("\t\t\tdefault:");
+			out.println("\t\t\t\treturn null;");
+			out.println("\t\t}");
+			out.println("\t}");
+			// array unset: unset($class['offset']);
+			out.println();
+			out.println("\tpublic function offsetUnset($offset) {");
+			out.println("\t\t$this->offsetSet($offset, null);");
+			out.println("\t}");
+			// array isset: isset($class['offset']);
+			out.println();
+			out.println("\tpublic function offsetExists($offset) {");
+			out.println("\t\t$array = $this->toArray();");
+			out.println("\t\treturn isset($array[$offset]);");
+			out.println("\t}");
+		}
 		String tblname = table.getName();
 		tblname = tblname.replaceAll("[0-9]+", "");
 		String tblOneName = despluralize(name).toLowerCase();
@@ -417,8 +485,7 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 			String[] values = new String[0];
 			if (indexedFields.containsKey(varName))
 				continue;
-			if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-					|| varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
+			if (isIndexed(varName)) {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
@@ -667,9 +734,7 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 					continue;
 				if (indexedFields.containsKey(varName))
 					continue;
-				if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-						|| varName
-								.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
+				if (isIndexed(varName)) {
 					varName = varName.replaceAll("\\[[0-9]+\\]", "");
 					if (usedFields.containsKey(varName))
 						continue;

@@ -72,8 +72,7 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 			String varName = normalize(field.getName(), false);
 			if (indexedFields.containsKey(varName))
 				continue;
-			if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-					|| varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
+			if (isIndexed(varName)) {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
@@ -123,8 +122,7 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 			String varName = normalize(field.getName(), false);
 			if (indexedFields.containsKey(varName))
 				continue;
-			if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-					|| varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
+			if (isIndexed(varName)) {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
@@ -238,9 +236,7 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 			out.println("begin");
 			for (Field field : table.getFields()) {
 				String varName = normalize(field.getName(), false);
-				if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-						|| varName
-								.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$"))
+				if (isIndexed(varName))
 					continue;
 				if (field.getType().getType() == DataType.BLOB) {
 					out.println("  if F" + varName + " <> nil then");
@@ -312,8 +308,7 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 			String varName = normalize(field.getName(), false);
 			if (indexedFields.containsKey(varName))
 				continue;
-			if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-					|| varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
+			if (isIndexed(varName)) {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
@@ -357,8 +352,7 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 		out.println("end;");
 		for (Field field : table.getFields()) {
 			String varName = normalize(field.getName(), false);
-			if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-					|| varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$"))
+			if (isIndexed(varName))
 				continue;
 			if (field.getType().getType() == DataType.BLOB) {
 				out.println();
@@ -392,8 +386,7 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 		usedFields.clear();
 		for (Field field : table.getFields()) {
 			String varName = normalize(field.getName(), false);
-			if (!varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-					&& !varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$"))
+			if (!isIndexed(varName))
 				continue;
 			varName = varName.replaceAll("\\[[0-9]+\\]", "");
 			if (usedFields.containsKey(varName))

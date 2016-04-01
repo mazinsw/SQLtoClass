@@ -35,8 +35,9 @@ public class JavaGenerator extends JavaGeneratorBase {
 			out.println("import java.util.Locale;");
 			out.println("import java.text.SimpleDateFormat;");
 		}
+		out.println("import java.io.Serializable;");
 		out.println("import org.json.JSONObject;");
-		impCount++;
+		impCount += 2;
 		return impCount;
 	}
 
@@ -52,14 +53,13 @@ public class JavaGenerator extends JavaGeneratorBase {
 		
 		processArray(table, indexedFields);
 		out.println();
-		out.println("public class " + baseType + " {");
+		out.println("public class " + baseType + " implements Serializable {");
 
 		// constants
 		usedFields.clear();
 		for (Field field : table.getFields()) {
 			String varName = normalize(field.getName(), false);
-			if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-					|| varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")
+			if (isIndexed(varName)
 					|| isBooleanField(field)
 					|| field.getType().getType() != DataType.ENUM) {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
@@ -84,8 +84,7 @@ public class JavaGenerator extends JavaGeneratorBase {
 			String varName = normalize(field.getName(), false);
 			if (indexedFields.containsKey(varName))
 				continue;
-			if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-					|| varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
+			if (isIndexed(varName)) {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
@@ -109,9 +108,7 @@ public class JavaGenerator extends JavaGeneratorBase {
 				String varName = normalize(field.getName(), false);
 				if (indexedFields.containsKey(varName))
 					continue;
-				if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-						|| varName
-								.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
+				if (isIndexed(varName)) {
 					varName = varName.replaceAll("\\[[0-9]+\\]", "");
 					if (usedFields.containsKey(varName))
 						continue;
@@ -133,9 +130,7 @@ public class JavaGenerator extends JavaGeneratorBase {
 				String varName = normalize(field.getName(), false);
 				if (indexedFields.containsKey(varName))
 					continue;
-				if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-						|| varName
-								.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
+				if (isIndexed(varName)) {
 					varName = varName.replaceAll("\\[[0-9]+\\]", "");
 					if (usedFields.containsKey(varName))
 						continue;
@@ -159,8 +154,7 @@ public class JavaGenerator extends JavaGeneratorBase {
 			String spacing = "\t\t";
 			String[] values = new String[0];
 			String sqType = getSQLiteType(name, field);
-			if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-					|| varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
+			if (isIndexed(varName)) {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
@@ -256,8 +250,7 @@ public class JavaGenerator extends JavaGeneratorBase {
 		}
 		for (Field field : table.getFields()) {
 			String varName = normalize(field.getName(), false);
-			if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-					|| varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
+			if (isIndexed(varName)) {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
@@ -333,8 +326,7 @@ public class JavaGenerator extends JavaGeneratorBase {
 		usedFields.clear();
 		for (Field field : table.getFields()) {
 			String varName = normalize(field.getName(), false);
-			if (varName.matches("^[a-zA-Z]+\\[[0-9]+\\]$")
-					|| varName.matches("^[a-zA-Z]+\\[[0-9]+\\]\\[[0-9]+\\]$")) {
+			if (isIndexed(varName)) {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
