@@ -1,0 +1,22 @@
+<h3>$[Table.name.plural]</h3>
+<a href="/manage/$[table.unix]/cadastrar.php">Cadastrar</a>
+<table>
+	<thead>
+		<tr>
+$[field.each]
+			<th>$[Field.name]</th>
+$[field.end]
+			<th>Ações</th>
+		</tr>
+	</thead>
+	<tbody>
+<?php foreach ($$[table.unix.plural] as $$[table.unix]) {?>
+		<tr>
+$[field.each]
+			<td><?php echo $$[table.unix]->$[field.get];?></td>
+$[field.end]
+			<td><a href="/manage/$[table.unix]/editar.php?$[table.pk]=<?php echo $$[table.unix]->$[table.pk.get]();?>">Editar</a></td>
+		</tr>
+<?php }?>
+	</tbody>
+</table>

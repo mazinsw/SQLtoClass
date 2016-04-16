@@ -15,7 +15,6 @@ import java.util.regex.Pattern;
 
 import ast.Constraint;
 import ast.DataType;
-import ast.EnumType;
 import ast.Field;
 import ast.Node;
 import ast.OrderField;
@@ -23,32 +22,57 @@ import ast.PrimaryKey;
 import ast.ScriptNode;
 import ast.Table;
 import ast.UniqueKey;
+import util.LogListener;
 import util.Messages;
 
-public abstract class CodeGenerator {
+public abstract class CodeGenerator implements LogListener {
 	private ScriptNode script;
 	private String outDir;
+
 	private Hashtable<String, String> indexedTables;
 	private String classPrefix;
 	private String classSuffix;
+	private LogListener logListener;
+	private int currentTableIndex;
 
 	public CodeGenerator(String outDir, ScriptNode script) {
 		this.outDir = outDir;
 		this.script = script;
 		indexedTables = new Hashtable<>();
+		setLogListener(this);
+		currentTableIndex = -1;
+	}
+	public String getOutputDirectory() {
+		return outDir;
+	}
+
+	public Table findTable(String name) {
+		if(name == null)
+			return null;
+		for (Node node : script.getStatements()) {
+			if (node instanceof Table && ((Table) node).getName().equalsIgnoreCase(name))
+				return (Table) node;
+		}
+		return null;
+	}
+	
+	public int getCurrentTableIndex() {
+		return currentTableIndex;
 	}
 
 	public void start() throws FileNotFoundException {
 		for (Node node : script.getStatements()) {
-			if (node instanceof Table)
+			if (node instanceof Table) {
+				currentTableIndex++;
 				genFile((Table) node);
+			}
 		}
 	}
 
 	private void genFile(Table table) throws FileNotFoundException {
 		String name = normalize(table.getName());
 		boolean indexed = false;
-		if (name.matches("[a-zA-Z]+\\[[0-9]+\\]")) {
+		if (isIndexed(name)) {
 			name = name.replaceAll("\\[[0-9]+\\]", "");
 			if (indexedTables.containsKey(name))
 				return;
@@ -57,14 +81,14 @@ public abstract class CodeGenerator {
 		}
 		String nameWithExt = getNameWithExtension(name);
 		String fileName = outDir + File.separatorChar + nameWithExt;
-		System.out.println(String.format(Messages.getString("CodeGenerator.string3"), nameWithExt)); //$NON-NLS-1$
+		log(String.format(Messages.getString("CodeGenerator.string3"), nameWithExt)); //$NON-NLS-1$
 		PrintWriter out = new PrintWriter(new OutputStreamWriter(
 				new FileOutputStream(fileName), getEncoding()), true);
 		genHeader(out, table, name, indexed);
 		genClass(out, table, name, indexed);
 		genFooter(out, table, name, indexed);
 		out.close();
-		System.out.println(String.format(Messages.getString("CodeGenerator.string4"), nameWithExt)); //$NON-NLS-1$
+		log(String.format(Messages.getString("CodeGenerator.string4"), nameWithExt)); //$NON-NLS-1$
 	}
 
 	public abstract void genHeader(PrintWriter out, Table table, String name,
@@ -86,17 +110,8 @@ public abstract class CodeGenerator {
 		return StandardCharsets.UTF_8;
 	}
 	
-	protected boolean isBooleanField(Field field) {
-		if(field.getType().getType() != DataType.ENUM)
-			return false;
-		EnumType type = (EnumType) field.getType();
-		if (type.getElements().size() == 2
-				&& ((type.getElements().get(0).equals("Y") && type
-						.getElements().get(1).equals("N")) || (type
-						.getElements().get(0).equals("N") && type
-						.getElements().get(1).equals("Y"))))
-			return true;
-		return false;
+	protected void log(String message) {
+		logListener.addMessage(message);
 	}
 	
 
@@ -126,7 +141,7 @@ public abstract class CodeGenerator {
 						.matcher(varName);
 				m.find();
 			}
-			System.out.println(String.format(Messages.getString("CodeGenerator.string13"), varName, m.groupCount())); //$NON-NLS-1$
+			log(String.format(Messages.getString("CodeGenerator.string13"), varName, m.groupCount())); //$NON-NLS-1$
 			varName = varName.replaceAll("\\[[0-9]+\\]", "");
 			String semicolon = "";
 			String newData = "";
@@ -272,25 +287,7 @@ public abstract class CodeGenerator {
 
 	public static String upperFix(String word) {
 		String upr = word.toUpperCase();
-		if (upr.equals("URL"))
-			word = upr;
-		else if (upr.equals("CPF"))
-			word = upr;
-		else if (upr.equals("CNPJ"))
-			word = upr;
-		else if (upr.equals("RG"))
-			word = upr;
-		else if (upr.equals("IE"))
-			word = upr;
-		else if (upr.equals("IM"))
-			word = upr;
-		else if (upr.equals("UF"))
-			word = upr;
-		else if (upr.equals("CEP"))
-			word = upr;
-		else if (upr.equals("GUID"))
-			word = upr;
-		else if (upr.equals("PID"))
+		if (TemplateLoader.UPR_WORDS.contains(upr))
 			word = upr;
 		return word;
 	}
@@ -409,7 +406,7 @@ public abstract class CodeGenerator {
 		return ("aeiou").indexOf(Character.toLowerCase(letter)) >= 0;
 	}
 	
-	public String getGenderChar(String name) {
+	public static String getGenderChar(String name) {
 		String nlc = name.toLowerCase();
 		if(!nlc.equals("id") && nlc.endsWith("id"))
 			nlc = nlc.substring(0, nlc.length() - 2);
@@ -518,6 +515,30 @@ public abstract class CodeGenerator {
 		return null;
 	}
 
+	protected Field getDescField(Table table) {
+		Hashtable<String, String> values = new Hashtable<>();
+		for (Field field : table.getFields()) {
+			values.clear();
+			TemplateLoader.extractComment(field.getComment(), values, "F.");
+			if(values.containsKey("F.S"))
+				return field;
+		}
+		for (Constraint constraint : table.getConstraints()) {
+			if (constraint instanceof UniqueKey) {
+				if(constraint.getFields().size() == 1) {
+					Field field = table.find(constraint.getFields().get(0).getName());
+					if(field.getType().getType() == DataType.STRING)
+						return field;
+				}
+			}
+		}
+		for (Field field : table.getFields()) {
+			if(field.getType().getType() == DataType.STRING)
+				return field;
+		}
+		return getPkField(table);
+	}
+
 	public void setClassPrefix(String classPrefix) {
 		this.classPrefix = classPrefix;
 	}
@@ -532,6 +553,19 @@ public abstract class CodeGenerator {
 
 	public void setClassSuffix(String classSuffix) {
 		this.classSuffix = classSuffix;
+	}
+	
+	@Override
+	public void addMessage(String message) {
+		System.out.println(message);
+	}
+
+	public LogListener getLogListener() {
+		return logListener;
+	}
+
+	public void setLogListener(LogListener logListener) {
+		this.logListener = logListener;
 	}
 
 }

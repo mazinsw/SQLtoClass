@@ -1,0 +1,53 @@
+format: $[command]
+example: $[table]
+output: my_table
+
+commands:
+table = database table name
+table.unix = Table name in unix format
+table.unix.plural = database table name on plural
+table.name = Beautiful name of table
+table.name.plural = Beautiful name of table on plural
+table.info = Describe the table funcionality
+table.pk = primary key field name
+table.pk.unix = primary key field name as unix name
+table.pk.get = generate a call to a get function that return primary key of table
+table.pk.set = generate a call to a set function that adjust primary key of table
+table.desc = representable field name
+table.desc.get = generate a call to a get function that return representable value
+table.gender = table gender
+table.class = class name for the table
+table.class.get = generate a call to a static get function to retrive a instance of class
+table.class.get.all = generate a call to a static get function in the selected language to retrive all rows of table
+table.class.file = file name of class
+reference = referenced table by field, have all table commands
+field = name of table field
+field.unix = name of field in unix format
+field.name = Beautiful name of table field
+field.info = Describe the field funcionality
+field.get = generate a call to a get function in the selected language for the field
+field.content = fill with each field template generated
+field.mask = mask informed on model for the field
+field.style = css style of field
+field.gender = field gender
+field.each = for each field proccess content
+	example: field.each(reference)
+	example: field.each(search)
+field.end = end each loop
+field.option = enum item value
+field.option.unix = enum item value as unix name
+field.option.each = for each enum value proccess content
+field.option.end = end each enum loop
+field.image.width = recommended image width
+field.image.height = recommended image height
+field.image.folder = image folder to upload
+field.image.default = default image url
+class = class name for the table
+class.get = generate a call to a static get function to retrive a instance of class
+class.get.all = generate a call to a static get function in the selected language to retrive all rows of table
+class.file = file name of class
+
+Tip: all command allow case formatting
+example: for table category, $[Table.name] outputs: Category
+example: for table category, $[table.name] outputs: category
+example: for table category, $[TABLE.name] outputs: CATEGORY

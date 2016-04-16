@@ -40,4 +40,12 @@ public class Foreign extends Constraint {
 	public void setDeleteAction(int deleteAction) {
 		this.deleteAction = deleteAction;
 	}
+
+	public boolean find(String name) {
+		for (OrderField orderField : getFields()) {
+			if(orderField.getName().equals(name))
+				return true;
+		}
+		return false;
+	}
 }

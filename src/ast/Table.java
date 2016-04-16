@@ -46,5 +46,16 @@ public class Table extends CommentedNode {
 		}
 		return null;
 	}
+
+	public String getReference(String name) {
+		for (Constraint constraint : constraints) {
+			if(constraint instanceof Foreign) {
+				Foreign foreign = (Foreign)constraint;
+				if(foreign.find(name))
+					return foreign.getTableName();
+			}
+		}
+		return null;
+	}
 	
 }

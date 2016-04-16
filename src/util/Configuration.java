@@ -28,6 +28,7 @@ public class Configuration {
 	private String packageNameDAO;
 	private boolean daoHerdado;
 	private boolean arrayAccess;
+	private boolean proccessTemplate;
 
 	public Configuration() {
 		load();
@@ -145,6 +146,14 @@ public class Configuration {
 		this.arrayAccess = arrayAccess;
 	}
 
+	public boolean isProccessTemplate() {
+		return proccessTemplate;
+	}
+
+	public void setProccessTemplate(boolean proccessTemplate) {
+		this.proccessTemplate = proccessTemplate;
+	}
+
 	public void load() {
 		File configFile = new File("config.properties");
 
@@ -174,6 +183,10 @@ public class Configuration {
 				arrayAccess = props.getProperty("ArrayAccess").equals(String.valueOf(true));
 			else
 				arrayAccess = false;
+			if (props.containsKey("ProccessTemplate"))
+				proccessTemplate = props.getProperty("ProccessTemplate").equals(String.valueOf(true));
+			else
+				proccessTemplate = false;
 			if (props.containsKey("generator"))
 				generator = Integer.valueOf(props.getProperty("generator"));
 			else
@@ -208,6 +221,7 @@ public class Configuration {
 			props.setProperty("generateDAO", String.valueOf(generateDAO));
 			props.setProperty("DAOHerdado", String.valueOf(daoHerdado));
 			props.setProperty("ArrayAccess", String.valueOf(arrayAccess));
+			props.setProperty("ProccessTemplate", String.valueOf(proccessTemplate));
 			props.setProperty("generator", String.valueOf(generator));
 			props.setProperty("phpPDO", String.valueOf(phpPDO));
 			FileWriter writer = new FileWriter(configFile);

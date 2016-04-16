@@ -14,8 +14,8 @@ DROP TABLE IF EXISTS `TEmpresas` ;
 CREATE TABLE IF NOT EXISTS `TEmpresas` (
   `ID` INT NOT NULL AUTO_INCREMENT,
   `Fantasia` VARCHAR(100) NOT NULL,
-  `RazaoSocial` VARCHAR(100) NULL DEFAULT NULL,
-  `Email` VARCHAR(60) NOT NULL,
+  `RazaoSocial` VARCHAR(100) NULL DEFAULT NULL COMMENT '[N:Razão social]',
+  `Email` VARCHAR(60) NOT NULL COMMENT '[N:E-mail]',
   `CNPJ` VARCHAR(20) NULL DEFAULT NULL,
   `EstadoID` INT NOT NULL,
   `CidadeID` INT NOT NULL,
@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS `TEmpresas` (
   UNIQUE INDEX `CNPJ_UNIQUE` (`CNPJ` ASC),
   UNIQUE INDEX `Email_UNIQUE` (`Email` ASC),
   UNIQUE INDEX `GUID_UNIQUE` (`GUID` ASC))
-ENGINE = InnoDB;
+ENGINE = InnoDB
+COMMENT = 'Informações da empresa[N:Empresa|Empresas]';
 
 -- -----------------------------------------------------
 -- Table `TDispositivos`
@@ -43,7 +44,8 @@ CREATE TABLE IF NOT EXISTS `TDispositivos` (
   `ID` INT NOT NULL AUTO_INCREMENT,
   `EmpresaID` INT NOT NULL,
   `DeviceID` VARCHAR(15) NOT NULL,
-  `Descricao` VARCHAR(45) NOT NULL,
+  `Type` ENUM('Computer', 'Tablet') NOT NULL COMMENT 'Tipo de dispositivo[N:Type of device][E:Personal computer|Portable tablet]',
+  `Descricao` VARCHAR(45) NOT NULL COMMENT '[N:Descrição][S]',
   `Modelo` VARCHAR(45) NOT NULL,
   `DataCadastro` DATETIME NOT NULL,
   `DataAtualizacao` DATETIME NULL DEFAULT NULL,
@@ -55,7 +57,8 @@ CREATE TABLE IF NOT EXISTS `TDispositivos` (
     REFERENCES `TEmpresas` (`ID`)
     ON DELETE RESTRICT
     ON UPDATE CASCADE)
-ENGINE = InnoDB;
+ENGINE = InnoDB
+COMMENT = '[N:Device|Devices][G:o]';
 
 
 SET SQL_MODE=@OLD_SQL_MODE;

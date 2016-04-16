@@ -409,7 +409,7 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 				out.println(spacing + "} else {");
 			}
 			String convType = "";
-			if(isBooleanField(field)) {
+			if(field.getType().isBoolean()) {
 				if(field.getType().getType() == DataType.ENUM)
 					convType = ".contains(\"Y\")";
 				else
@@ -518,7 +518,7 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 			String value = valueGet;
 			if(field.getType().getType() == DataType.DECIMAL) {
 				value = value + ".toPlainString()";
-			} else if(isBooleanField(field)) {
+			} else if(field.getType().isBoolean()) {
 				if(field.getType().getType() == DataType.ENUM)
 					value = valueGet + " ? \"Y\" : \"N\"";
 			} else if(field.getType().getType() == DataType.DATE || field.getType().getType() == DataType.DATETIME || field.getType().getType() == DataType.TIME) {

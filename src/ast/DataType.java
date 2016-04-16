@@ -29,4 +29,13 @@ public class DataType extends Node {
 	public void setType(int type) {
 		this.type = type;
 	}
+	
+	public boolean isBoolean() {
+		return getType() == BOOLEAN;
+	}
+
+	public boolean isNumeric() {
+		return getType() == INTEGER || getType() == BIGINT || getType() == TINYINT || 
+				getType() == FLOAT || getType() == DECIMAL || getType() == DOUBLE;
+	}
 }

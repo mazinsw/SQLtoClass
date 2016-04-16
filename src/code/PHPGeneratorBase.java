@@ -1,10 +1,16 @@
 package code;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Stack;
+
+import org.apache.commons.io.FileUtils;
 
 import util.Pair;
 import ast.Constraint;
@@ -13,16 +19,20 @@ import ast.EnumType;
 import ast.Field;
 import ast.Foreign;
 import ast.OrderField;
+import ast.PrimaryKey;
 import ast.ScriptNode;
 import ast.Table;
 
 public abstract class PHPGeneratorBase extends CodeGenerator {
 
 	private boolean arrayAccess;
+	private boolean proccessTemplate;
 	private static final String[] indexNames = { "$linha", "$coluna" };
+	private TemplateLoader templateLoader;
 
 	public PHPGeneratorBase(String outDir, ScriptNode script) {
 		super(outDir, script);
+		templateLoader = new TemplateLoader();
 	}
 
 	public boolean isArrayAccess() {
@@ -31,6 +41,17 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 
 	public void setArrayAccess(boolean arrayAccess) {
 		this.arrayAccess = arrayAccess;
+	}
+
+	public boolean isProccessTemplate() {
+		return proccessTemplate;
+	}
+	
+	@Override
+	public void start() throws FileNotFoundException {
+		if(isProccessTemplate())
+			templateLoader.load();
+		super.start();
 	}
 
 	private String genParams(String data, String sep) {
@@ -66,6 +87,33 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 		}
 		return indexDecl;
 	}
+	
+	private String genMultilineComment(String comment, String identation) {
+		String result = identation + "/**";
+		int offset = 0;
+		if(comment == null || comment.trim().isEmpty())
+			return null;
+		for (int i = 0; i < comment.length(); i++) {
+			switch (comment.charAt(i)) {
+			case '\r':
+			case '\n':
+				int old_i = i;
+				if(i + 1 < comment.length() && comment.charAt(i + 1) == '\n')
+					i++;
+				String line = comment.substring(offset, old_i);
+				result += "\r\n" + identation + " * " + line.trim();
+				offset = i + 1;
+				break;
+			default:
+				break;
+			}
+		}
+		if(offset < comment.length()) {
+			String line = comment.substring(offset, comment.length());
+			result += "\r\n" + identation + " * " + line.trim();
+		}
+		return result + "\r\n" + identation + " */";
+	}
 
 	@Override
 	public void genHeader(PrintWriter out, Table table, String name,
@@ -92,6 +140,12 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 		String arrayIntf = "";
 		if(isArrayAccess())
 			arrayIntf = " implements ArrayAccess";
+
+		Hashtable<String, String> fieldValues = new Hashtable<>();
+		String tableComment = TemplateLoader.extractComment(table.getComment(), fieldValues, "F.");
+		String tableMLComment = genMultilineComment(tableComment, "");
+		if(tableMLComment != null)
+			out.println(tableMLComment);
 		out.println("class " + getClassName(name) + arrayIntf + " {");
 	}
 
@@ -246,6 +300,10 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 		}
 		for (Field field : table.getFields()) {
 			String varName = normalize(field.getName(), false);
+
+			Hashtable<String, String> fieldValues = new Hashtable<>();
+			String fieldComment = TemplateLoader.extractComment(field.getComment(), fieldValues, "F.");
+			String fieldMLComment = genMultilineComment(fieldComment, "\t");
 			if (isIndexed(varName)) {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
@@ -258,6 +316,8 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 				out.println();
 				String params = genParams(data, ",");
 				// with var array
+				if(fieldMLComment != null)
+					out.println(fieldMLComment);
 				out.println("\tpublic function get" + varName + "(" + params
 						+ ") {");
 				String[] paramNames = params.split(", ");
@@ -275,6 +335,8 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 						+ ";");
 				out.println("\t}");
 				out.println();
+				if(fieldMLComment != null)
+					out.println(fieldMLComment);
 				out.println("\tpublic function set" + varName + "(" + params
 						+ ", $value) {");
 				for (int i = 0; i < values.length; i++) {
@@ -293,16 +355,22 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 			} else {
 				String unixVarName = unixTransform(varName);
 				out.println();
+				if(fieldMLComment != null)
+					out.println(fieldMLComment);
 				out.println("\tpublic function get" + varName + "() {");
 				out.println("\t\treturn $this->" + unixVarName + ";");
 				out.println("\t}");
-				if (isBooleanField(field)) {
+				if (field.getType().isBoolean()) {
 					out.println();
+					if(fieldMLComment != null)
+						out.println(fieldMLComment);
 					out.println("\tpublic function is" + varName + "() {");
 					out.println("\t\treturn $this->" + unixVarName + " == 'Y';");
 					out.println("\t}");
 				}
 				out.println();
+				if(fieldMLComment != null)
+					out.println(fieldMLComment);
 				out.println("\tpublic function set" + varName + "($"
 						+ unixVarName + ") {");
 				out.println("\t\t$this->" + unixVarName + " = $" + unixVarName
@@ -821,7 +889,7 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 			genSQLGetTodos(out, tblname, indexStr, pkName, unixName);
 			out.println("\t}");
 			out.println();
-			out.println("\tpublic static function getTod" + tblgc + "s("
+			out.println("\tpublic static function " + getAllFunctionName(name) + "("
 					+ paramIndexStr + "$inicio = null, $quantidade = null) {");
 			out.println("\t\t$query = self::initSearch(" + paramIndexStr + ");");
 			genSQLLimit(out, tblname, indexStr, unixName);
@@ -914,6 +982,8 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 	public void genFooter(PrintWriter out, Table table, String name,
 			boolean indexed) {
 		out.println("}");
+		if(isProccessTemplate())
+			runTemplate(table, name, indexed);
 	}
 
 	@Override
@@ -923,6 +993,322 @@ public abstract class PHPGeneratorBase extends CodeGenerator {
 
 	protected String getClassName(String name) {
 		return getClassPrefix() + name + getClassSuffix();
+	}
+
+	public void setProccessTemplate(boolean proccessTemplate) {
+		this.proccessTemplate = proccessTemplate;
+	}
+
+	private void runTemplate(Table table, String name, boolean indexed) {
+		Hashtable<String, String> values = new Hashtable<>();
+		TemplateLoader.extractComment(table.getComment(), values, "T.");
+		File outDir = new File(getOutputDirectory());
+		for (File file : templateLoader.getFiles()) {
+			File tempFile = templateLoader.rebase(file, outDir);
+			File destFile = new File(applyTemplate(tempFile.getAbsolutePath(), table, name, null, values, 0));
+			log("Template: " + destFile.getAbsolutePath());
+			if(file.isDirectory())
+				destFile.mkdirs();
+			else {
+				destFile.getParentFile().mkdirs();
+				try {
+					String fileContent = FileUtils.readFileToString(file, getEncoding());
+					String oldContent = "";
+					// same content, append
+					if(tempFile.equals(destFile) && destFile.exists() && getCurrentTableIndex() != 0) {
+						oldContent = FileUtils.readFileToString(destFile, getEncoding());
+					}
+					fileContent = applyTemplate(oldContent + fileContent, table, name, null, values, 0);
+					FileUtils.writeStringToFile(destFile, fileContent, getEncoding());
+				} catch (IOException e) {
+					log(e.getMessage());
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	private String applyTemplate(String source, Table table, String name, Field field, Hashtable<String, String> values, int enumIndex) {
+		String className = getClassName(name);
+		Field pkField = getPkField(table);
+		Field descField = getDescField(table);
+		String nameWithExt = getNameWithExtension(name);
+		String unixName = unixTransform(name);
+		String result = source, command = "", option = "";
+		Stack<Integer> fieldStack = new Stack<>();
+		Stack<String> filterStack = new Stack<>();
+		Stack<Integer> optionStack = new Stack<>();
+		int state = 0, startoffset, offset = 0;
+		startoffset = -1;
+		for (int i = 0; i < source.length(); i++) {
+			switch (source.charAt(i)) {
+			case '$':
+				state = 1;
+				startoffset = i;
+				break;
+			case '[':
+				if(state == 1) {
+					command = "";
+					option = "";
+					state = 2;
+				} else {
+					state = 0;
+					startoffset = -1;
+				}
+				break;
+			case '.':
+				if(state >= 2) {
+					if(state > 2)
+						option += source.charAt(i);
+					state = 3;
+				} else {
+					state = 0;
+					startoffset = -1;
+				}
+				break;
+			case ']':
+				// execute
+				if(state >= 2 && !command.isEmpty()) {
+					String replace = "";
+					if(command.equalsIgnoreCase("field")) {
+						if(option.startsWith("each")) {
+							if(i + 1 < source.length() && source.charAt(i + 1) == '\r') {
+								i++;
+								if(i + 1 < source.length() && source.charAt(i + 1) == '\n')
+									i++;
+							} else if(i + 1 < source.length() && source.charAt(i + 1) == '\n')
+								i++;
+							fieldStack.push(startoffset + offset);
+							String filter = option.replaceFirst("each\\((\\w+)\\)", "$1");
+							filterStack.push(filter);
+						} else if(option.equals("end")) {
+							if(i + 1 < source.length() && source.charAt(i + 1) == '\r') {
+								i++;
+								if(i + 1 < source.length() && source.charAt(i + 1) == '\n')
+									i++;
+							} else if(i + 1 < source.length() && source.charAt(i + 1) == '\n')
+								i++;
+							if(!fieldStack.empty()) {
+								int oldstartoffset = startoffset;
+								startoffset = fieldStack.pop() - offset;
+								String filter = filterStack.pop();
+								String eachContent = result.substring(startoffset + offset, oldstartoffset + offset);
+								for (Field afield : table.getFields()) {
+									Hashtable<String, String> fieldValues = new Hashtable<>();
+									fieldValues.putAll(values);
+									TemplateLoader.extractComment(afield.getComment(), fieldValues, "F.");
+									if(afield == pkField || fieldValues.containsKey("F.D"))
+										continue;
+									if(filter.equals("reference") && table.getReference(afield.getName()) == null)
+										continue;
+									if(filter.equals("search") && !values.containsKey("F.S"))
+										continue;
+									replace += applyTemplate(eachContent, table, name, afield, fieldValues, 0);
+								}
+							}
+						} else if(option.equals("option.each")) {
+							if(i + 1 < source.length() && source.charAt(i + 1) == '\r') {
+								i++;
+								if(i + 1 < source.length() && source.charAt(i + 1) == '\n')
+									i++;
+							} else if(i + 1 < source.length() && source.charAt(i + 1) == '\n')
+								i++;
+							optionStack.push(startoffset + offset);
+						} else if(option.equals("option.end")) {
+							if(i + 1 < source.length() && source.charAt(i + 1) == '\r') {
+								i++;
+								if(i + 1 < source.length() && source.charAt(i + 1) == '\n')
+									i++;
+							} else if(i + 1 < source.length() && source.charAt(i + 1) == '\n')
+								i++;
+							if(!optionStack.empty()) {
+								int oldstartoffset = startoffset;
+								startoffset = optionStack.pop() - offset;
+								String eachContent = result.substring(startoffset + offset, oldstartoffset + offset);
+								if(field.getType() instanceof EnumType) {
+									EnumType enumType = (EnumType)field.getType();
+									for (int index = 0; index < enumType.getElements().size(); index++) {
+										replace += applyTemplate(eachContent, table, name, field, values, index);
+									}
+								}
+							}
+						} else if(!fieldStack.empty() || !optionStack.empty()) {
+							replace = source.substring(startoffset, i + 1);
+						} else if(field == null) {
+							// ignore, incorrect usage
+						} else if(option.equals("content")) {
+							try {
+								File fileField = TemplateLoader.getFileFromType(table, field, values);
+								String fileContent = FileUtils.readFileToString(fileField, getEncoding());
+								replace = applyTemplate(fileContent, table, name, field, values, 0);
+							} catch (Exception e) {
+								log(e.getMessage());
+								e.printStackTrace();
+							}
+						} else if(option.equals("option") || option.equals("option.unix") || option.equals("option.name")) {
+							if(field.getType() instanceof EnumType) {
+								EnumType enumType = (EnumType)field.getType();
+								List<String> elements = enumType.getElements();
+								if(enumIndex >= 0 && enumIndex < elements.size()) {
+									if(option.equals("option.name"))
+										replace = TemplateLoader.recase(command, TemplateLoader.getValueByIndex(values.get("F.E"), enumIndex, elements.get(enumIndex)), true);
+									else if(option.equals("option.unix"))
+										replace = unixTransform(elements.get(enumIndex));
+									else
+										replace = elements.get(enumIndex);
+								}
+							}
+						} else if(option.equals("mask")) {
+							replace = TemplateLoader.getValueByIndex(values.get("F.M"), 0, "");
+						} else if(option.equals("style")) {
+							if(values.containsKey("F.M"))
+								replace = TemplateLoader.getValueByIndex(values.get("F.L"), 0, "masked");
+							else if(field.getType().isNumeric())
+								replace = TemplateLoader.getValueByIndex(values.get("F.L"), 0, "numeric");
+							else
+								replace = TemplateLoader.getValueByIndex(values.get("F.L"), 0, "");
+						} else if(option.equals("image.width") || option.equals("image.height")) {
+							String value = TemplateLoader.getValueByIndex(values.get("F.I"), 0, "64x64");
+							if(option.equals("image.width") || value.split("x").length < 2)
+								value = value.split("x")[0];
+							else
+								value = value.split("x")[1];
+							replace = TemplateLoader.recase(command, value);
+						} else if(option.equals("image.folder")) {
+							replace = TemplateLoader.recase(command, TemplateLoader.getValueByIndex(values.get("F.I"), 1, unixName));
+						} else if(option.equals("image.default")) {
+							replace = TemplateLoader.recase(command, TemplateLoader.getValueByIndex(values.get("F.I"), 2, ""));
+						} else if(option.equals("gender")) {
+								replace = TemplateLoader.recase(command, TemplateLoader.getValueByIndex(values.get("F.G"), 0, getGenderChar(despluralize(field.getName()).toLowerCase()))); 
+						} else {
+							String varName = normalize(field.getName(), false);
+							if(option.equals("unix"))
+								replace = TemplateLoader.getValueByIndex(values.get("F.U"), 0, unixTransform(varName));
+							else if(option.equals("name"))
+								replace = TemplateLoader.recase(command, TemplateLoader.getValueByIndex(values.get("F.N"), 0, field.getName()), true);
+							else if(option.equals("info")) {
+								replace = TemplateLoader.recase(command, TemplateLoader.getValueByIndex(values.get("F.F"), 0, 
+										TemplateLoader.getValueByIndex(values.get("F.N"), 0, field.getName())));
+							} else if(option.equals("get")) {
+								String params = "";
+								if (isIndexed(varName)) {
+									List<Integer> indexes = extractIndex(varName);
+									String sep = "";
+									varName = varName.replaceAll("\\[[0-9]+\\]", "");
+									for (Integer integer : indexes) {
+										params += sep + integer;
+										sep = ", ";
+									}
+								}
+								replace = "get" + varName + "(" + params + ")";
+							} else
+								replace = TemplateLoader.recase(command, field.getName());
+						}
+					} else if(!fieldStack.empty() || !optionStack.empty()) {
+						replace = source.substring(startoffset, i + 1);
+					} else if(command.equalsIgnoreCase("table")) {
+						if(option.startsWith("class")) {
+							replace = applyTemplate("$[" + option + "]", table, name, field, values, enumIndex);
+						} else if(option.equals("gender"))
+							replace = TemplateLoader.recase(command, TemplateLoader.getValueByIndex(values.get("T.G"), 0, getGenderChar(despluralize(name).toLowerCase()))); 
+						else if(option.equals("name"))
+							replace = TemplateLoader.recase(command, TemplateLoader.getValueByIndex(values.get("T.N"), 0, despluralize(name)), true); 
+						else if(option.equals("name.plural"))
+							replace = TemplateLoader.recase(command, TemplateLoader.getValueByIndex(values.get("T.N"), 1, despluralize(name) + "s"), true);
+						else if(option.equals("info"))
+							replace = TemplateLoader.recase(command, TemplateLoader.getValueByIndex(values.get("T.F"), 0, 
+									TemplateLoader.getValueByIndex(values.get("T.N"), 0, despluralize(name)))); 
+						else if(option.equals("unix"))
+							replace = TemplateLoader.getValueByIndex(values.get("F.U"), 0, unixName); 
+						else if(option.equals("unix.plural"))
+							replace = TemplateLoader.getValueByIndex(values.get("F.U"), 1, unixTransform(normalize(TemplateLoader.getValueByIndex(values.get("T.N"), 1, name + "s"), false)));
+						else if(option.equals("pk"))
+							replace = TemplateLoader.recase(command, (pkField == null? "ID": pkField.getName()));
+						else if(option.equals("pk.unix"))
+							replace = unixTransform(pkField == null? "ID": pkField.getName());
+						else if(option.equals("pk.get"))
+							replace = "get" + getPKFieldFunctionSuffix(pkField);
+						else if(option.equals("pk.set"))
+							replace = "set" + getPKFieldFunctionSuffix(pkField);
+						else if(option.equals("desc"))
+							replace = TemplateLoader.recase(command, (descField == null? (pkField == null? "ID": pkField.getName()): descField.getName()));
+						else if(option.equals("desc.get"))
+							replace = "get" + getDescFieldFunctionSuffix(descField, pkField);
+						else
+							replace = table.getName();
+					} else if(command.equalsIgnoreCase("reference")) {
+						if(field != null) {
+							Table refTable = findTable(table.getReference(field.getName()));
+							if(refTable != null) {
+								Hashtable<String, String> refValues = new Hashtable<>();
+								TemplateLoader.extractComment(refTable.getComment(), refValues, "T.");
+								String refName = normalize(refTable.getName());
+								replace = applyTemplate("$[" + TemplateLoader.recase(command, "table") + (option.isEmpty()?"":".") + option + "]", refTable, refName, null, refValues, 0);
+							}
+						}
+					} else if(command.equals("class")) {
+						if(option.equals("file"))
+							replace = nameWithExt;
+						else if(option.equals("get"))
+							replace = getPKFunctionName(table);
+						else if(option.equals("get.all"))
+							replace = getAllFunctionName(name);
+						else
+							replace = className;
+					}
+					int oldoffset = offset;
+					oldoffset -= result.length();
+					result = result.substring(0, startoffset + offset) + replace + result.substring(i + 1 + offset);
+					offset = oldoffset + result.length();
+				}
+				state = 0;
+				startoffset = -1;
+				break;
+			default:
+				if(state < 2) {
+					state = 0;
+					startoffset = -1;
+				} else if(state == 2)
+					command += source.charAt(i);
+				else if(state == 3)
+					option += source.charAt(i);
+				break;
+			}
+		}
+		return result;
+	}
+
+	private static String getAllFunctionName(String name) {
+		String tblOneName = despluralize(name).toLowerCase();
+		String tblgc = getGenderChar(tblOneName);
+		return "getTod" + tblgc + "s";
+	}
+	
+	private String getPKFunctionName(Table table) {
+		PrimaryKey constraint = getPrimaryKey(table);
+		if(constraint == null)
+			return "getPeloID";
+		String gch = getGenderChar(normalize(constraint.getFields().get(0)
+				.getName(), false));
+		String catFieldName = "";
+		for (OrderField ofield : constraint.getFields()) {
+			String fieldName = ofield.getName();
+			String norField = normalize(fieldName, false).replace("][", "_").replace("[", "").replace("]", "");
+			catFieldName += norField;
+		}
+		return "getPel" + gch + catFieldName;
+	}
+
+	private static String getPKFieldFunctionSuffix(Field pkField) {
+		if(pkField == null)
+			return "ID";
+		return normalize(pkField.getName(), false);
+	}
+
+	private static String getDescFieldFunctionSuffix(Field descField, Field pkField) {
+		if(descField == null)
+			return getPKFieldFunctionSuffix(pkField);
+		return normalize(descField.getName(), false);
 	}
 
 }

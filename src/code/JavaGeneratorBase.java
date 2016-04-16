@@ -156,7 +156,7 @@ public abstract class JavaGeneratorBase extends CodeGenerator {
 		case DataType.CHAR:
 			return true;
 		case DataType.ENUM:
-			if (isBooleanField(field)) {
+			if (field.getType().isBoolean()) {
 				return false;
 			}
 			return true;
@@ -169,7 +169,7 @@ public abstract class JavaGeneratorBase extends CodeGenerator {
 	}
 
 	protected String getMethodPreffix(Field field) {
-		if(isBooleanField(field))
+		if(field.getType().isBoolean())
 			return "is";
 		return "get";
 	}
@@ -210,7 +210,7 @@ public abstract class JavaGeneratorBase extends CodeGenerator {
 		case DataType.BLOB:
 			return "byte[]";
 		case DataType.ENUM:
-			if (isBooleanField(field)) {
+			if (field.getType().isBoolean()) {
 				if(!field.isNotNull() || alwaysClass)
 					return "Boolean";
 				return "boolean";

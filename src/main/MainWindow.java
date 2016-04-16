@@ -28,6 +28,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import util.Configuration;
+import util.LogListener;
 import ast.ASTBuilder;
 import code.CodeGenerator;
 import code.DelphiGenerator;
@@ -41,7 +42,7 @@ import code.PHPGeneratorFluentPDO;
 import javax.swing.SwingConstants;
 import util.Messages;
 
-public class MainWindow extends JFrame {
+public class MainWindow extends JFrame implements LogListener {
 
 	/**
 	 * 
@@ -70,6 +71,7 @@ public class MainWindow extends JFrame {
 	private JRadioButton rdbtnJava;
 	private JTextField textFieldPacote;
 	private JTextField textFieldPacoteDAO;
+	private JCheckBox chckbxProcessarTemplates;
 	
 	/**
 	 * Launch the application.
@@ -350,6 +352,11 @@ public class MainWindow extends JFrame {
 		chckbxAcessarComoArray.setSelected(false);
 		chckbxAcessarComoArray.setBounds(10, 232, 97, 23);
 		contentPane.add(chckbxAcessarComoArray);
+		
+		chckbxProcessarTemplates = new JCheckBox(Messages.getString("MainWindow.chckbxProcessarTemplates.text")); //$NON-NLS-1$
+		chckbxProcessarTemplates.setSelected(false);
+		chckbxProcessarTemplates.setBounds(10, 256, 149, 23);
+		contentPane.add(chckbxProcessarTemplates);
 		initForm();
 	}
 
@@ -378,6 +385,7 @@ public class MainWindow extends JFrame {
 		chckbxUsarFluentPDO.setSelected(configuration.getPHPPDO() == Configuration.PHP_FLUENT_PDO);
 		chckbxDAOHerdado.setSelected(configuration.isDAOHerdado());
 		chckbxAcessarComoArray.setSelected(configuration.isArrayAccess());
+		chckbxProcessarTemplates.setSelected(configuration.isProccessTemplate());
 	}
 
 	private void optionsChanged() {
@@ -428,6 +436,7 @@ public class MainWindow extends JFrame {
 			else
 				gen = new PHPGeneratorDB(textFieldPastaSaida.getText(), builder.getScript());
 			((PHPGeneratorBase)gen).setArrayAccess(chckbxAcessarComoArray.isSelected());
+			((PHPGeneratorBase)gen).setProccessTemplate(chckbxProcessarTemplates.isSelected());
 		} else {
 			gen = new JavaGenerator(textFieldPastaSaida.getText(), builder.getScript());
 			JavaGenerator javaGen = (JavaGenerator)gen;
@@ -435,6 +444,7 @@ public class MainWindow extends JFrame {
 		}
 		gen.setClassPrefix(textFieldPrefixo.getText());
 		gen.setClassSuffix(textFieldSufixo.getText());
+		gen.setLogListener(this);
 		try {
 			gen.start();
 			if(chckbxGerarDao.isSelected() && !rdbtnPhp.isSelected()) {
@@ -474,6 +484,7 @@ public class MainWindow extends JFrame {
 				configuration.setPHPPDO(Configuration.PHP_DB_PDO);
 			configuration.setDAOHerdado(chckbxDAOHerdado.isSelected());
 			configuration.setArrayAccess(chckbxAcessarComoArray.isSelected());
+			configuration.setProccessTemplate(chckbxProcessarTemplates.isSelected());
 			configuration.setPathDAO(textFieldPastaSaidaDAO.getText());
 			configuration.setPrefixDAO(textFieldPrefixoDAO.getText());
 			configuration.setSuffixDAO(textFieldSufixoDAO.getText());
@@ -522,5 +533,10 @@ public class MainWindow extends JFrame {
 	private void addLog(String msg) {
 		DefaultListModel<String> model = (DefaultListModel<String>) listLog.getModel();
 		model.addElement(msg);
+	}
+
+	@Override
+	public void addMessage(String message) {
+		addLog(message);
 	}
 }

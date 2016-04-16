@@ -1,0 +1,5 @@
+<h2>$[Table.name]</h2>
+<form action="/manage/$[table.unix]/editar.php?$[table.pk]=<?php echo $$[table.unix]->$[table.pk.get]();?>">
+<?php include('form_$[table.unix].html'); ?>
+<button type="submit">Salvar</button>
+</form>

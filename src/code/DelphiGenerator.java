@@ -53,9 +53,11 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 		}
 		if (enumFields.size() > 0)
 			out.println();
-		if (table.getComment() != null && table.getComment().length() > 0) {
+		Hashtable<String, String> values  = new Hashtable<>();
+		String tableComment = TemplateLoader.extractComment(table.getComment(), values, "T.");
+		if (tableComment != null && !tableComment.isEmpty()) {
 			out.println("  ///	<summary>");
-			out.println("  ///	  " + table.getComment());
+			out.println("  ///	  " + tableComment);
 			out.println("  ///	</summary>");
 		}
 		out.println("  T" + getClassName(name) + " = class");
@@ -122,17 +124,20 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 			String varName = normalize(field.getName(), false);
 			if (indexedFields.containsKey(varName))
 				continue;
+
+			Hashtable<String, String> fieldValues  = new Hashtable<>();
+			String fieldComment = TemplateLoader.extractComment(field.getComment(), fieldValues, "F.");
 			if (isIndexed(varName)) {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
 				String data = indexedFields.get(varName);
 				usedFields.put(varName, data);
-				if (field.getComment() != null
-						&& field.getComment().length() > 0) {
+				if (fieldComment != null
+						&& !fieldComment.isEmpty()) {
 					out.println();
 					out.println("    ///	<summary>");
-					out.println("    ///	  " + field.getComment());
+					out.println("    ///	  " + fieldComment);
 					out.println("    ///	</summary>");
 				}
 				out.println("    property " + varName + "["
@@ -140,22 +145,22 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 						+ convertType(name, field) + " read Get" + varName
 						+ " write Set" + varName + ";");
 			} else if (field.getType().getType() == DataType.BLOB) {
-				if (field.getComment() != null
-						&& field.getComment().length() > 0) {
+				if (fieldComment != null
+						&& !fieldComment.isEmpty()) {
 					out.println();
 					out.println("    ///	<summary>");
-					out.println("    ///	  " + field.getComment());
+					out.println("    ///	  " + fieldComment);
 					out.println("    ///	</summary>");
 				}
 				out.println("    property " + varName + ": "
 						+ convertType(name, field) + " read F" + varName
 						+ " write Set" + varName + ";");
 			} else {
-				if (field.getComment() != null
-						&& field.getComment().length() > 0) {
+				if (fieldComment != null
+						&& !fieldComment.isEmpty()) {
 					out.println();
 					out.println("    ///	<summary>");
-					out.println("    ///	  " + field.getComment());
+					out.println("    ///	  " + fieldComment);
 					out.println("    ///	</summary>");
 				}
 				out.println("    property " + varName + ": "

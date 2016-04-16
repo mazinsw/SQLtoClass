@@ -60,7 +60,7 @@ public class JavaGenerator extends JavaGeneratorBase {
 		for (Field field : table.getFields()) {
 			String varName = normalize(field.getName(), false);
 			if (isIndexed(varName)
-					|| isBooleanField(field)
+					|| field.getType().isBoolean()
 					|| field.getType().getType() != DataType.ENUM) {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				continue;
@@ -199,7 +199,7 @@ public class JavaGenerator extends JavaGeneratorBase {
 				extraSpc = "\t";
 			}
 			String convType = "";
-			if(isBooleanField(field)) {
+			if(field.getType().isBoolean()) {
 				if(field.getType().getType() == DataType.ENUM)
 					convType = ".contains(\"Y\")";
 				else
