@@ -38,4 +38,27 @@ public class DataType extends Node {
 		return getType() == INTEGER || getType() == BIGINT || getType() == TINYINT || 
 				getType() == FLOAT || getType() == DECIMAL || getType() == DOUBLE;
 	}
+
+	public boolean isString() {
+		return getType() == STRING || getType() == TEXT || getType() == CHAR;
+	}
+
+	public int getSize() {
+		switch (getType()) {
+		case DOUBLE:
+		case BIGINT:
+		case DATETIME:
+			return 8;
+		case INTEGER:
+		case FLOAT:
+			return 4;
+		case TIME:
+		case DATE:
+			return 3;
+		case TINYINT:
+		case BOOLEAN:
+			return 1;
+		}
+		return 0;
+	}
 }

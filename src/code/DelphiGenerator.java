@@ -57,7 +57,7 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 		String tableComment = TemplateLoader.extractComment(table.getComment(), values, "T.");
 		if (tableComment != null && !tableComment.isEmpty()) {
 			out.println("  ///	<summary>");
-			out.println("  ///	  " + tableComment);
+			out.println(TemplateLoader.wrap(tableComment, 72, "  ///	  "));
 			out.println("  ///	</summary>");
 		}
 		out.println("  T" + getClassName(name) + " = class");
@@ -137,7 +137,7 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 						&& !fieldComment.isEmpty()) {
 					out.println();
 					out.println("    ///	<summary>");
-					out.println("    ///	  " + fieldComment);
+					out.println(TemplateLoader.wrap(fieldComment, 72, "    ///	  "));
 					out.println("    ///	</summary>");
 				}
 				out.println("    property " + varName + "["
@@ -149,7 +149,7 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 						&& !fieldComment.isEmpty()) {
 					out.println();
 					out.println("    ///	<summary>");
-					out.println("    ///	  " + fieldComment);
+					out.println(TemplateLoader.wrap(fieldComment, 72, "    ///	  "));
 					out.println("    ///	</summary>");
 				}
 				out.println("    property " + varName + ": "
@@ -160,7 +160,7 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 						&& !fieldComment.isEmpty()) {
 					out.println();
 					out.println("    ///	<summary>");
-					out.println("    ///	  " + fieldComment);
+					out.println(TemplateLoader.wrap(fieldComment, 72, "    ///	  "));
 					out.println("    ///	</summary>");
 				}
 				out.println("    property " + varName + ": "

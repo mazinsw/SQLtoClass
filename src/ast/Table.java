@@ -28,7 +28,10 @@ public class Table extends CommentedNode {
 	}
 
 	public void addConstraint(Constraint constraint) {
-		constraints.add(constraint);
+		if(constraint instanceof PrimaryKey)
+			constraints.add(0, constraint);
+		else
+			constraints.add(constraint);
 	}
 
 	public List<Index> getIndexes() {
@@ -53,6 +56,22 @@ public class Table extends CommentedNode {
 				Foreign foreign = (Foreign)constraint;
 				if(foreign.find(name))
 					return foreign.getTableName();
+			}
+		}
+		return null;
+	}
+
+	public boolean isUnique(Field field) {
+		return getUniqueIndex(field) != null;
+	}
+
+	public Index getUniqueIndex(Field field) {
+		for (Index index : getIndexes()) {
+			if(!(index instanceof UniqueKey))
+				continue;
+			for (OrderField oField : index.getFields()) {
+				if(oField.getName().equalsIgnoreCase(field.getName()))
+					return index;
 			}
 		}
 		return null;

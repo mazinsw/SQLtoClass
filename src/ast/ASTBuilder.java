@@ -1,7 +1,9 @@
 package ast;
 
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -80,9 +82,9 @@ public class ASTBuilder extends SQLBaseListener {
 
 	public boolean build(String fileName) {
 		ANTLRInputStream input;
-		FileReader fr;
+		InputStreamReader fr;
 		try {
-			fr = new FileReader(fileName);
+			fr = new InputStreamReader(new FileInputStream(fileName), StandardCharsets.UTF_8);
 			input = new ANTLRInputStream(fr);
 		} catch (IOException e) {
 			errors.add("can't load SQL source file");

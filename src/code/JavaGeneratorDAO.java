@@ -1,6 +1,8 @@
 package code;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -8,9 +10,11 @@ import util.Pair;
 import ast.Constraint;
 import ast.DataType;
 import ast.Field;
+import ast.Foreign;
 import ast.OrderField;
 import ast.ScriptNode;
 import ast.Table;
+import ast.UniqueKey;
 
 public class JavaGeneratorDAO extends JavaGeneratorBase {
 	private String classBasePrefix;
@@ -33,11 +37,8 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 		int impCount = super.genImport(out, table, name, types);
 		if (impCount == 0)
 			out.println();
-		List<Constraint> list = getUniqueKeyList(table);
-		if(list.size() > 0 && list.get(0).getFields().size() > 1) {
-			out.println("import java.util.List;");
-			out.println("import java.util.ArrayList;");
-		}
+		out.println("import java.util.List;");
+		out.println("import java.util.ArrayList;");
 		if (types.containsKey("Date")) {
 			out.println("import java.util.Locale;");
 			out.println("import java.text.ParseException;");
@@ -68,6 +69,9 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 		String baseVarName = getCamelCaseName(baseType);
 		// constructor
 		out.println();
+		out.println("\t/**");
+		out.println("\t * Auto generated class, do not change, all changes will be discarted!");
+		out.println("\t */");
 		out.println("public class " + getClassName(name)
 				+ " extends DAOBase {");
 
@@ -84,9 +88,15 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 		out.println("\t\tsuper(dbHelper);");
 		out.println("\t}");
 		// find and list objects
-		List<Constraint> list = getUniqueKeyList(table);
+		List<UniqueKey> list = getUniqueKeys(table);
 		Field pkField = getPkField(table);
-		for (Constraint constraint : list) {
+		String pkSelect = "*";
+		if(pkField != null)
+			pkSelect = pkField.getName();
+		Constraint uniqueKey = getPrimaryKey(table);
+		if(uniqueKey == null && list.size() > 0)
+			uniqueKey = list.get(0);
+		if (uniqueKey != null) {
 			// generate get primary key selection
 			out.println();
 			out.println("\t/**");
@@ -96,16 +106,15 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 			out.println("\t */");
 			out.println("\tpublic static String getUniqueWhere() {");
 			String whereSQL = "", whereSep = "";
-			for (int i = 0; i < constraint.getFields().size(); i++) {
-				OrderField oField = constraint.getFields().get(i);
+			for (int i = 0; i < uniqueKey.getFields().size(); i++) {
+				OrderField oField = uniqueKey.getFields().get(i);
 				whereSQL += whereSep + oField.getName() + " = ?";
 				whereSep = " AND ";
 			}
 			out.println("\t\treturn \"" + whereSQL + "\";");
 			out.println("\t}");
-			break;
 		}
-		for (Constraint constraint : list) {
+		if (uniqueKey != null) {
 			// generate update method
 			out.println();
 			out.println("\t/**");
@@ -116,9 +125,9 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 			out.println("\t * @return returns a string array with primary key values");
 			out.println("\t */");
 			out.println("\tpublic static String[] getUniqueArgs(" + baseType + " " + baseVarName + ") {");
-			out.println("\t\tString[] args = new String[" + constraint.getFields().size() + "];");
-			for (int i = 0; i < constraint.getFields().size(); i++) {
-				OrderField oField = constraint.getFields().get(i);
+			out.println("\t\tString[] args = new String[" + uniqueKey.getFields().size() + "];");
+			for (int i = 0; i < uniqueKey.getFields().size(); i++) {
+				OrderField oField = uniqueKey.getFields().get(i);
 				Field field = table.find(oField.getName());
 				String varName = normalize(oField.getName(), false);
 				String varType = convertType(name, field, true);
@@ -129,7 +138,6 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 			}
 			out.println("\t\treturn args;");
 			out.println("\t}");
-			break;
 		}
 		// generate order by method
 		out.println();
@@ -139,22 +147,32 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 		out.println("\t * @return returns string that order elemets returned from getAll methods");
 		out.println("\t */");
 		out.println("\tpublic String getOrderBy() {");
-		out.println("\t\treturn null; // don't order");
+		out.println("\t\treturn null; // default order");
 		out.println("\t}");
+		
+		List<Foreign> fkList = getForeignKeys(table);
+		List<Constraint> cstList = new ArrayList<>();
+		cstList.addAll(fkList);
+		if(uniqueKey != null)
+			cstList.add(0, uniqueKey);
+		HashSet<String> mtdSet = new HashSet<>();
 		// generate getAll and load methods
-		for (Constraint constraint : list) {
-			String paramList = "", sep = "", whereSQL = "", whereSep = "", cmmStr = "", cmmCont = "", cmmSep = "";
+		for (Constraint constraint : cstList) {
+			String paramList = "", sep = "", whereSQL = "", whereSep = "", cmmStr = "", cmmCont = "", cmmSep = "", mtdSuffix = "";
 			String listType = "List<" + baseType  + ">";
 			String listName =  "list";
 			for (int i = 0; i < constraint.getFields().size(); i++) {
 				OrderField oField = constraint.getFields().get(i);
 				Field field = table.find(oField.getName());
 				String varName = normalize(oField.getName(), false);
+				varName = varName.replaceAll("\\[[0-9]+\\]", "");
+				mtdSuffix += Character.toUpperCase(varName.charAt(0)) + varName.substring(1);
 				String fieldVarName = getCamelCaseName(varName);
 				String returnType = listType;
-				String instType = "ArrayList<" + baseType  + ">";
+				String instType = "ArrayList<>";
 				String returnName = listName;
-				if(i == constraint.getFields().size() - 1) {
+				boolean loadMethd = i == constraint.getFields().size() - 1 && (constraint instanceof UniqueKey);
+				if(loadMethd) {
 					returnType = baseType;
 					instType = baseType;
 					returnName = baseVarName;
@@ -169,13 +187,16 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 					cmmStr = cmmCont + " and " + fieldVarName;
 				cmmCont += cmmSep + fieldVarName;
 				cmmSep = ", ";
-				String methodName = "getAll";
-				if(i == constraint.getFields().size() - 1) {
+				String methodName = "getAllFrom" + mtdSuffix;
+				if(loadMethd) {
 					methodName = "load";
 				}
+				if(mtdSet.contains(methodName))
+					continue;
+				mtdSet.add(methodName);
 				out.println();
 				out.println("\t/**");
-				if(i == constraint.getFields().size() - 1)
+				if(loadMethd)
 					out.println("\t * Get a " + baseType + " from database for " + cmmStr);
 				else
 					out.println("\t * Get all " + baseVarName + " from database for " + cmmStr);
@@ -187,7 +208,7 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 					out.println("\t * @param " + cfieldVarName + " a identifier for " + cfieldVarName);
 				}
 				out.println("\t *");
-				if(i == constraint.getFields().size() - 1)
+				if(loadMethd)
 					out.println("\t * @return returns a " + baseType + " from database for " + cmmStr);
 				else
 					out.println("\t * @return returns a list of " + baseType + " from database for " + cmmStr);
@@ -195,7 +216,7 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 				out.println("\tpublic " + returnType + " " + methodName + "(" + paramList + ") {");
 				out.println("\t\t" + returnType + " " + returnName + " = new "  + instType + "();");
 				out.println("\t\tSQLiteDatabase db = getHelper().getReadableDatabase();");
-				if(i == constraint.getFields().size() - 1)
+				if(loadMethd)
 					out.println("\t\tString where = getUniqueWhere();");
 				else
 					out.println("\t\tString where = \"" + whereSQL + "\";");
@@ -212,7 +233,7 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 						out.println("\t\targs[" + j + "] = " + convertType(name, cfield, true) + ".toString(" + cfieldVarName + ");");
 				}
 				out.println("\t\tCursor cursor = db.query(TABLE_NAME, null, where, args, null, null, getOrderBy());");
-				if(i == constraint.getFields().size() - 1) {
+				if(loadMethd) {
 					out.println("\t\tif (cursor.moveToNext()) {");
 					out.println("\t\t\tfill(cursor, " + baseVarName  + ");");
 					out.println("\t\t} else {");
@@ -232,13 +253,52 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 				out.println("\t}");
 			}
 		}
+		out.println();
+		out.println("\t/**");
+		out.println("\t * Get all " + baseVarName + " from database");
+		out.println("\t *");
+		out.println("\t * @return returns a list of all " + baseType + " from database");
+		out.println("\t */");
+		out.println("\tpublic List<" + baseType  + "> getAll() {");
+		out.println("\t\tList<" + baseType  + "> list = new ArrayList<>();");
+		out.println("\t\tSQLiteDatabase db = getHelper().getReadableDatabase();");
+		out.println("\t\tCursor cursor = db.query(TABLE_NAME, null, null, null, null, null, getOrderBy());");
+		out.println("\t\twhile (cursor.moveToNext()) {");
+		out.println("\t\t\t" + baseType + " " + baseVarName + " = new "  + baseType + "();");
+		out.println("\t\t\tfill(cursor, " + baseVarName  + ");");
+		out.println("\t\t\tlist.add(" + baseVarName + ");");
+		out.println("\t\t}");
+		out.println("\t\tcursor.close();");
+		out.println("\t\tdb.close();");
+		out.println("\t\treturn list;");
+		out.println("\t}");
 		// generate getCount
-		for (Constraint constraint : list) {
-			String paramList = "", sep = "", whereSQL = "", whereSep = "", cmmStr = "", cmmSep = "";
-			for (int i = 0; i < constraint.getFields().size() - 1; i++) {
+		mtdSet.clear();
+		out.println();
+		out.println("\t/**");
+		out.println("\t * Get count of rows from " + baseVarName + " table");
+		out.println("\t *");
+		out.println("\t * @return return count of rows from " + baseType);
+		out.println("\t */");
+		out.println("\tpublic int getCount() {");
+		out.println("\t\tSQLiteDatabase db = getHelper().getReadableDatabase();");
+		out.println("\t\tCursor cursor = db.query(TABLE_NAME, new String[] {\"COUNT(" + pkSelect + ")\"}, null, null, null, null, null);");
+		out.println("\t\tcursor.moveToFirst();");
+		out.println("\t\tint count = cursor.getInt(0);");
+		out.println("\t\tcursor.close();");
+		out.println("\t\tdb.close();");
+		out.println("\t\treturn count;");
+		out.println("\t}");
+		for (Constraint constraint : cstList) {
+			String paramList = "", sep = "", whereSQL = "", whereSep = "", cmmStr = "", cmmSep = "", mtdSuffix = "";
+			if(constraint instanceof UniqueKey)
+				continue;
+			for (int i = 0; i < constraint.getFields().size(); i++) {
 				OrderField oField = constraint.getFields().get(i);
 				Field field = table.find(oField.getName());
 				String varName = normalize(oField.getName(), false);
+				varName = varName.replaceAll("\\[[0-9]+\\]", "");
+				mtdSuffix += Character.toUpperCase(varName.charAt(0)) + varName.substring(1);
 				String fieldVarName = getCamelCaseName(varName);
 				paramList += sep + convertType(name, field) + " " + fieldVarName;
 				sep = ", ";
@@ -249,6 +309,10 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 					cmmSep = " and ";
 				else
 					cmmSep = ", ";
+				String methodName = "getCountFrom" + mtdSuffix;
+				if(mtdSet.contains(methodName))
+					continue;
+				mtdSet.add(methodName);
 				out.println();
 				out.println("\t/**");
 				out.println("\t * Get count of " + baseVarName + " from " + cmmStr);
@@ -262,7 +326,7 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 				out.println("\t *");
 				out.println("\t * @return returns a count of " + baseType + " from " + cmmStr);
 				out.println("\t */");
-				out.println("\tpublic int getCount(" + paramList + ") {");
+				out.println("\tpublic int " + methodName + "(" + paramList + ") {");
 				out.println("\t\tSQLiteDatabase db = getHelper().getReadableDatabase();");
 				out.println("\t\tString where = \"" + whereSQL + "\";");
 				out.println("\t\tString[] args = new String[" + (i + 1) + "];");
@@ -277,7 +341,7 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 					else
 						out.println("\t\targs[" + j + "] = " + convertType(name, cfield, true) + ".toString(" + cfieldVarName + ");");
 				}
-				out.println("\t\tCursor cursor = db.query(TABLE_NAME, new String[] {\"COUNT(*)\"}, where, args, null, null, null);");
+				out.println("\t\tCursor cursor = db.query(TABLE_NAME, new String[] {\"COUNT(" + pkSelect + ")\"}, where, args, null, null, null);");
 				out.println("\t\tcursor.moveToFirst();");
 				out.println("\t\tint count = cursor.getInt(0);");
 				out.println("\t\tcursor.close();");

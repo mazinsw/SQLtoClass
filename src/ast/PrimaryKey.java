@@ -1,5 +1,5 @@
 package ast;
 
-public class PrimaryKey extends Constraint {
+public class PrimaryKey extends UniqueKey {
 
 }

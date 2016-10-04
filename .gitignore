@@ -26,7 +26,8 @@ $RECYCLE.BIN/
 .LSOverride
 
 # Icon must ends with two \r.
-Icon
+Icon
+
 
 # Thumbnails
 ._*
@@ -36,7 +37,7 @@ Icon
 .Trashes
 
 *.class
-
+*.sublime-workspace
 bin/parser/*.tokens
 .settings
 outdir/*

@@ -4,9 +4,9 @@ require_once(dirname(dirname(__FILE__)) . '/$[class.file]');
 if ($_POST) {
 	$$[table.unix] = new $[class]($_POST);
 	try {
-		$$[table.unix]->$[table.pk.set](null);
+		$$[table.unix]->$[table.pk.set]null);
 		$$[table.unix] = $[class]::cadastrar($$[table.unix]);
-		Thunder::success('$[Table.name] "'.$$[table.unix]->$[table.desc.get]().'" cadastrad$[table.gender] com sucesso!', true);
+		Thunder::success('$[Table.name] "'.$$[table.unix]->$[table.desc.get].'" cadastrad$[table.gender] com sucesso!', true);
 		redirect(WEB_ROOT . '/manage/$[table.unix]/');
 	} catch (Exception $e) {
 		Thunder::error($e->getMessage());

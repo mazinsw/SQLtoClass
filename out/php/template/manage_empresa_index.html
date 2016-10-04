@@ -1,0 +1,44 @@
+<h3>Empresas</h3>
+<a href="/manage/empresa/cadastrar.php">Cadastrar</a>
+<table>
+	<thead>
+		<tr>
+			<th>Nome fantasia</th>
+			<th>Razão social</th>
+			<th>E-mail</th>
+			<th>Senha</th>
+			<th>CNPJ</th>
+			<th>Estadoid</th>
+			<th>Cidadeid</th>
+			<th>Endereco</th>
+			<th>Fone1</th>
+			<th>Fone2</th>
+			<th>Site</th>
+			<th>GUID</th>
+			<th>Datacadastro</th>
+			<th>Dataatualizacao</th>
+			<th>Ações</th>
+		</tr>
+	</thead>
+	<tbody>
+<?php foreach ($empresas as $empresa) {?>
+		<tr>
+			<td><?php echo $empresa->getFantasia();?></td>
+			<td><?php echo $empresa->getRazaoSocial();?></td>
+			<td><?php echo $empresa->getEmail();?></td>
+			<td><?php echo $empresa->getSenha();?></td>
+			<td><?php echo $empresa->getCNPJ();?></td>
+			<td><?php echo $empresa->getEstadoID();?></td>
+			<td><?php echo $empresa->getCidadeID();?></td>
+			<td><?php echo $empresa->getEndereco();?></td>
+			<td><?php echo $empresa->getFone(1);?></td>
+			<td><?php echo $empresa->getFone(2);?></td>
+			<td><?php echo $empresa->getSite();?></td>
+			<td><?php echo $empresa->getGUID();?></td>
+			<td><?php echo $empresa->getDataCadastro();?></td>
+			<td><?php echo $empresa->getDataAtualizacao();?></td>
+			<td><a href="/manage/empresa/editar.php?id=<?php echo $empresa->getID();?>">Editar</a></td>
+		</tr>
+<?php }?>
+	</tbody>
+</table>

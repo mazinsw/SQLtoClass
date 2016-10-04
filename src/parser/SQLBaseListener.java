@@ -1,8 +1,7 @@
-// Generated from D:\Projetos\SQLtoClass\src\parser\SQL.g4 by ANTLR 4.1
+// Generated from .\src\parser\SQL.g4 by ANTLR 4.5.3
 package parser;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -14,936 +13,867 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 public class SQLBaseListener implements SQLListener {
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeTinyBlobStmt(@NotNull SQLParser.TypeTinyBlobStmtContext ctx) { }
+	@Override public void enterScript(SQLParser.ScriptContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeTinyBlobStmt(@NotNull SQLParser.TypeTinyBlobStmtContext ctx) { }
-
+	@Override public void exitScript(SQLParser.ScriptContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCharsetName(@NotNull SQLParser.CharsetNameContext ctx) { }
+	@Override public void enterStmt(SQLParser.StmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCharsetName(@NotNull SQLParser.CharsetNameContext ctx) { }
-
+	@Override public void exitStmt(SQLParser.StmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterIndexStmt(@NotNull SQLParser.IndexStmtContext ctx) { }
+	@Override public void enterDropSchema(SQLParser.DropSchemaContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitIndexStmt(@NotNull SQLParser.IndexStmtContext ctx) { }
-
+	@Override public void exitDropSchema(SQLParser.DropSchemaContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterReferenceDefinition(@NotNull SQLParser.ReferenceDefinitionContext ctx) { }
+	@Override public void enterCreateSchema(SQLParser.CreateSchemaContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitReferenceDefinition(@NotNull SQLParser.ReferenceDefinitionContext ctx) { }
-
+	@Override public void exitCreateSchema(SQLParser.CreateSchemaContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterIdName(@NotNull SQLParser.IdNameContext ctx) { }
+	@Override public void enterCreateSpecification(SQLParser.CreateSpecificationContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitIdName(@NotNull SQLParser.IdNameContext ctx) { }
-
+	@Override public void exitCreateSpecification(SQLParser.CreateSpecificationContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterStringItem(@NotNull SQLParser.StringItemContext ctx) { }
+	@Override public void enterTableComment(SQLParser.TableCommentContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitStringItem(@NotNull SQLParser.StringItemContext ctx) { }
-
+	@Override public void exitTableComment(SQLParser.TableCommentContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeLongTextStmt(@NotNull SQLParser.TypeLongTextStmtContext ctx) { }
+	@Override public void enterSetStmt(SQLParser.SetStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeLongTextStmt(@NotNull SQLParser.TypeLongTextStmtContext ctx) { }
-
+	@Override public void exitSetStmt(SQLParser.SetStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeNumericStmt(@NotNull SQLParser.TypeNumericStmtContext ctx) { }
+	@Override public void enterSetOption(SQLParser.SetOptionContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeNumericStmt(@NotNull SQLParser.TypeNumericStmtContext ctx) { }
-
+	@Override public void exitSetOption(SQLParser.SetOptionContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterUniqueStmt(@NotNull SQLParser.UniqueStmtContext ctx) { }
+	@Override public void enterSetDefaultValue(SQLParser.SetDefaultValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitUniqueStmt(@NotNull SQLParser.UniqueStmtContext ctx) { }
-
+	@Override public void exitSetDefaultValue(SQLParser.SetDefaultValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCreateSchema(@NotNull SQLParser.CreateSchemaContext ctx) { }
+	@Override public void enterUseStmt(SQLParser.UseStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCreateSchema(@NotNull SQLParser.CreateSchemaContext ctx) { }
-
+	@Override public void exitUseStmt(SQLParser.UseStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeMediumTextStmt(@NotNull SQLParser.TypeMediumTextStmtContext ctx) { }
+	@Override public void enterDropTable(SQLParser.DropTableContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeMediumTextStmt(@NotNull SQLParser.TypeMediumTextStmtContext ctx) { }
-
+	@Override public void exitDropTable(SQLParser.DropTableContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterDefaultNotNull(@NotNull SQLParser.DefaultNotNullContext ctx) { }
+	@Override public void enterDropTableName(SQLParser.DropTableNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitDefaultNotNull(@NotNull SQLParser.DefaultNotNullContext ctx) { }
-
+	@Override public void exitDropTableName(SQLParser.DropTableNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeRealStmt(@NotNull SQLParser.TypeRealStmtContext ctx) { }
+	@Override public void enterCreateTable(SQLParser.CreateTableContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeRealStmt(@NotNull SQLParser.TypeRealStmtContext ctx) { }
-
+	@Override public void exitCreateTable(SQLParser.CreateTableContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeIntStmt(@NotNull SQLParser.TypeIntStmtContext ctx) { }
+	@Override public void enterTableName(SQLParser.TableNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeIntStmt(@NotNull SQLParser.TypeIntStmtContext ctx) { }
-
+	@Override public void exitTableName(SQLParser.TableNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeBitStmt(@NotNull SQLParser.TypeBitStmtContext ctx) { }
+	@Override public void enterFieldStmt(SQLParser.FieldStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeBitStmt(@NotNull SQLParser.TypeBitStmtContext ctx) { }
-
+	@Override public void exitFieldStmt(SQLParser.FieldStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeMediumIntStmt(@NotNull SQLParser.TypeMediumIntStmtContext ctx) { }
+	@Override public void enterPrimaryKeyStmt(SQLParser.PrimaryKeyStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeMediumIntStmt(@NotNull SQLParser.TypeMediumIntStmtContext ctx) { }
-
+	@Override public void exitPrimaryKeyStmt(SQLParser.PrimaryKeyStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTableComment(@NotNull SQLParser.TableCommentContext ctx) { }
+	@Override public void enterIndexStmt(SQLParser.IndexStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTableComment(@NotNull SQLParser.TableCommentContext ctx) { }
-
+	@Override public void exitIndexStmt(SQLParser.IndexStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSetOption(@NotNull SQLParser.SetOptionContext ctx) { }
+	@Override public void enterUniqueStmt(SQLParser.UniqueStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSetOption(@NotNull SQLParser.SetOptionContext ctx) { }
-
+	@Override public void exitUniqueStmt(SQLParser.UniqueStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeLongBlobStmt(@NotNull SQLParser.TypeLongBlobStmtContext ctx) { }
+	@Override public void enterForeignStmt(SQLParser.ForeignStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeLongBlobStmt(@NotNull SQLParser.TypeLongBlobStmtContext ctx) { }
-
+	@Override public void exitForeignStmt(SQLParser.ForeignStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterDefaultValue(@NotNull SQLParser.DefaultValueContext ctx) { }
+	@Override public void enterColumnName(SQLParser.ColumnNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitDefaultValue(@NotNull SQLParser.DefaultValueContext ctx) { }
-
+	@Override public void exitColumnName(SQLParser.ColumnNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterOption(@NotNull SQLParser.OptionContext ctx) { }
+	@Override public void enterConstraintName(SQLParser.ConstraintNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitOption(@NotNull SQLParser.OptionContext ctx) { }
-
+	@Override public void exitConstraintName(SQLParser.ConstraintNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterConstraintName(@NotNull SQLParser.ConstraintNameContext ctx) { }
+	@Override public void enterConstraintTable(SQLParser.ConstraintTableContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitConstraintName(@NotNull SQLParser.ConstraintNameContext ctx) { }
-
+	@Override public void exitConstraintTable(SQLParser.ConstraintTableContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSetDefaultValue(@NotNull SQLParser.SetDefaultValueContext ctx) { }
+	@Override public void enterColumnDefinition(SQLParser.ColumnDefinitionContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSetDefaultValue(@NotNull SQLParser.SetDefaultValueContext ctx) { }
-
+	@Override public void exitColumnDefinition(SQLParser.ColumnDefinitionContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeIntegerStmt(@NotNull SQLParser.TypeIntegerStmtContext ctx) { }
+	@Override public void enterAutoIncrement(SQLParser.AutoIncrementContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeIntegerStmt(@NotNull SQLParser.TypeIntegerStmtContext ctx) { }
-
+	@Override public void exitAutoIncrement(SQLParser.AutoIncrementContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeTextStmt(@NotNull SQLParser.TypeTextStmtContext ctx) { }
+	@Override public void enterColumnDefaultValue(SQLParser.ColumnDefaultValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeTextStmt(@NotNull SQLParser.TypeTextStmtContext ctx) { }
-
+	@Override public void exitColumnDefaultValue(SQLParser.ColumnDefaultValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeYearStmt(@NotNull SQLParser.TypeYearStmtContext ctx) { }
+	@Override public void enterDefaultNull(SQLParser.DefaultNullContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeYearStmt(@NotNull SQLParser.TypeYearStmtContext ctx) { }
-
+	@Override public void exitDefaultNull(SQLParser.DefaultNullContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterForeignStmt(@NotNull SQLParser.ForeignStmtContext ctx) { }
+	@Override public void enterDefaultNotNull(SQLParser.DefaultNotNullContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitForeignStmt(@NotNull SQLParser.ForeignStmtContext ctx) { }
-
+	@Override public void exitDefaultNotNull(SQLParser.DefaultNotNullContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeFloatStmt(@NotNull SQLParser.TypeFloatStmtContext ctx) { }
+	@Override public void enterFieldComment(SQLParser.FieldCommentContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeFloatStmt(@NotNull SQLParser.TypeFloatStmtContext ctx) { }
-
+	@Override public void exitFieldComment(SQLParser.FieldCommentContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterScript(@NotNull SQLParser.ScriptContext ctx) { }
+	@Override public void enterReferenceDefinition(SQLParser.ReferenceDefinitionContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitScript(@NotNull SQLParser.ScriptContext ctx) { }
-
+	@Override public void exitReferenceDefinition(SQLParser.ReferenceDefinitionContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeCharStmt(@NotNull SQLParser.TypeCharStmtContext ctx) { }
+	@Override public void enterReferenceTable(SQLParser.ReferenceTableContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeCharStmt(@NotNull SQLParser.TypeCharStmtContext ctx) { }
-
+	@Override public void exitReferenceTable(SQLParser.ReferenceTableContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeTimeStmt(@NotNull SQLParser.TypeTimeStmtContext ctx) { }
+	@Override public void enterIndexColName(SQLParser.IndexColNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeTimeStmt(@NotNull SQLParser.TypeTimeStmtContext ctx) { }
-
+	@Override public void exitIndexColName(SQLParser.IndexColNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterDropTable(@NotNull SQLParser.DropTableContext ctx) { }
+	@Override public void enterTypeBitStmt(SQLParser.TypeBitStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitDropTable(@NotNull SQLParser.DropTableContext ctx) { }
-
+	@Override public void exitTypeBitStmt(SQLParser.TypeBitStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeDateStmt(@NotNull SQLParser.TypeDateStmtContext ctx) { }
+	@Override public void enterTypeTinyIntStmt(SQLParser.TypeTinyIntStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeDateStmt(@NotNull SQLParser.TypeDateStmtContext ctx) { }
-
+	@Override public void exitTypeTinyIntStmt(SQLParser.TypeTinyIntStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeVarCharStmt(@NotNull SQLParser.TypeVarCharStmtContext ctx) { }
+	@Override public void enterTypeSmallIntStmt(SQLParser.TypeSmallIntStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeVarCharStmt(@NotNull SQLParser.TypeVarCharStmtContext ctx) { }
-
+	@Override public void exitTypeSmallIntStmt(SQLParser.TypeSmallIntStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterColumnDefinition(@NotNull SQLParser.ColumnDefinitionContext ctx) { }
+	@Override public void enterTypeMediumIntStmt(SQLParser.TypeMediumIntStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitColumnDefinition(@NotNull SQLParser.ColumnDefinitionContext ctx) { }
-
+	@Override public void exitTypeMediumIntStmt(SQLParser.TypeMediumIntStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeTimeStampStmt(@NotNull SQLParser.TypeTimeStampStmtContext ctx) { }
+	@Override public void enterTypeIntStmt(SQLParser.TypeIntStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeTimeStampStmt(@NotNull SQLParser.TypeTimeStampStmtContext ctx) { }
-
+	@Override public void exitTypeIntStmt(SQLParser.TypeIntStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeBinaryStmt(@NotNull SQLParser.TypeBinaryStmtContext ctx) { }
+	@Override public void enterTypeIntegerStmt(SQLParser.TypeIntegerStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeBinaryStmt(@NotNull SQLParser.TypeBinaryStmtContext ctx) { }
-
+	@Override public void exitTypeIntegerStmt(SQLParser.TypeIntegerStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeBigIntStmt(@NotNull SQLParser.TypeBigIntStmtContext ctx) { }
+	@Override public void enterTypeBigIntStmt(SQLParser.TypeBigIntStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeBigIntStmt(@NotNull SQLParser.TypeBigIntStmtContext ctx) { }
-
+	@Override public void exitTypeBigIntStmt(SQLParser.TypeBigIntStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeTinyTextStmt(@NotNull SQLParser.TypeTinyTextStmtContext ctx) { }
+	@Override public void enterTypeRealStmt(SQLParser.TypeRealStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeTinyTextStmt(@NotNull SQLParser.TypeTinyTextStmtContext ctx) { }
-
+	@Override public void exitTypeRealStmt(SQLParser.TypeRealStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterDropTableName(@NotNull SQLParser.DropTableNameContext ctx) { }
+	@Override public void enterTypeDoubleStmt(SQLParser.TypeDoubleStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitDropTableName(@NotNull SQLParser.DropTableNameContext ctx) { }
-
+	@Override public void exitTypeDoubleStmt(SQLParser.TypeDoubleStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeEnumStmt(@NotNull SQLParser.TypeEnumStmtContext ctx) { }
+	@Override public void enterTypeFloatStmt(SQLParser.TypeFloatStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeEnumStmt(@NotNull SQLParser.TypeEnumStmtContext ctx) { }
-
+	@Override public void exitTypeFloatStmt(SQLParser.TypeFloatStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterPrimaryKeyStmt(@NotNull SQLParser.PrimaryKeyStmtContext ctx) { }
+	@Override public void enterTypeDecimalStmt(SQLParser.TypeDecimalStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitPrimaryKeyStmt(@NotNull SQLParser.PrimaryKeyStmtContext ctx) { }
-
+	@Override public void exitTypeDecimalStmt(SQLParser.TypeDecimalStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTableOptions(@NotNull SQLParser.TableOptionsContext ctx) { }
+	@Override public void enterTypeNumericStmt(SQLParser.TypeNumericStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTableOptions(@NotNull SQLParser.TableOptionsContext ctx) { }
-
+	@Override public void exitTypeNumericStmt(SQLParser.TypeNumericStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCreateTable(@NotNull SQLParser.CreateTableContext ctx) { }
+	@Override public void enterTypeDateStmt(SQLParser.TypeDateStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCreateTable(@NotNull SQLParser.CreateTableContext ctx) { }
-
+	@Override public void exitTypeDateStmt(SQLParser.TypeDateStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeSetStmt(@NotNull SQLParser.TypeSetStmtContext ctx) { }
+	@Override public void enterTypeTimeStmt(SQLParser.TypeTimeStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeSetStmt(@NotNull SQLParser.TypeSetStmtContext ctx) { }
-
+	@Override public void exitTypeTimeStmt(SQLParser.TypeTimeStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSetStmt(@NotNull SQLParser.SetStmtContext ctx) { }
+	@Override public void enterTypeTimeStampStmt(SQLParser.TypeTimeStampStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSetStmt(@NotNull SQLParser.SetStmtContext ctx) { }
-
+	@Override public void exitTypeTimeStampStmt(SQLParser.TypeTimeStampStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTableName(@NotNull SQLParser.TableNameContext ctx) { }
+	@Override public void enterTypeDateTimeStmt(SQLParser.TypeDateTimeStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTableName(@NotNull SQLParser.TableNameContext ctx) { }
-
+	@Override public void exitTypeDateTimeStmt(SQLParser.TypeDateTimeStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeTinyIntStmt(@NotNull SQLParser.TypeTinyIntStmtContext ctx) { }
+	@Override public void enterTypeYearStmt(SQLParser.TypeYearStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeTinyIntStmt(@NotNull SQLParser.TypeTinyIntStmtContext ctx) { }
-
+	@Override public void exitTypeYearStmt(SQLParser.TypeYearStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterColumnName(@NotNull SQLParser.ColumnNameContext ctx) { }
+	@Override public void enterTypeCharStmt(SQLParser.TypeCharStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitColumnName(@NotNull SQLParser.ColumnNameContext ctx) { }
-
+	@Override public void exitTypeCharStmt(SQLParser.TypeCharStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterDefaultNull(@NotNull SQLParser.DefaultNullContext ctx) { }
+	@Override public void enterTypeVarCharStmt(SQLParser.TypeVarCharStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitDefaultNull(@NotNull SQLParser.DefaultNullContext ctx) { }
-
+	@Override public void exitTypeVarCharStmt(SQLParser.TypeVarCharStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCreateSpecification(@NotNull SQLParser.CreateSpecificationContext ctx) { }
+	@Override public void enterTypeBinaryStmt(SQLParser.TypeBinaryStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCreateSpecification(@NotNull SQLParser.CreateSpecificationContext ctx) { }
-
+	@Override public void exitTypeBinaryStmt(SQLParser.TypeBinaryStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeMediumBlobStmt(@NotNull SQLParser.TypeMediumBlobStmtContext ctx) { }
+	@Override public void enterTypeVarBinaryStmt(SQLParser.TypeVarBinaryStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeMediumBlobStmt(@NotNull SQLParser.TypeMediumBlobStmtContext ctx) { }
-
+	@Override public void exitTypeVarBinaryStmt(SQLParser.TypeVarBinaryStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeSmallIntStmt(@NotNull SQLParser.TypeSmallIntStmtContext ctx) { }
+	@Override public void enterTypeTinyBlobStmt(SQLParser.TypeTinyBlobStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeSmallIntStmt(@NotNull SQLParser.TypeSmallIntStmtContext ctx) { }
-
+	@Override public void exitTypeTinyBlobStmt(SQLParser.TypeTinyBlobStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterReferenceTable(@NotNull SQLParser.ReferenceTableContext ctx) { }
+	@Override public void enterTypeBlobStmt(SQLParser.TypeBlobStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitReferenceTable(@NotNull SQLParser.ReferenceTableContext ctx) { }
-
+	@Override public void exitTypeBlobStmt(SQLParser.TypeBlobStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterConstraintTable(@NotNull SQLParser.ConstraintTableContext ctx) { }
+	@Override public void enterTypeMediumBlobStmt(SQLParser.TypeMediumBlobStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitConstraintTable(@NotNull SQLParser.ConstraintTableContext ctx) { }
-
+	@Override public void exitTypeMediumBlobStmt(SQLParser.TypeMediumBlobStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeDoubleStmt(@NotNull SQLParser.TypeDoubleStmtContext ctx) { }
+	@Override public void enterTypeLongBlobStmt(SQLParser.TypeLongBlobStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeDoubleStmt(@NotNull SQLParser.TypeDoubleStmtContext ctx) { }
-
+	@Override public void exitTypeLongBlobStmt(SQLParser.TypeLongBlobStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterFieldStmt(@NotNull SQLParser.FieldStmtContext ctx) { }
+	@Override public void enterTypeTinyTextStmt(SQLParser.TypeTinyTextStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitFieldStmt(@NotNull SQLParser.FieldStmtContext ctx) { }
-
+	@Override public void exitTypeTinyTextStmt(SQLParser.TypeTinyTextStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterIndexColName(@NotNull SQLParser.IndexColNameContext ctx) { }
+	@Override public void enterTypeTextStmt(SQLParser.TypeTextStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitIndexColName(@NotNull SQLParser.IndexColNameContext ctx) { }
-
+	@Override public void exitTypeTextStmt(SQLParser.TypeTextStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeDateTimeStmt(@NotNull SQLParser.TypeDateTimeStmtContext ctx) { }
+	@Override public void enterTypeMediumTextStmt(SQLParser.TypeMediumTextStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeDateTimeStmt(@NotNull SQLParser.TypeDateTimeStmtContext ctx) { }
-
+	@Override public void exitTypeMediumTextStmt(SQLParser.TypeMediumTextStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterAutoIncrement(@NotNull SQLParser.AutoIncrementContext ctx) { }
+	@Override public void enterTypeLongTextStmt(SQLParser.TypeLongTextStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitAutoIncrement(@NotNull SQLParser.AutoIncrementContext ctx) { }
-
+	@Override public void exitTypeLongTextStmt(SQLParser.TypeLongTextStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterStmt(@NotNull SQLParser.StmtContext ctx) { }
+	@Override public void enterTypeEnumStmt(SQLParser.TypeEnumStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitStmt(@NotNull SQLParser.StmtContext ctx) { }
-
+	@Override public void exitTypeEnumStmt(SQLParser.TypeEnumStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterColumnDefaultValue(@NotNull SQLParser.ColumnDefaultValueContext ctx) { }
+	@Override public void enterTypeSetStmt(SQLParser.TypeSetStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitColumnDefaultValue(@NotNull SQLParser.ColumnDefaultValueContext ctx) { }
-
+	@Override public void exitTypeSetStmt(SQLParser.TypeSetStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterFieldComment(@NotNull SQLParser.FieldCommentContext ctx) { }
+	@Override public void enterStringItem(SQLParser.StringItemContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitFieldComment(@NotNull SQLParser.FieldCommentContext ctx) { }
-
+	@Override public void exitStringItem(SQLParser.StringItemContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCollateName(@NotNull SQLParser.CollateNameContext ctx) { }
+	@Override public void enterCharsetName(SQLParser.CharsetNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCollateName(@NotNull SQLParser.CollateNameContext ctx) { }
-
+	@Override public void exitCharsetName(SQLParser.CharsetNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeBlobStmt(@NotNull SQLParser.TypeBlobStmtContext ctx) { }
+	@Override public void enterCollateName(SQLParser.CollateNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeBlobStmt(@NotNull SQLParser.TypeBlobStmtContext ctx) { }
-
+	@Override public void exitCollateName(SQLParser.CollateNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterReferenceOption(@NotNull SQLParser.ReferenceOptionContext ctx) { }
+	@Override public void enterReferenceOption(SQLParser.ReferenceOptionContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitReferenceOption(@NotNull SQLParser.ReferenceOptionContext ctx) { }
-
+	@Override public void exitReferenceOption(SQLParser.ReferenceOptionContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeDecimalStmt(@NotNull SQLParser.TypeDecimalStmtContext ctx) { }
+	@Override public void enterDefaultValue(SQLParser.DefaultValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeDecimalStmt(@NotNull SQLParser.TypeDecimalStmtContext ctx) { }
-
+	@Override public void exitDefaultValue(SQLParser.DefaultValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterUseStmt(@NotNull SQLParser.UseStmtContext ctx) { }
+	@Override public void enterTableOptions(SQLParser.TableOptionsContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitUseStmt(@NotNull SQLParser.UseStmtContext ctx) { }
-
+	@Override public void exitTableOptions(SQLParser.TableOptionsContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeVarBinaryStmt(@NotNull SQLParser.TypeVarBinaryStmtContext ctx) { }
+	@Override public void enterOption(SQLParser.OptionContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypeVarBinaryStmt(@NotNull SQLParser.TypeVarBinaryStmtContext ctx) { }
-
+	@Override public void exitOption(SQLParser.OptionContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterDropSchema(@NotNull SQLParser.DropSchemaContext ctx) { }
+	@Override public void enterIdName(SQLParser.IdNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitDropSchema(@NotNull SQLParser.DropSchemaContext ctx) { }
+	@Override public void exitIdName(SQLParser.IdNameContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterEveryRule(@NotNull ParserRuleContext ctx) { }
+	@Override public void enterEveryRule(ParserRuleContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitEveryRule(@NotNull ParserRuleContext ctx) { }
+	@Override public void exitEveryRule(ParserRuleContext ctx) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void visitTerminal(@NotNull TerminalNode node) { }
+	@Override public void visitTerminal(TerminalNode node) { }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
+	 *
+	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void visitErrorNode(@NotNull ErrorNode node) { }
+	@Override public void visitErrorNode(ErrorNode node) { }
 }

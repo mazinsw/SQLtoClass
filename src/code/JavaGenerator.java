@@ -12,6 +12,7 @@ import ast.Field;
 import ast.OrderField;
 import ast.ScriptNode;
 import ast.Table;
+import ast.UniqueKey;
 
 public class JavaGenerator extends JavaGeneratorBase {
 
@@ -52,7 +53,15 @@ public class JavaGenerator extends JavaGeneratorBase {
 		boolean constAdded = false;
 		
 		processArray(table, indexedFields);
+		Hashtable<String, String> tableOptions  = new Hashtable<>();
+		String tableComment = TemplateLoader.extractComment(table.getComment(), tableOptions, "T.");
 		out.println();
+		out.println("\t/**");
+		if (tableComment != null && !tableComment.isEmpty()) {
+			out.println(TemplateLoader.wrap(tableComment, 100, "\t * "));
+		}
+		out.println("\t * Auto generated class, do not change, all changes will be discarted!");
+		out.println("\t */");
 		out.println("public class " + baseType + " implements Serializable {");
 
 		// constants
@@ -250,6 +259,8 @@ public class JavaGenerator extends JavaGeneratorBase {
 		}
 		for (Field field : table.getFields()) {
 			String varName = normalize(field.getName(), false);
+			Hashtable<String, String> fieldOptions  = new Hashtable<>();
+			String fieldComment = TemplateLoader.extractComment(field.getComment(), fieldOptions, "F.");
 			if (isIndexed(varName)) {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
@@ -261,6 +272,11 @@ public class JavaGenerator extends JavaGeneratorBase {
 				out.println();
 				String params = genParams(data, ",");
 				String varParams = genVarParams(data, ",");
+				if (fieldComment != null && !fieldComment.isEmpty()) {
+					out.println("\t/**");
+					out.println(TemplateLoader.wrap(fieldComment, 100, "\t * "));
+					out.println("\t */");
+				}
 				// with var array
 				out.println("\tpublic " + convertType(name, field) + " "
 						+ getMethodPreffix(field) + varName + "(" + params
@@ -310,6 +326,11 @@ public class JavaGenerator extends JavaGeneratorBase {
 			} else {
 				String javaVarName = getCamelCaseName(varName);
 				out.println();
+				if (fieldComment != null && !fieldComment.isEmpty()) {
+					out.println("\t/**");
+					out.println("\t * " + fieldComment);
+					out.println("\t */");
+				}
 				out.println("\tpublic " + convertType(name, field) + " "
 						+ getMethodPreffix(field) + varName + "() {");
 				out.println("\t\treturn " + javaVarName + ";");
@@ -352,11 +373,14 @@ public class JavaGenerator extends JavaGeneratorBase {
 		out.println("\t\t\treturn false;");
 		out.println("\t\t" + baseType + " obj = ("
 				+ baseType + ")o;");
-		List<Constraint> list = getUniqueKeyList(table);
-		for (Constraint constraint : list) {
+		List<UniqueKey> list = getUniqueKeys(table);
+		Constraint uniqueKey = getPrimaryKey(table);
+		if(uniqueKey == null && list.size() > 0)
+			uniqueKey = list.get(0);
+		if (uniqueKey != null) {
 			out.print("\t\tif(");
 			OrderField prevField = null;
-			for (OrderField oField : constraint.getFields()) {
+			for (OrderField oField : uniqueKey.getFields()) {
 				if (prevField != null) {
 					out.println(" &&");
 					out.print("\t\t   ");

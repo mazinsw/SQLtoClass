@@ -1,10 +1,15 @@
 <?php
 
+/**
+ * Informações da empresa Informações da empresa Informações da empresa Informações
+ * da empresa Informações da empresa
+ */
 class ZEmpresa {
 	private $id;
 	private $fantasia;
 	private $razao_social;
 	private $email;
+	private $senha;
 	private $cnpj;
 	private $estado_id;
 	private $cidade_id;
@@ -16,22 +21,7 @@ class ZEmpresa {
 	private $data_atualizacao;
 
 	public function __construct($empresa = array()) {
-		if(is_array($empresa)) {
-			$this->setID($empresa['id']);
-			$this->setFantasia($empresa['fantasia']);
-			$this->setRazaoSocial($empresa['razaosocial']);
-			$this->setEmail($empresa['email']);
-			$this->setCNPJ($empresa['cnpj']);
-			$this->setEstadoID($empresa['estadoid']);
-			$this->setCidadeID($empresa['cidadeid']);
-			$this->setEndereco($empresa['endereco']);
-			for($i = 1; $i <= 2; $i++)
-				$this->setFone($i, $empresa['fone'.$i]);
-			$this->setSite($empresa['site']);
-			$this->setGUID($empresa['guid']);
-			$this->setDataCadastro($empresa['datacadastro']);
-			$this->setDataAtualizacao($empresa['dataatualizacao']);
-		}
+		$this->fromArray($empresa);
 	}
 
 	public function getID() {
@@ -64,6 +54,14 @@ class ZEmpresa {
 
 	public function setEmail($email) {
 		$this->email = $email;
+	}
+
+	public function getSenha() {
+		return $this->senha;
+	}
+
+	public function setSenha($senha) {
+		$this->senha = $senha;
 	}
 
 	public function getCNPJ() {
@@ -148,6 +146,7 @@ class ZEmpresa {
 		$empresa['fantasia'] = $this->getFantasia();
 		$empresa['razaosocial'] = $this->getRazaoSocial();
 		$empresa['email'] = $this->getEmail();
+		$empresa['senha'] = $this->getSenha();
 		$empresa['cnpj'] = $this->getCNPJ();
 		$empresa['estadoid'] = $this->getEstadoID();
 		$empresa['cidadeid'] = $this->getCidadeID();
@@ -161,53 +160,84 @@ class ZEmpresa {
 		return $empresa;
 	}
 
+	public function fromArray($empresa = array()) {
+		if(!is_array($empresa))
+			return $this;
+		$this->setID($empresa['id']);
+		$this->setFantasia($empresa['fantasia']);
+		$this->setRazaoSocial($empresa['razaosocial']);
+		$this->setEmail($empresa['email']);
+		$this->setSenha($empresa['senha']);
+		$this->setCNPJ($empresa['cnpj']);
+		$this->setEstadoID($empresa['estadoid']);
+		$this->setCidadeID($empresa['cidadeid']);
+		$this->setEndereco($empresa['endereco']);
+		for($i = 1; $i <= 2; $i++)
+			$this->setFone($i, $empresa['fone'.$i]);
+		$this->setSite($empresa['site']);
+		$this->setGUID($empresa['guid']);
+		$this->setDataCadastro($empresa['datacadastro']);
+		$this->setDataAtualizacao($empresa['dataatualizacao']);
+	}
+
 	public static function getPeloID($id) {
-		return new ZEmpresa(DB::GetTableRow('TEmpresas', array('id' => $id)));
+		$query = DB::$pdo->from('TEmpresas')
+		                 ->where(array('id' => $id));
+		return new ZEmpresa($query->fetch());
 	}
 
 	public static function getPelaFantasia($fantasia) {
-		return new ZEmpresa(DB::GetTableRow('TEmpresas', array('fantasia' => $fantasia)));
+		$query = DB::$pdo->from('TEmpresas')
+		                 ->where(array('fantasia' => $fantasia));
+		return new ZEmpresa($query->fetch());
 	}
 
 	public static function getPeloCNPJ($cnpj) {
-		return new ZEmpresa(DB::GetTableRow('TEmpresas', array('cnpj' => $cnpj)));
+		$query = DB::$pdo->from('TEmpresas')
+		                 ->where(array('cnpj' => $cnpj));
+		return new ZEmpresa($query->fetch());
 	}
 
-	public static function getPeloEmail($email) {
-		return new ZEmpresa(DB::GetTableRow('TEmpresas', array('email' => $email)));
+	public static function getPelaEmail($email) {
+		$query = DB::$pdo->from('TEmpresas')
+		                 ->where(array('email' => $email));
+		return new ZEmpresa($query->fetch());
 	}
 
 	public static function getPelaGUID($guid) {
-		return new ZEmpresa(DB::GetTableRow('TEmpresas', array('guid' => $guid)));
+		$query = DB::$pdo->from('TEmpresas')
+		                 ->where(array('guid' => $guid));
+		return new ZEmpresa($query->fetch());
 	}
 
 	private static function validarCampos(&$empresa) {
 		$erros = array();
 		$empresa['fantasia'] = strip_tags(trim($empresa['fantasia']));
 		if(strlen($empresa['fantasia']) == 0)
-			$erros['fantasia'] = 'A Fantasia não pode ser vazia';
+			$erros['fantasia'] = 'O nome fantasia não pode ser vazio';
 		$empresa['razaosocial'] = strip_tags(trim($empresa['razaosocial']));
 		if(strlen($empresa['razaosocial']) == 0)
 			$empresa['razaosocial'] = null;
 		$empresa['email'] = strip_tags(trim($empresa['email']));
 		if(!check_email($empresa['email']))
-			$erros['email'] = 'Email inválido';
+			$erros['email'] = 'e-mail inválido';
+		$empresa['senha'] = strval($empresa['senha']);
 		$empresa['cnpj'] = number_only($empresa['cnpj']);
 		if(strlen($empresa['cnpj']) == 0)
 			$empresa['cnpj'] = null;
 		else if(!check_cnpj($empresa['cnpj']))
 			$erros['cnpj'] = 'CNPJ inválido';
 		if(!is_numeric($empresa['estadoid']))
-			$erros['estadoid'] = 'O EstadoID não é um número';
+			$erros['estadoid'] = 'O estadoid não foi informado';
 		if(!is_numeric($empresa['cidadeid']))
-			$erros['cidadeid'] = 'A CidadeID não é um número';
+			$erros['cidadeid'] = 'A cidadeid não foi informada';
 		$empresa['endereco'] = strip_tags(trim($empresa['endereco']));
 		if(strlen($empresa['endereco']) == 0)
 			$empresa['endereco'] = null;
 		for($i = 1; $i <= 2; $i++) {
 			$empresa['fone'.$i] = number_only($empresa['fone'.$i]);
 			if(!check_fone($empresa['fone'.$i]))
-				$erros['fone'.$i] = 'Fone1 inválido';
+				$erros['fone'.$i] = 'fone1 inválido';
 		}
 		$empresa['site'] = strip_tags(trim($empresa['site']));
 		if(strlen($empresa['site']) == 0)
@@ -225,11 +255,11 @@ class ZEmpresa {
 		if(stripos($e->getMessage(), 'PRIMARY') !== false)
 			throw new ValidationException(array('id' => 'O ID informado já está cadastrado'));
 		if(stripos($e->getMessage(), 'Fantasia_UNIQUE') !== false)
-			throw new ValidationException(array('fantasia' => 'A Fantasia informada já está cadastrada'));
+			throw new ValidationException(array('fantasia' => 'O nome fantasia informado já está cadastrado'));
 		if(stripos($e->getMessage(), 'CNPJ_UNIQUE') !== false)
 			throw new ValidationException(array('cnpj' => 'O CNPJ informado já está cadastrado'));
 		if(stripos($e->getMessage(), 'Email_UNIQUE') !== false)
-			throw new ValidationException(array('email' => 'O Email informado já está cadastrado'));
+			throw new ValidationException(array('email' => 'O e-mail informado já está cadastrado'));
 		if(stripos($e->getMessage(), 'GUID_UNIQUE') !== false)
 			throw new ValidationException(array('guid' => 'A GUID informada já está cadastrada'));
 	}
@@ -238,7 +268,7 @@ class ZEmpresa {
 		$_empresa = $empresa->toArray();
 		self::validarCampos($_empresa);
 		try {
-		$_empresa['id'] = DB::Insert('TEmpresas', $_empresa);
+			$_empresa['id'] = DB::$pdo->insertInto('TEmpresas')->values($_empresa)->execute();
 		} catch (Exception $e) {
 			self::handleException($e);
 			throw $e;
@@ -255,6 +285,7 @@ class ZEmpresa {
 			'fantasia',
 			'razaosocial',
 			'email',
+			'senha',
 			'cnpj',
 			'estadoid',
 			'cidadeid',
@@ -266,10 +297,10 @@ class ZEmpresa {
 		for($i = 1; $i <= 2; $i++)
 			$campos[] = 'fone'.$i;
 		try {
-		$table = new Table('TEmpresas', $_empresa);
-		$table->SetPk('id', $_empresa['id']);
-		if(!$table->Update($campos))
-			throw new Exception('Falha ao atualizar a empresa');
+			$query = DB::$pdo->update('TEmpresas');
+			$query = $query->set(array_intersect_key($_empresa, array_flip($campos)));
+			$query = $query->where('id', $_empresa['id']);
+			$query->execute();
 		} catch (Exception $e) {
 			self::handleException($e);
 			throw $e;
@@ -280,22 +311,22 @@ class ZEmpresa {
 	public static function excluir($id) {
 		if(!$id)
 			throw new Exception('Não foi possível excluir a empresa, o id da empresa não foi informado');
-		return DB::Delete('TEmpresas', array('id' => $id));
+		$query = DB::$pdo->deleteFrom('TEmpresas')
+		                 ->where(array('id' => $id));
+		return $query->execute();
 	}
 
 	private static function initSearch() {
-		$query = array();
-		$query['order'] = 'ORDER BY id ASC';
-		return $query;
+		return   DB::$pdo->from('TEmpresas')
+		                 ->orderBy('id ASC');
 	}
 
 	public static function getTodas($inicio = null, $quantidade = null) {
 		$query = self::initSearch();
 		if(!is_null($inicio) && !is_null($quantidade)) {
-			$query['size'] = $quantidade;
-			$query['offset'] = $inicio;
+			$query = $query->limit($quantidade)->offset($inicio);
 		}
-		$_empresas = DB::LimitQuery('TEmpresas', $query);
+		$_empresas = $query->fetchAll();
 		$empresas = array();
 		foreach($_empresas as $empresa)
 			$empresas[] = new ZEmpresa($empresa);
@@ -304,7 +335,7 @@ class ZEmpresa {
 
 	public static function getCount() {
 		$query = self::initSearch();
-		return Table::Count('TEmpresas', $query['condition']);
+		return $query->count();
 	}
 
 }

@@ -1,0 +1,35 @@
+<div class="form-control">
+	<label for="empresaid">Empresaid:</label>
+	<select id="empresaid" name="empresaid">
+<?php foreach($empresas as $empresa) {?>
+		<option value="<?php echo $empresa->getID();?>" <?php echo $dispositivo->getEmpresaID() == $empresa->getID()?'selected':'';?>><?php echo $empresa->getFantasia()?></option>
+<?php }?>
+	</select>
+</div>
+<div class="form-control">
+	<label for="deviceid">Deviceid:</label>
+	<input type="text" id="deviceid" name="deviceid" value="{$dispositivo->getDeviceID()}" />
+</div>
+<div class="form-control">
+	<label for="type">Type of device:</label>
+	<select id="type" name="type">
+		<option value="Computer" <?php echo $dispositivo->getType() == 'Computer'?'selected':'';?>>Personal computer</option>
+		<option value="Tablet" <?php echo $dispositivo->getType() == 'Tablet'?'selected':'';?>>Portable tablet</option>
+	</select>
+</div>
+<div class="form-control">
+	<label for="descricao">Descrição:</label>
+	<input type="text" id="descricao" name="descricao" value="{$dispositivo->getDescricao()}" />
+</div>
+<div class="form-control">
+	<label for="modelo">Modelo:</label>
+	<input type="text" id="modelo" name="modelo" value="{$dispositivo->getModelo()}" />
+</div>
+<div class="form-control">
+	<label for="datacadastro">Datacadastro:</label>
+	<input type="datetime" id="datacadastro" name="datacadastro" value="{$dispositivo->getDataCadastro()}" />
+</div>
+<div class="form-control">
+	<label for="dataatualizacao">Dataatualizacao:</label>
+	<input type="datetime" id="dataatualizacao" name="dataatualizacao" value="{$dispositivo->getDataAtualizacao()}" />
+</div>

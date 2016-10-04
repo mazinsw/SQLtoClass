@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.apache.commons.lang3.text.WordUtils;
 
 import ast.DataType;
 import ast.Field;
@@ -17,7 +18,7 @@ public class TemplateLoader {
 	private Collection<File> files;
 	private File directory;
 	
-	public static final String UPR_WORDS = "URL|CPF|CNPJ|RG|IE|IM|UF|CEP|GUID|PID";
+	public static final String UPR_WORDS = "URL|CPF|CNPJ|RG|IE|IM|UF|CEP|GUID|PID|NCM|CFOP|CEST|ICMS|IPI|PIS";
 
 	public TemplateLoader() {
 		files = new ArrayList<>();
@@ -41,6 +42,21 @@ public class TemplateLoader {
 		return new File(file.getAbsolutePath().replace(directory.getAbsolutePath(), base.getAbsolutePath()));
 	}
 	
+	/**
+	 * Return wrap text with max length characters
+	 * 
+	 * @param text text to wrap
+	 * @param length max line width
+	 * @param preffix preffix for each line
+	 * @return
+	 */
+	public static String wrap(String text, int length, String preffix) {
+		text = WordUtils.wrap(text, length);
+		if(preffix == null)
+			return text;
+		return preffix + text.replaceAll("\n", "\n" + preffix);
+	}
+	
 	public static String recase(String wordcase, String entry) {
 		return recase(wordcase, entry, false);
 	}
@@ -49,7 +65,9 @@ public class TemplateLoader {
 		String result = entry;
 		if (useWordDB && TemplateLoader.UPR_WORDS.contains(entry.toUpperCase()))
 			return entry.toUpperCase();
-		if(Character.isLowerCase(wordcase.charAt(0)))
+		if(Character.isLowerCase(wordcase.charAt(0)) && wordcase.length() > 1 && Character.isUpperCase(wordcase.charAt(1)))
+			result = entry;
+		else if(Character.isLowerCase(wordcase.charAt(0)))
 			result = result.toLowerCase();
 		else if(wordcase.length() > 1 && Character.isUpperCase(wordcase.charAt(1)))
 			result = result.toUpperCase();
@@ -58,44 +76,105 @@ public class TemplateLoader {
 		return result;
 	}
 	
-	public static File getFileFromType(Table table, Field field, Hashtable<String, String> values) throws Exception {
+	public static String getTypeNameFromType(Table table, Field field) {
 		if(field.getType().isBoolean())
-			return new File("template/field/boolean.html");
-		if(table.getReference(field.getName()) != null)
-			return new File("template/field/reference.html");
+			return "boolean";
 		switch (field.getType().getType()) {
 		case DataType.DECIMAL:
-			return new File("template/field/currency.html");
+			return "currency";
 		case DataType.DATE:
-			return new File("template/field/date.html");
+			return "date";
 		case DataType.DATETIME:
-			return new File("template/field/datetime.html");
+			return "datetime";
 		case DataType.ENUM:
-			if(values.containsKey("F.R"))
-				return new File("template/field/radio.html");
-			return new File("template/field/enum.html");
+			return "enum";
 		case DataType.FLOAT:
+			return "float";
 		case DataType.DOUBLE:
-			return new File("template/field/float.html");
+			return "double";
 		case DataType.BLOB:
-			return new File("template/field/image.html");
+			return "blob";
 		case DataType.TINYINT:
 		case DataType.INTEGER:
+			return "integer";
 		case DataType.BIGINT:
-			return new File("template/field/integer.html");
+			return "bigint";
 		case DataType.STRING:
 		case DataType.CHAR:
-			if(values.containsKey("F.M"))
-				return new File("template/field/masked.html");
-			if(values.containsKey("F.T"))
-				return new File("template/field/text.html");
-			return new File("template/field/string.html");
+			return "string";
 		case DataType.TEXT:
-			return new File("template/field/text.html");
+			return "text";
 		case DataType.TIME:
+			return "time";
+		default:
+			return "unknow";
+		}
+	}
+	
+	public static File getFileForField(Table table, Field field, Hashtable<String, String> attributes) throws Exception {
+		String type = getTypeNameFromType(table, field);
+		String attribute = "unknow";
+		
+		if(table.getReference(field.getName()) != null)
+			attribute = "reference";
+		else if(attributes.containsKey("F.R"))
+			attribute = "radio";
+		else if(attributes.containsKey("F.M"))
+			attribute = "masked";
+		else if(attributes.containsKey("F.P"))
+			attribute = "password";
+		else if(attributes.containsKey("F.I"))
+			attribute = "image";
+		switch (attribute) {
+		case "reference":
+			return new File("template/field/reference.html");
+		case "radio":
+			return new File("template/field/radio.html");
+		case "image":
+			return new File("template/field/image.html");
+		case "masked":
+			return new File("template/field/masked.html");
+		case "password":
+			return new File("template/field/password.html");
+		}
+		
+		switch (type) {
+		case "boolean":
+			return new File("template/field/boolean.html");
+		case "reference":
+			return new File("template/field/reference.html");
+		case "currency":
+			return new File("template/field/currency.html");
+		case "date":
+			return new File("template/field/date.html");
+		case "datetime":
+			return new File("template/field/datetime.html");
+		case "radio":
+			return new File("template/field/radio.html");
+		case "enum":
+			return new File("template/field/enum.html");
+		case "float":
+		case "double":
+			return new File("template/field/float.html");
+		case "image":
+			return new File("template/field/image.html");
+		case "blob":
+			return new File("template/field/blob.html");
+		case "integer":
+		case "bigint":
+			return new File("template/field/integer.html");
+		case "masked":
+			return new File("template/field/masked.html");
+		case "password":
+			return new File("template/field/password.html");
+		case "text":
+			return new File("template/field/text.html");
+		case "string":
+			return new File("template/field/string.html");
+		case "time":
 			return new File("template/field/time.html");
 		default:
-			throw new Exception(String.format("Unknow template for type '%d'", field.getType().getType()));
+			throw new Exception(String.format("Unknow template for type '%s'(%d)", type, field.getType().getType()));
 		}
 	}
 	
@@ -108,12 +187,47 @@ public class TemplateLoader {
 		return array[index];
 	}
 	
+	private static String resolveSlashs(String cmm) {
+		String comment = "";
+		for (int i = 0; i < cmm.length(); i++) {
+			switch (cmm.charAt(i)) {
+			case '\\':
+				if(i + 1 >= cmm.length())
+					break;
+				i++;
+				if(cmm.charAt(i) == 'n')
+					comment += '\n';
+				else if(cmm.charAt(i) == 't')
+					comment += '\t';
+				else if(cmm.charAt(i) == 'r')
+					comment += '\r';
+				else
+					comment += cmm.charAt(i);
+				break;
+			default:
+				comment += cmm.charAt(i);
+				break;
+			}
+		}
+		return comment;
+	}
+	
+	public static String extractComment(String fieldComment) {
+		Hashtable<String, String> values = new Hashtable<>();
+		return extractComment(fieldComment, values, "");
+	}
+	
+	public static String extractComment(String fieldComment, Hashtable<String, String> values) {
+		return extractComment(fieldComment, values, "");
+	}
+	
 	public static String extractComment(String fieldComment, Hashtable<String, String> values, String preffix) {
 		String comment = "", cmm = fieldComment;
 		List<String> cmds = new ArrayList<>();
 		int state = 0, offset = -1;
 		if(cmm == null)
 			return null;
+		cmm = resolveSlashs(cmm);
 		for (int i = cmm.length() - 1; i >= 0; i--) {
 			switch (cmm.charAt(i)) {
 			case ']':
@@ -141,26 +255,7 @@ public class TemplateLoader {
 		}
 		if(state != 2)
 			cmm = "";
-		for (int i = 0; i < cmm.length(); i++) {
-			switch (cmm.charAt(i)) {
-			case '\\':
-				if(i + 1 >= cmm.length())
-					break;
-				i++;
-				if(cmm.charAt(i) == 'n')
-					comment += '\n';
-				else if(cmm.charAt(i) == 't')
-					comment += '\t';
-				else if(cmm.charAt(i) == 'r')
-					comment += '\r';
-				else
-					comment += cmm.charAt(i);
-				break;
-			default:
-				comment += cmm.charAt(i);
-				break;
-			}
-		}
+		comment = cmm;
 		for (String cmd : cmds) {
 			offset = cmd.indexOf(':');
 			if(offset == -1) {

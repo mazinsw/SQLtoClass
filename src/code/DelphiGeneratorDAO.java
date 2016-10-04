@@ -50,18 +50,24 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 	@Override
 	public void genHeader(PrintWriter out, Table table, String name,
 			boolean indexed) {
+		PrimaryKey primaryKey = getPrimaryKey(table);
+		List<Field> keyFields = getFields(table, primaryKey);
+		String listVarName = getBaseClassName(name);
+		String classParam = "; " + getBaseClassName(name) + ": T" + getBaseClassName(name);
+		String inheritedClass = "", staticMember = "class ";
+		String otherUses = "";
+		if(keyFields.size() == 1) {
+			otherUses += ", System.Generics.Collections";
+		}
 		out.println("unit " + getClassName(name) + ";");
 		out.println();
 		out.println("interface");
 		out.println();
 		out.println("uses");
-		out.println("  " + getBaseClassName(name) + ", ZDataset, SysUtils;");
+		out.println("  " + getBaseClassName(name) + ", ZDataset, SysUtils" + otherUses + ";");
 		out.println();
 		out.println("type");
 		out.println();
-		String listVarName = getBaseClassName(name);
-		String classParam = "; " + getBaseClassName(name) + ": T" + getBaseClassName(name);
-		String inheritedClass = "", staticMember = "class ";
 		if(isInherited()) {
 			listVarName = getClassName(name);
 			out.println("  T" + getClassName(name) + " = class;");
@@ -69,17 +75,17 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 			staticMember = "";
 			classParam = "";
 		}
-		out.println("  TListar" + name + " = procedure("
+		out.println("  TListar" + name + "<T> = procedure("
 				+ listVarName + ": T" + listVarName
-				+ ") of object;");
+				+ "; UserData: T) of object;");
 		out.println();
 		out.println("  T" + getClassName(name) + " = class" + inheritedClass);
 		out.println("  private");
 		out.println("    class procedure PreencheParametros(Qry: TZQuery; "
 				+ getBaseClassName(name) + ": T" + getBaseClassName(name)
 				+ ");");
-		out.println("    class procedure Listar(Qry: TZQuery; Metodo: TListar" + name
-				+ ");");
+		out.println("    class procedure Listar<T>(Qry: TZQuery; Metodo: TListar" + name
+				+ "<T>; UserData: T);");
 		out.println("  public");
 		out.println("    class procedure CarregaCampos(Qry: TZQuery; "
 				+ getBaseClassName(name) + ": T" + getBaseClassName(name)
@@ -90,7 +96,7 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 					+ ");");
 		}
 		out.println("  public");
-		List<Constraint> uniqueList = getUniqueConstraints(table);
+		List<UniqueKey> uniqueList = getUniqueKeys(table, true);
 		if(uniqueList.size() > 0) {
 			out.println("    " + staticMember + "function Procurar(Qry: TZQuery" + classParam + "): Boolean;");
 		}
@@ -108,19 +114,26 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 			out.println("    " + staticMember + "procedure Substituir(Qry: TZQuery" + classParam + ");");
 		}
 		out.println("    " + staticMember + "procedure Excluir(Qry: TZQuery" + classParam + ");");
+		if(keyFields.size() == 1) {
+			Field keyField = keyFields.get(0);
+			String keyName = normalize(keyField.getName(), false);
+			out.println("    class function GetIndexPel" + getGenderChar(keyField.getName())
+			+ keyName + "(List: TList<T" + getClassName(name) + ">; " + keyName + ": " + convertType(name, keyField, true) + ";");
+			out.println("      Default: Integer = -1): Integer;");
+		}
 		String indexField = "";
 		if(indexed)
 			indexField = "; " + getBaseClassName(name) + "ID: Integer";
 		out.println("    class procedure ExcluirTod" + getGenderChar(name)
 				+ "s(Qry: TZQuery" + indexField + ");");
 		out.println("    class procedure ListarTod" + getGenderChar(name)
-				+ "s(Qry: TZQuery" + indexField + "; Metodo: TListar" + name
-				+ ";");
-		out.println("      Inicio: Integer = 0; Tamanho: Integer = 0);");
+				+ "s<T>(Qry: TZQuery" + indexField + "; Metodo: TListar" + name
+				+ "<T>;");
+		out.println("      UserData: T; Inicio: Integer = 0; Tamanho: Integer = 0);");
 		out.println("  end;");
 		int exceptionCount = 0;
 		for (Constraint constraint : table.getConstraints()) {
-			if (!((constraint instanceof PrimaryKey) || (constraint instanceof UniqueKey)))
+			if (!(constraint instanceof UniqueKey))
 				continue;
 			if (exceptionCount == 0)
 				out.println();
@@ -210,7 +223,7 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 			String name, boolean indexed,
 			List<Field> keyFields, boolean update) {
 		for (Constraint constraint : table.getConstraints()) {
-			if (!((constraint instanceof PrimaryKey) || (constraint instanceof UniqueKey)))
+			if (!(constraint instanceof UniqueKey))
 				continue;
 			out.println("      if StrUtils.ContainsText(E.Message, '''"
 						+ constraint.getName() + "''') then");
@@ -272,7 +285,7 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 			exLoad = "Ex";
 			loadVarName = "Self";
 		}
-		List<Constraint> uniqueList = getUniqueConstraints(table);
+		List<UniqueKey> uniqueList = getUniqueKeys(table, true);
 		out.println();
 		out.println("implementation");
 		out.println();
@@ -537,6 +550,22 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 				+ getGenderChar(name) + " " + normalize(name).toLowerCase() + "');");
 		out.println("  end;");
 		out.println("end;");
+		if(keyFields.size() == 1) {
+			Field keyField = keyFields.get(0);
+			String keyName = normalize(keyField.getName(), false);
+			out.println();
+			out.println("class function T" + getClassName(name) + ".GetIndexPel" + getGenderChar(keyField.getName())
+			+ keyName + "(List: TList<T" + getClassName(name) + ">; " + keyName + ": " + convertType(name, keyField, true) + ";");
+			out.println("  Default: Integer): Integer;");
+			out.println("begin");
+			out.println("  for Result := 0 to List.Count - 1 do");
+			out.println("  begin");
+			out.println("    if List[Result]." + keyName + " = " + keyName + " then");
+			out.println("      Exit;");
+			out.println("  end;");
+			out.println("  Result := Default;");
+			out.println("end;");
+		}
 		out.println();
 		String indexField = "";
 		if(indexed)
@@ -549,9 +578,9 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println("end;");
 		out.println();
 		out.println("class procedure T" + getClassName(name) + ".ListarTod"
-				+ getGenderChar(name) + "s(Qry: TZQuery" + indexField + "; Metodo: TListar"
-				+ name + ";");
-		out.println("  Inicio, Tamanho: Integer);");
+				+ getGenderChar(name) + "s<T>(Qry: TZQuery" + indexField + "; Metodo: TListar"
+				+ name + "<T>;");
+		out.println("  UserData: T; Inicio, Tamanho: Integer);");
 		out.println("var");
 		out.println("  LimiteSQL: string;");
 		out.println("begin");
@@ -565,7 +594,7 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println("    Qry.ParamByName('LimiteInicio').AsInteger := Inicio;");
 		out.println("    Qry.ParamByName('LimiteTamanho').AsInteger := Tamanho;");
 		out.println("  end;");
-		out.println("  Listar(Qry, Metodo);");
+		out.println("  Listar<T>(Qry, Metodo, UserData);");
 		out.println("end;");
 
 
@@ -635,7 +664,7 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println("end;");
 		out.println();
 		out.println("class procedure T" + getClassName(name)
-				+ ".Listar(Qry: TZQuery; Metodo: TListar" + name + ");");
+				+ ".Listar<T>(Qry: TZQuery; Metodo: TListar" + name + "<T>; UserData: T);");
 		out.println("var");
 		out.println("  " + listVarName + ": T"
 				+ listVarName + ";");
@@ -646,7 +675,7 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println("    " + listVarName + " := T"
 				+ listVarName + ".Create;");
 		out.println("    CarregaCampos" + exLoad + "(Qry, " + listVarName + ");");
-		out.println("    Metodo(" + listVarName + ");");
+		out.println("    Metodo(" + listVarName + ", UserData);");
 		out.println("    Qry.Next;");
 		out.println("  end;");
 		out.println("  Qry.Close;");

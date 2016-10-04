@@ -13,9 +13,10 @@ DROP TABLE IF EXISTS `TEmpresas` ;
 
 CREATE TABLE IF NOT EXISTS `TEmpresas` (
   `ID` INT NOT NULL AUTO_INCREMENT,
-  `Fantasia` VARCHAR(100) NOT NULL,
+  `Fantasia` VARCHAR(100) NOT NULL COMMENT '[N:Nome fantasia][G:o]',
   `RazaoSocial` VARCHAR(100) NULL DEFAULT NULL COMMENT '[N:Razão social]',
-  `Email` VARCHAR(60) NOT NULL COMMENT '[N:E-mail]',
+  `Email` VARCHAR(60) NOT NULL COMMENT '[N:E-mail][G:o]',
+  `Senha` VARCHAR(12) NOT NULL COMMENT '[P]',
   `CNPJ` VARCHAR(20) NULL DEFAULT NULL,
   `EstadoID` INT NOT NULL,
   `CidadeID` INT NOT NULL,
@@ -33,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `TEmpresas` (
   UNIQUE INDEX `Email_UNIQUE` (`Email` ASC),
   UNIQUE INDEX `GUID_UNIQUE` (`GUID` ASC))
 ENGINE = InnoDB
-COMMENT = 'Informações da empresa[N:Empresa|Empresas]';
+COMMENT = 'Informações da empresa Informações da empresa Informações da empresa Informações da empresa Informações da empresa[N:Ámpresa|Empresas]';
 
 -- -----------------------------------------------------
 -- Table `TDispositivos`

@@ -12,7 +12,7 @@ F: describe the field or table
 M: set field as masked by option
 	example: [M:999-9999]
 D: Default field, with this flag, the field will not be filled by the user
-I: Treats that field as image url, options sets the image proprortion and base directory
+I: Treats that field as image url, options sets the image dimension and base directory
 	example: [I:64x64|user|default.png] will be /static/img/user/image_uploaded.png
 S: indicate that field must be used to search entries in his table
 	options: S, use select element to search
@@ -22,6 +22,7 @@ T: force field to be filled as textarea element
 E: Informs enum beautiful names
 	example: [E:Apple|Orange|Banana]
 G: name gender
-	example: [G:a] or [G|o]
+	example: [G:a] or [G:o]
 L: field style
 	[L:form-control]
+P: Treats that field as password field

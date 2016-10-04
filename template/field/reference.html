@@ -2,7 +2,7 @@
 	<label for="$[field]">$[Field.name]:</label>
 	<select id="$[field]" name="$[field]">
 <?php foreach($$[reference.unix.plural] as $$[reference.unix]) {?>
-		<option value="<?php echo $$[reference.unix]->$[reference.pk.get]();?>" <?php echo $$[table.unix]->$[field.get] == $$[reference.unix]->$[reference.pk.get]()?'selected':'';?>><?php echo $$[reference.unix]->$[reference.desc.get]()?></option>
+		<option value="<?php echo $$[reference.unix]->$[reference.pk.get];?>" <?php echo $$[table.unix]->$[field.get] == $$[reference.unix]->$[reference.pk.get]?'selected':'';?>><?php echo $$[reference.unix]->$[reference.desc.get]?></option>
 <?php }?>
 	</select>
 </div>

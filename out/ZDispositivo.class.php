@@ -1,24 +1,22 @@
 <?php
 
+class DispositivoType {
+	const COMPUTER = 'Computer';
+	const TABLET = 'Tablet';
+}
+
 class ZDispositivo {
 	private $id;
 	private $empresa_id;
 	private $device_id;
+	private $type;
 	private $descricao;
 	private $modelo;
 	private $data_cadastro;
 	private $data_atualizacao;
 
 	public function __construct($dispositivo = array()) {
-		if(is_array($dispositivo)) {
-			$this->setID($dispositivo['id']);
-			$this->setEmpresaID($dispositivo['empresaid']);
-			$this->setDeviceID($dispositivo['deviceid']);
-			$this->setDescricao($dispositivo['descricao']);
-			$this->setModelo($dispositivo['modelo']);
-			$this->setDataCadastro($dispositivo['datacadastro']);
-			$this->setDataAtualizacao($dispositivo['dataatualizacao']);
-		}
+		$this->fromArray($dispositivo);
 	}
 
 	public function getID() {
@@ -43,6 +41,17 @@ class ZDispositivo {
 
 	public function setDeviceID($device_id) {
 		$this->device_id = $device_id;
+	}
+
+	/**
+	 * Tipo de dispositivo
+	 */
+	public function getType() {
+		return $this->type;
+	}
+
+	public function setType($type) {
+		$this->type = $type;
 	}
 
 	public function getDescricao() {
@@ -82,6 +91,7 @@ class ZDispositivo {
 		$dispositivo['id'] = $this->getID();
 		$dispositivo['empresaid'] = $this->getEmpresaID();
 		$dispositivo['deviceid'] = $this->getDeviceID();
+		$dispositivo['type'] = $this->getType();
 		$dispositivo['descricao'] = $this->getDescricao();
 		$dispositivo['modelo'] = $this->getModelo();
 		$dispositivo['datacadastro'] = $this->getDataCadastro();
@@ -89,27 +99,47 @@ class ZDispositivo {
 		return $dispositivo;
 	}
 
+	public function fromArray($dispositivo = array()) {
+		if(!is_array($dispositivo))
+			return $this;
+		$this->setID($dispositivo['id']);
+		$this->setEmpresaID($dispositivo['empresaid']);
+		$this->setDeviceID($dispositivo['deviceid']);
+		$this->setType($dispositivo['type']);
+		$this->setDescricao($dispositivo['descricao']);
+		$this->setModelo($dispositivo['modelo']);
+		$this->setDataCadastro($dispositivo['datacadastro']);
+		$this->setDataAtualizacao($dispositivo['dataatualizacao']);
+	}
+
 	public static function getPeloID($id) {
-		return new ZDispositivo(DB::GetTableRow('TDispositivos', array('id' => $id)));
+		$query = DB::$pdo->from('TDispositivos')
+		                 ->where(array('id' => $id));
+		return new ZDispositivo($query->fetch());
 	}
 
 	public static function getPelaEmpresaIDDeviceID($empresa_id, $device_id) {
-		return new ZDispositivo(DB::GetTableRow('TDispositivos', array('empresaid' => $empresa_id, 'deviceid' => $device_id)));
+		$query = DB::$pdo->from('TDispositivos')
+		                 ->where(array('empresaid' => $empresa_id, 'deviceid' => $device_id));
+		return new ZDispositivo($query->fetch());
 	}
 
 	private static function validarCampos(&$dispositivo) {
 		$erros = array();
 		if(!is_numeric($dispositivo['empresaid']))
-			$erros['empresaid'] = 'A EmpresaID não é um número';
+			$erros['empresaid'] = 'A empresaid não foi informada';
 		$dispositivo['deviceid'] = strip_tags(trim($dispositivo['deviceid']));
 		if(strlen($dispositivo['deviceid']) == 0)
-			$erros['deviceid'] = 'O DeviceID não pode ser vazio';
+			$erros['deviceid'] = 'O deviceid não pode ser vazio';
+		$dispositivo['type'] = strval($dispositivo['type']);
+		if(!in_array($dispositivo['type'], array('Computer', 'Tablet')))
+			$erros['type'] = 'O type of device informado não é válido';
 		$dispositivo['descricao'] = strip_tags(trim($dispositivo['descricao']));
 		if(strlen($dispositivo['descricao']) == 0)
-			$erros['descricao'] = 'A Descricao não pode ser vazia';
+			$erros['descricao'] = 'A descrição não pode ser vazia';
 		$dispositivo['modelo'] = strip_tags(trim($dispositivo['modelo']));
 		if(strlen($dispositivo['modelo']) == 0)
-			$erros['modelo'] = 'O Modelo não pode ser vazio';
+			$erros['modelo'] = 'O modelo não pode ser vazio';
 		$dispositivo['datacadastro'] = date('Y-m-d H:i:s');
 		$dispositivo['dataatualizacao'] = date('Y-m-d H:i:s');
 		if(!empty($erros))
@@ -120,14 +150,14 @@ class ZDispositivo {
 		if(stripos($e->getMessage(), 'PRIMARY') !== false)
 			throw new ValidationException(array('id' => 'O ID informado já está cadastrado'));
 		if(stripos($e->getMessage(), 'UK_Dispositivo') !== false)
-			throw new ValidationException(array('deviceid' => 'O DeviceID informado já está cadastrado'));
+			throw new ValidationException(array('deviceid' => 'O deviceid informado já está cadastrado'));
 	}
 
 	public static function cadastrar($dispositivo) {
 		$_dispositivo = $dispositivo->toArray();
 		self::validarCampos($_dispositivo);
 		try {
-		$_dispositivo['id'] = DB::Insert('TDispositivos', $_dispositivo);
+			$_dispositivo['id'] = DB::$pdo->insertInto('TDispositivos')->values($_dispositivo)->execute();
 		} catch (Exception $e) {
 			self::handleException($e);
 			throw $e;
@@ -143,15 +173,16 @@ class ZDispositivo {
 		$campos = array(
 			'empresaid',
 			'deviceid',
+			'type',
 			'descricao',
 			'modelo',
 			'dataatualizacao',
 		);
 		try {
-		$table = new Table('TDispositivos', $_dispositivo);
-		$table->SetPk('id', $_dispositivo['id']);
-		if(!$table->Update($campos))
-			throw new Exception('Falha ao atualizar a dispositivo');
+			$query = DB::$pdo->update('TDispositivos');
+			$query = $query->set(array_intersect_key($_dispositivo, array_flip($campos)));
+			$query = $query->where('id', $_dispositivo['id']);
+			$query->execute();
 		} catch (Exception $e) {
 			self::handleException($e);
 			throw $e;
@@ -162,22 +193,22 @@ class ZDispositivo {
 	public static function excluir($id) {
 		if(!$id)
 			throw new Exception('Não foi possível excluir o dispositivo, o id do dispositivo não foi informado');
-		return DB::Delete('TDispositivos', array('id' => $id));
+		$query = DB::$pdo->deleteFrom('TDispositivos')
+		                 ->where(array('id' => $id));
+		return $query->execute();
 	}
 
 	private static function initSearch() {
-		$query = array();
-		$query['order'] = 'ORDER BY id ASC';
-		return $query;
+		return   DB::$pdo->from('TDispositivos')
+		                 ->orderBy('id ASC');
 	}
 
 	public static function getTodos($inicio = null, $quantidade = null) {
 		$query = self::initSearch();
 		if(!is_null($inicio) && !is_null($quantidade)) {
-			$query['size'] = $quantidade;
-			$query['offset'] = $inicio;
+			$query = $query->limit($quantidade)->offset($inicio);
 		}
-		$_dispositivos = DB::LimitQuery('TDispositivos', $query);
+		$_dispositivos = $query->fetchAll();
 		$dispositivos = array();
 		foreach($_dispositivos as $dispositivo)
 			$dispositivos[] = new ZDispositivo($dispositivo);
@@ -186,23 +217,21 @@ class ZDispositivo {
 
 	public static function getCount() {
 		$query = self::initSearch();
-		return Table::Count('TDispositivos', $query['condition']);
+		return $query->count();
 	}
 
 	private static function initSearchDaEmpresaID($empresa_id) {
-		$query = array();
-		$query['condition'] = array('empresaid' => $empresa_id);
-		$query['order'] = 'ORDER BY id ASC';
-		return $query;
+		return   DB::$pdo->from('TDispositivos')
+		                 ->where(array('empresaid' => $empresa_id))
+		                 ->orderBy('id ASC');
 	}
 
 	public static function getTodosDaEmpresaID($empresa_id, $inicio = null, $quantidade = null) {
 		$query = self::initSearchDaEmpresaID($empresa_id);
 		if(!is_null($inicio) && !is_null($quantidade)) {
-			$query['size'] = $quantidade;
-			$query['offset'] = $inicio;
+			$query = $query->limit($quantidade)->offset($inicio);
 		}
-		$_dispositivos = DB::LimitQuery('TDispositivos', $query);
+		$_dispositivos = $query->fetchAll();
 		$dispositivos = array();
 		foreach($_dispositivos as $dispositivo)
 			$dispositivos[] = new ZDispositivo($dispositivo);
@@ -211,7 +240,7 @@ class ZDispositivo {
 
 	public static function getCountDaEmpresaID($empresa_id) {
 		$query = self::initSearchDaEmpresaID($empresa_id);
-		return Table::Count('TDispositivos', $query['condition']);
+		return $query->count();
 	}
 
 }

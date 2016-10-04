@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -14,8 +15,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import ast.Constraint;
-import ast.DataType;
 import ast.Field;
+import ast.Foreign;
 import ast.Node;
 import ast.OrderField;
 import ast.PrimaryKey;
@@ -310,6 +311,8 @@ public abstract class CodeGenerator implements LogListener {
 	public static String unixTransform(String word) {
 		String result = "";
 		boolean lastIsUpper = true;
+		word = Normalizer.normalize(word, Normalizer.Form.NFD);
+		word = word.replaceAll("\\p{M}", "");
 		for (int i = 0; i < word.length(); i++) {
 			char ch = word.charAt(i);
 			if (lastIsUpper) {
@@ -322,7 +325,7 @@ public abstract class CodeGenerator implements LogListener {
 			} else
 				result += ch;
 		}
-		return result;
+		return result.replace(' ', '_');
 	}
 	
 	public static boolean isFunctionChecker(String field) {
@@ -451,23 +454,41 @@ public abstract class CodeGenerator implements LogListener {
 		return cName.toUpperCase();
 	}
 
-	protected List<Constraint> getUniqueKeyList(Table table) {
-		List<Constraint> list = new ArrayList<Constraint>();
-		// get from primary key
-		for (Constraint constraint : table.getConstraints()) {
-			if (constraint instanceof PrimaryKey) {
-				list.add(constraint);
-				break;
-			}
+	public List<Field> getFields(Table table, Constraint constraint) {
+		List<Field> list = new ArrayList<>();
+		if(constraint == null)
+			return list;
+		for (OrderField orderField : constraint.getFields()) {
+			Field field = table.find(orderField.getName());
+			if(field == null)
+				throw new RuntimeException(String.format(Messages.getString("CodeGenerator.string0"), orderField.getName(), table.getName())); //$NON-NLS-1$
+			list.add(field);
 		}
-		// get from unique key
-		if(list.isEmpty()) {
-			for (Constraint constraint : table.getConstraints()) {
-				if (constraint instanceof UniqueKey) {
-					list.add(constraint);
-					break;
-				}
-			}
+		return list;
+	}
+	
+	public List<UniqueKey> getUniqueKeys(Table table) {
+		return getUniqueKeys(table, false);
+	}
+
+	public List<UniqueKey> getUniqueKeys(Table table, boolean skipPk) {
+		List<UniqueKey> list = new ArrayList<>();
+		for (Constraint constraint : table.getConstraints()) {
+			if (!(constraint instanceof UniqueKey))
+				continue;
+			if(skipPk && (constraint instanceof PrimaryKey))
+				continue;
+			list.add((UniqueKey)constraint);
+		}
+		return list;
+	}
+
+	public List<Foreign> getForeignKeys(Table table) {
+		List<Foreign> list = new ArrayList<>();
+		for (Constraint constraint : table.getConstraints()) {
+			if (!(constraint instanceof Foreign))
+				continue;
+			list.add((Foreign)constraint);
 		}
 		return list;
 	}
@@ -481,59 +502,39 @@ public abstract class CodeGenerator implements LogListener {
 		return null;
 	}
 
-	public List<Field> getFields(Table table, Constraint constraint) {
-		List<Field> list = new ArrayList<>();
-		if(constraint == null)
-			return list;
-		for (OrderField orderField : constraint.getFields()) {
-			Field field = table.find(orderField.getName());
-			if(field == null)
-				throw new RuntimeException(String.format(Messages.getString("CodeGenerator.string0"), orderField.getName(), table.getName())); //$NON-NLS-1$
-			list.add(field);
-		}
-		return list;
-	}
-
-	public List<Constraint> getUniqueConstraints(Table table) {
-		List<Constraint> list = new ArrayList<>();
-		for (Constraint constraint : table.getConstraints()) {
-			if (!(constraint instanceof UniqueKey))
-				continue;
-			list.add(constraint);
-		}
-		return list;
-	}
-
 	protected Field getPkField(Table table) {
-		for (Constraint constraint : table.getConstraints()) {
-			if (constraint instanceof PrimaryKey) {
-				if(constraint.getFields().size() == 1)
-					return table.find(constraint.getFields().get(0).getName());
-				break;
-			}
-		}
+		Constraint constraint = getPrimaryKey(table);
+		if(constraint != null && constraint.getFields().size() == 1)
+			return table.find(constraint.getFields().get(0).getName());
 		return null;
 	}
 
 	protected Field getDescField(Table table) {
 		Hashtable<String, String> values = new Hashtable<>();
+		Field descField = null;
 		for (Field field : table.getFields()) {
 			values.clear();
 			TemplateLoader.extractComment(field.getComment(), values, "F.");
-			if(values.containsKey("F.S"))
-				return field;
+			if(values.containsKey("F.S")) {
+				if(field.getType().isString() || descField == null)
+					descField = field;
+				if(values.get("F.S").isEmpty())
+					return field;
+			}
 		}
+		if(descField != null)
+			return descField;
 		for (Constraint constraint : table.getConstraints()) {
 			if (constraint instanceof UniqueKey) {
 				if(constraint.getFields().size() == 1) {
 					Field field = table.find(constraint.getFields().get(0).getName());
-					if(field.getType().getType() == DataType.STRING)
+					if(field.getType().isString())
 						return field;
 				}
 			}
 		}
 		for (Field field : table.getFields()) {
-			if(field.getType().getType() == DataType.STRING)
+			if(field.getType().isString())
 				return field;
 		}
 		return getPkField(table);
