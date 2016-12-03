@@ -21,7 +21,7 @@ public class JavaGenerator extends JavaGeneratorBase {
 	}
 
 	@Override
-	public void genHeader(PrintWriter out, Table table, String name,
+	protected void genHeader(PrintWriter out, Table table, String name,
 			boolean indexed) {
 		super.genHeader(out, table, name, indexed);
 	}
@@ -43,7 +43,7 @@ public class JavaGenerator extends JavaGeneratorBase {
 	}
 
 	@Override
-	public void genClass(PrintWriter out, Table table, String name,
+	protected void genBody(PrintWriter out, Table table, String name,
 			boolean indexed) {
 		Hashtable<String, String> indexedFields = new Hashtable<>();
 		Hashtable<String, Pair<String, Field>> usedFields = new Hashtable<>();
@@ -408,10 +408,28 @@ public class JavaGenerator extends JavaGeneratorBase {
 	}
 
 	@Override
-	public void genFooter(PrintWriter out, Table table, String name,
+	protected void genFooter(PrintWriter out, Table table, String name,
 			boolean indexed) {
 		// TODO Auto-generated method stub
 
+	}
+
+	protected String getConstantName(String name) {
+		String cName = "";
+		boolean prevIsUpr = true;
+		for (int i = 0; i < name.length(); i++) {
+			if(Character.isLowerCase(name.charAt(i))) {
+				cName += name.charAt(i);
+				prevIsUpr = false;
+			} else {
+				if(!prevIsUpr) {
+					cName += "_";
+					prevIsUpr = true;
+				}
+				cName += name.charAt(i);
+			}
+		}
+		return cName.toUpperCase();
 	}
 
 }

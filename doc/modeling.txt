@@ -26,3 +26,7 @@ G: name gender
 L: field style
 	[L:form-control]
 P: Treats that field as password field
+K: define a package
+	example: [K:package.io|package/io/]
+H: Define inheritance
+	example: [H:table or name]

@@ -26,7 +26,7 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 	}
 
 	@Override
-	public void genHeader(PrintWriter out, Table table, String name,
+	protected void genHeader(PrintWriter out, Table table, String name,
 			boolean indexed) {
 		super.genHeader(out, table, name, indexed);
 	}
@@ -60,7 +60,7 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 	}
 
 	@Override
-	public void genClass(PrintWriter out, Table table, String name,
+	protected void genBody(PrintWriter out, Table table, String name,
 			boolean indexed) {
 		Hashtable<String, String> indexedFields = new Hashtable<>();
 		Hashtable<String, Pair<String, Field>> usedFields = new Hashtable<>();
@@ -89,7 +89,7 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 		out.println("\t}");
 		// find and list objects
 		List<UniqueKey> list = getUniqueKeys(table);
-		Field pkField = getPkField(table);
+		Field pkField = getPrimary(table);
 		String pkSelect = "*";
 		if(pkField != null)
 			pkSelect = pkField.getName();
@@ -620,8 +620,12 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 	}
 
 	@Override
-	public void genFooter(PrintWriter out, Table table, String name,
+	protected void genFooter(PrintWriter out, Table table, String name,
 			boolean indexed) {
+	}
+
+	private String getBaseClassName(String name) {
+		return getClassBasePrefix() + name + getClassBaseSuffix();
 	}
 
 	public String getClassBasePrefix() {
@@ -638,10 +642,6 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 
 	public void setClassBaseSuffix(String classBaseSuffix) {
 		this.classBaseSuffix = classBaseSuffix;
-	}
-
-	private String getBaseClassName(String name) {
-		return getClassBasePrefix() + name + getClassBaseSuffix();
 	}
 
 	public void setPackageBaseName(String name) {

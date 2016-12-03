@@ -1106,43 +1106,6 @@ public class SQLParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
-	public static class FieldStmtContext extends CreateDefinitionContext {
-		public ColumnNameContext columnName() {
-			return getRuleContext(ColumnNameContext.class,0);
-		}
-		public ColumnDefinitionContext columnDefinition() {
-			return getRuleContext(ColumnDefinitionContext.class,0);
-		}
-		public FieldStmtContext(CreateDefinitionContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterFieldStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitFieldStmt(this);
-		}
-	}
-	public static class IndexStmtContext extends CreateDefinitionContext {
-		public List<IndexColNameContext> indexColName() {
-			return getRuleContexts(IndexColNameContext.class);
-		}
-		public IndexColNameContext indexColName(int i) {
-			return getRuleContext(IndexColNameContext.class,i);
-		}
-		public ConstraintNameContext constraintName() {
-			return getRuleContext(ConstraintNameContext.class,0);
-		}
-		public IndexStmtContext(CreateDefinitionContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterIndexStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitIndexStmt(this);
-		}
-	}
 	public static class ForeignStmtContext extends CreateDefinitionContext {
 		public List<IndexColNameContext> indexColName() {
 			return getRuleContexts(IndexColNameContext.class);
@@ -1169,6 +1132,46 @@ public class SQLParser extends Parser {
 			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitForeignStmt(this);
 		}
 	}
+	public static class PrimaryKeyStmtContext extends CreateDefinitionContext {
+		public List<IndexColNameContext> indexColName() {
+			return getRuleContexts(IndexColNameContext.class);
+		}
+		public IndexColNameContext indexColName(int i) {
+			return getRuleContext(IndexColNameContext.class,i);
+		}
+		public ConstraintNameContext constraintName() {
+			return getRuleContext(ConstraintNameContext.class,0);
+		}
+		public PrimaryKeyStmtContext(CreateDefinitionContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterPrimaryKeyStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitPrimaryKeyStmt(this);
+		}
+	}
+	public static class IndexStmtContext extends CreateDefinitionContext {
+		public List<IndexColNameContext> indexColName() {
+			return getRuleContexts(IndexColNameContext.class);
+		}
+		public IndexColNameContext indexColName(int i) {
+			return getRuleContext(IndexColNameContext.class,i);
+		}
+		public ConstraintNameContext constraintName() {
+			return getRuleContext(ConstraintNameContext.class,0);
+		}
+		public IndexStmtContext(CreateDefinitionContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterIndexStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitIndexStmt(this);
+		}
+	}
 	public static class UniqueStmtContext extends CreateDefinitionContext {
 		public List<IndexColNameContext> indexColName() {
 			return getRuleContexts(IndexColNameContext.class);
@@ -1192,24 +1195,21 @@ public class SQLParser extends Parser {
 			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitUniqueStmt(this);
 		}
 	}
-	public static class PrimaryKeyStmtContext extends CreateDefinitionContext {
-		public List<IndexColNameContext> indexColName() {
-			return getRuleContexts(IndexColNameContext.class);
+	public static class FieldStmtContext extends CreateDefinitionContext {
+		public ColumnNameContext columnName() {
+			return getRuleContext(ColumnNameContext.class,0);
 		}
-		public IndexColNameContext indexColName(int i) {
-			return getRuleContext(IndexColNameContext.class,i);
+		public ColumnDefinitionContext columnDefinition() {
+			return getRuleContext(ColumnDefinitionContext.class,0);
 		}
-		public ConstraintNameContext constraintName() {
-			return getRuleContext(ConstraintNameContext.class,0);
-		}
-		public PrimaryKeyStmtContext(CreateDefinitionContext ctx) { copyFrom(ctx); }
+		public FieldStmtContext(CreateDefinitionContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterPrimaryKeyStmt(this);
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterFieldStmt(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitPrimaryKeyStmt(this);
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitFieldStmt(this);
 		}
 	}
 
@@ -2150,6 +2150,126 @@ public class SQLParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
+	public static class TypeBlobStmtContext extends DataTypeContext {
+		public TypeBlobStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeBlobStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeBlobStmt(this);
+		}
+	}
+	public static class TypeTinyTextStmtContext extends DataTypeContext {
+		public CharsetNameContext charsetName() {
+			return getRuleContext(CharsetNameContext.class,0);
+		}
+		public CollateNameContext collateName() {
+			return getRuleContext(CollateNameContext.class,0);
+		}
+		public TypeTinyTextStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeTinyTextStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeTinyTextStmt(this);
+		}
+	}
+	public static class TypeDecimalStmtContext extends DataTypeContext {
+		public List<TerminalNode> INT() { return getTokens(SQLParser.INT); }
+		public TerminalNode INT(int i) {
+			return getToken(SQLParser.INT, i);
+		}
+		public TypeDecimalStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeDecimalStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeDecimalStmt(this);
+		}
+	}
+	public static class TypeLongTextStmtContext extends DataTypeContext {
+		public CharsetNameContext charsetName() {
+			return getRuleContext(CharsetNameContext.class,0);
+		}
+		public CollateNameContext collateName() {
+			return getRuleContext(CollateNameContext.class,0);
+		}
+		public TypeLongTextStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeLongTextStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeLongTextStmt(this);
+		}
+	}
+	public static class TypeMediumBlobStmtContext extends DataTypeContext {
+		public TypeMediumBlobStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeMediumBlobStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeMediumBlobStmt(this);
+		}
+	}
+	public static class TypeDoubleStmtContext extends DataTypeContext {
+		public List<TerminalNode> INT() { return getTokens(SQLParser.INT); }
+		public TerminalNode INT(int i) {
+			return getToken(SQLParser.INT, i);
+		}
+		public TypeDoubleStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeDoubleStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeDoubleStmt(this);
+		}
+	}
+	public static class TypeTimeStmtContext extends DataTypeContext {
+		public TypeTimeStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeTimeStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeTimeStmt(this);
+		}
+	}
+	public static class TypeLongBlobStmtContext extends DataTypeContext {
+		public TypeLongBlobStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeLongBlobStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeLongBlobStmt(this);
+		}
+	}
+	public static class TypeTinyIntStmtContext extends DataTypeContext {
+		public TerminalNode INT() { return getToken(SQLParser.INT, 0); }
+		public TypeTinyIntStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeTinyIntStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeTinyIntStmt(this);
+		}
+	}
 	public static class TypeTinyBlobStmtContext extends DataTypeContext {
 		public TypeTinyBlobStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
 		@Override
@@ -2184,218 +2304,6 @@ public class SQLParser extends Parser {
 			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeSetStmt(this);
 		}
 	}
-	public static class TypeLongTextStmtContext extends DataTypeContext {
-		public CharsetNameContext charsetName() {
-			return getRuleContext(CharsetNameContext.class,0);
-		}
-		public CollateNameContext collateName() {
-			return getRuleContext(CollateNameContext.class,0);
-		}
-		public TypeLongTextStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeLongTextStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeLongTextStmt(this);
-		}
-	}
-	public static class TypeNumericStmtContext extends DataTypeContext {
-		public List<TerminalNode> INT() { return getTokens(SQLParser.INT); }
-		public TerminalNode INT(int i) {
-			return getToken(SQLParser.INT, i);
-		}
-		public TypeNumericStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeNumericStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeNumericStmt(this);
-		}
-	}
-	public static class TypeMediumTextStmtContext extends DataTypeContext {
-		public CharsetNameContext charsetName() {
-			return getRuleContext(CharsetNameContext.class,0);
-		}
-		public CollateNameContext collateName() {
-			return getRuleContext(CollateNameContext.class,0);
-		}
-		public TypeMediumTextStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeMediumTextStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeMediumTextStmt(this);
-		}
-	}
-	public static class TypeRealStmtContext extends DataTypeContext {
-		public List<TerminalNode> INT() { return getTokens(SQLParser.INT); }
-		public TerminalNode INT(int i) {
-			return getToken(SQLParser.INT, i);
-		}
-		public TypeRealStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeRealStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeRealStmt(this);
-		}
-	}
-	public static class TypeIntStmtContext extends DataTypeContext {
-		public TerminalNode INT() { return getToken(SQLParser.INT, 0); }
-		public TypeIntStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeIntStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeIntStmt(this);
-		}
-	}
-	public static class TypeMediumIntStmtContext extends DataTypeContext {
-		public TerminalNode INT() { return getToken(SQLParser.INT, 0); }
-		public TypeMediumIntStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeMediumIntStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeMediumIntStmt(this);
-		}
-	}
-	public static class TypeTinyIntStmtContext extends DataTypeContext {
-		public TerminalNode INT() { return getToken(SQLParser.INT, 0); }
-		public TypeTinyIntStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeTinyIntStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeTinyIntStmt(this);
-		}
-	}
-	public static class TypeBitStmtContext extends DataTypeContext {
-		public TerminalNode INT() { return getToken(SQLParser.INT, 0); }
-		public TypeBitStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeBitStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeBitStmt(this);
-		}
-	}
-	public static class TypeLongBlobStmtContext extends DataTypeContext {
-		public TypeLongBlobStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeLongBlobStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeLongBlobStmt(this);
-		}
-	}
-	public static class TypeSmallIntStmtContext extends DataTypeContext {
-		public TerminalNode INT() { return getToken(SQLParser.INT, 0); }
-		public TypeSmallIntStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeSmallIntStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeSmallIntStmt(this);
-		}
-	}
-	public static class TypeMediumBlobStmtContext extends DataTypeContext {
-		public TypeMediumBlobStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeMediumBlobStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeMediumBlobStmt(this);
-		}
-	}
-	public static class TypeDoubleStmtContext extends DataTypeContext {
-		public List<TerminalNode> INT() { return getTokens(SQLParser.INT); }
-		public TerminalNode INT(int i) {
-			return getToken(SQLParser.INT, i);
-		}
-		public TypeDoubleStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeDoubleStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeDoubleStmt(this);
-		}
-	}
-	public static class TypeIntegerStmtContext extends DataTypeContext {
-		public TerminalNode INT() { return getToken(SQLParser.INT, 0); }
-		public TypeIntegerStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeIntegerStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeIntegerStmt(this);
-		}
-	}
-	public static class TypeTextStmtContext extends DataTypeContext {
-		public CharsetNameContext charsetName() {
-			return getRuleContext(CharsetNameContext.class,0);
-		}
-		public CollateNameContext collateName() {
-			return getRuleContext(CollateNameContext.class,0);
-		}
-		public TypeTextStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeTextStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeTextStmt(this);
-		}
-	}
-	public static class TypeDateTimeStmtContext extends DataTypeContext {
-		public TypeDateTimeStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeDateTimeStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeDateTimeStmt(this);
-		}
-	}
-	public static class TypeYearStmtContext extends DataTypeContext {
-		public TypeYearStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeYearStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeYearStmt(this);
-		}
-	}
 	public static class TypeFloatStmtContext extends DataTypeContext {
 		public List<TerminalNode> INT() { return getTokens(SQLParser.INT); }
 		public TerminalNode INT(int i) {
@@ -2411,35 +2319,6 @@ public class SQLParser extends Parser {
 			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeFloatStmt(this);
 		}
 	}
-	public static class TypeTimeStmtContext extends DataTypeContext {
-		public TypeTimeStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeTimeStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeTimeStmt(this);
-		}
-	}
-	public static class TypeCharStmtContext extends DataTypeContext {
-		public TerminalNode INT() { return getToken(SQLParser.INT, 0); }
-		public CharsetNameContext charsetName() {
-			return getRuleContext(CharsetNameContext.class,0);
-		}
-		public CollateNameContext collateName() {
-			return getRuleContext(CollateNameContext.class,0);
-		}
-		public TypeCharStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeCharStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeCharStmt(this);
-		}
-	}
 	public static class TypeDateStmtContext extends DataTypeContext {
 		public TypeDateStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
 		@Override
@@ -2449,17 +2328,6 @@ public class SQLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeDateStmt(this);
-		}
-	}
-	public static class TypeBlobStmtContext extends DataTypeContext {
-		public TypeBlobStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeBlobStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeBlobStmt(this);
 		}
 	}
 	public static class TypeVarCharStmtContext extends DataTypeContext {
@@ -2480,19 +2348,21 @@ public class SQLParser extends Parser {
 			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeVarCharStmt(this);
 		}
 	}
-	public static class TypeDecimalStmtContext extends DataTypeContext {
-		public List<TerminalNode> INT() { return getTokens(SQLParser.INT); }
-		public TerminalNode INT(int i) {
-			return getToken(SQLParser.INT, i);
+	public static class TypeMediumTextStmtContext extends DataTypeContext {
+		public CharsetNameContext charsetName() {
+			return getRuleContext(CharsetNameContext.class,0);
 		}
-		public TypeDecimalStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		public CollateNameContext collateName() {
+			return getRuleContext(CollateNameContext.class,0);
+		}
+		public TypeMediumTextStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeDecimalStmt(this);
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeMediumTextStmt(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeDecimalStmt(this);
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeMediumTextStmt(this);
 		}
 	}
 	public static class TypeTimeStampStmtContext extends DataTypeContext {
@@ -2506,57 +2376,16 @@ public class SQLParser extends Parser {
 			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeTimeStampStmt(this);
 		}
 	}
-	public static class TypeBigIntStmtContext extends DataTypeContext {
+	public static class TypeMediumIntStmtContext extends DataTypeContext {
 		public TerminalNode INT() { return getToken(SQLParser.INT, 0); }
-		public TypeBigIntStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		public TypeMediumIntStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeBigIntStmt(this);
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeMediumIntStmt(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeBigIntStmt(this);
-		}
-	}
-	public static class TypeBinaryStmtContext extends DataTypeContext {
-		public TerminalNode INT() { return getToken(SQLParser.INT, 0); }
-		public TypeBinaryStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeBinaryStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeBinaryStmt(this);
-		}
-	}
-	public static class TypeVarBinaryStmtContext extends DataTypeContext {
-		public TerminalNode INT() { return getToken(SQLParser.INT, 0); }
-		public TypeVarBinaryStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeVarBinaryStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeVarBinaryStmt(this);
-		}
-	}
-	public static class TypeTinyTextStmtContext extends DataTypeContext {
-		public CharsetNameContext charsetName() {
-			return getRuleContext(CharsetNameContext.class,0);
-		}
-		public CollateNameContext collateName() {
-			return getRuleContext(CollateNameContext.class,0);
-		}
-		public TypeTinyTextStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeTinyTextStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeTinyTextStmt(this);
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeMediumIntStmt(this);
 		}
 	}
 	public static class TypeEnumStmtContext extends DataTypeContext {
@@ -2580,6 +2409,177 @@ public class SQLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeEnumStmt(this);
+		}
+	}
+	public static class TypeBitStmtContext extends DataTypeContext {
+		public TerminalNode INT() { return getToken(SQLParser.INT, 0); }
+		public TypeBitStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeBitStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeBitStmt(this);
+		}
+	}
+	public static class TypeNumericStmtContext extends DataTypeContext {
+		public List<TerminalNode> INT() { return getTokens(SQLParser.INT); }
+		public TerminalNode INT(int i) {
+			return getToken(SQLParser.INT, i);
+		}
+		public TypeNumericStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeNumericStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeNumericStmt(this);
+		}
+	}
+	public static class TypeRealStmtContext extends DataTypeContext {
+		public List<TerminalNode> INT() { return getTokens(SQLParser.INT); }
+		public TerminalNode INT(int i) {
+			return getToken(SQLParser.INT, i);
+		}
+		public TypeRealStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeRealStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeRealStmt(this);
+		}
+	}
+	public static class TypeTextStmtContext extends DataTypeContext {
+		public CharsetNameContext charsetName() {
+			return getRuleContext(CharsetNameContext.class,0);
+		}
+		public CollateNameContext collateName() {
+			return getRuleContext(CollateNameContext.class,0);
+		}
+		public TypeTextStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeTextStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeTextStmt(this);
+		}
+	}
+	public static class TypeBigIntStmtContext extends DataTypeContext {
+		public TerminalNode INT() { return getToken(SQLParser.INT, 0); }
+		public TypeBigIntStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeBigIntStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeBigIntStmt(this);
+		}
+	}
+	public static class TypeDateTimeStmtContext extends DataTypeContext {
+		public TypeDateTimeStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeDateTimeStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeDateTimeStmt(this);
+		}
+	}
+	public static class TypeBinaryStmtContext extends DataTypeContext {
+		public TerminalNode INT() { return getToken(SQLParser.INT, 0); }
+		public TypeBinaryStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeBinaryStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeBinaryStmt(this);
+		}
+	}
+	public static class TypeYearStmtContext extends DataTypeContext {
+		public TypeYearStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeYearStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeYearStmt(this);
+		}
+	}
+	public static class TypeIntStmtContext extends DataTypeContext {
+		public TerminalNode INT() { return getToken(SQLParser.INT, 0); }
+		public TypeIntStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeIntStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeIntStmt(this);
+		}
+	}
+	public static class TypeVarBinaryStmtContext extends DataTypeContext {
+		public TerminalNode INT() { return getToken(SQLParser.INT, 0); }
+		public TypeVarBinaryStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeVarBinaryStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeVarBinaryStmt(this);
+		}
+	}
+	public static class TypeCharStmtContext extends DataTypeContext {
+		public TerminalNode INT() { return getToken(SQLParser.INT, 0); }
+		public CharsetNameContext charsetName() {
+			return getRuleContext(CharsetNameContext.class,0);
+		}
+		public CollateNameContext collateName() {
+			return getRuleContext(CollateNameContext.class,0);
+		}
+		public TypeCharStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeCharStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeCharStmt(this);
+		}
+	}
+	public static class TypeSmallIntStmtContext extends DataTypeContext {
+		public TerminalNode INT() { return getToken(SQLParser.INT, 0); }
+		public TypeSmallIntStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeSmallIntStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeSmallIntStmt(this);
+		}
+	}
+	public static class TypeIntegerStmtContext extends DataTypeContext {
+		public TerminalNode INT() { return getToken(SQLParser.INT, 0); }
+		public TypeIntegerStmtContext(DataTypeContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).enterTypeIntegerStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLListener ) ((SQLListener)listener).exitTypeIntegerStmt(this);
 		}
 	}
 

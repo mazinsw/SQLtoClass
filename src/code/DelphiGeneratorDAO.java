@@ -40,15 +40,16 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		this.classBaseSuffix = classBaseSuffix;
 	}
 
-	public static String getExceptionName(String name, Constraint constraint) {
-		String uniqueFieldName = constraint.getFields()
-					.get(constraint.getFields().size() - 1).getName();
-		String normalized = normalize(uniqueFieldName, false).replace("][", "_").replace("[", "").replace("]", "");
-		return "E" + name + normalized;
+	public boolean isInherited() {
+		return inherited;
+	}
+
+	public void setInherited(boolean inherited) {
+		this.inherited = inherited;
 	}
 
 	@Override
-	public void genHeader(PrintWriter out, Table table, String name,
+	protected void genHeader(PrintWriter out, Table table, String name,
 			boolean indexed) {
 		PrimaryKey primaryKey = getPrimaryKey(table);
 		List<Field> keyFields = getFields(table, primaryKey);
@@ -142,135 +143,8 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		}
 	}
 
-	private void genWhereParams(PrintWriter out, Table table, String name,
-			boolean indexed, List<Field> keyFields) {
-		if (keyFields.size() > 0) {
-			out.println(" ' +");
-			out.print("    'WHERE ");
-		} else
-			out.println("';");
-		String AndStmt = "", space = "";
-		for (Field field : keyFields) {
-			if (!AndStmt.equals(""))
-				out.println(AndStmt);
-			out.print(space + field.getName() + " = :" + field.getName());
-			space = "    '";
-			AndStmt = " AND ' + ";
-		}
-		if (keyFields.size() > 0)
-			out.println("';");
-	}
-
-	private void genSetParams(PrintWriter out, Table table, String name,
-			boolean indexed, List<Field> keyFields) {
-		for (Field field : keyFields) {
-			String varName = normalize(field.getName(), false);
-			writeSetParam(out, name, field, varName, "  ");
-		}
-	}
-
-	private void genUpdateAssignFields(PrintWriter out, Table table,
-			String name, boolean indexed) {
-		String AndStmt = "";
-		for (Field field : table.getFields()) {
-			if (field.getType().getType() == DataType.BLOB) {
-				out.println("' +");
-				out.println(" // '" + field.getName() + " = :" + field.getName() + " ' + ");
-				out.print("    '");
-				continue;
-			}
-			if (field.getType().getType() == DataType.DATETIME && getDateFromDB(field)) {
-				out.println("' +");
-				out.println(" // '" + field.getName() + " = :" + field.getName() + " ' + ");
-				out.print("    '");
-				continue;
-			}
-			if (!AndStmt.equals(""))
-				out.println(AndStmt);
-			out.print("    '" + field.getName() + " = :" + field.getName());
-			AndStmt = ", ' + ";
-		}
-	}
-	
-	private List<Field> getAutoFields(Table table) {
-		List<Field> list = new ArrayList<>();
-		for (Field field : table.getFields()) {
-			if (field.getType().getType() == DataType.DATETIME && getDateFromDB(field)) {
-				list.add(field);
-			}
-		}
-		return list;
-	}
-
-	private void genInsertAssignFields(PrintWriter out, Table table,
-			String name, boolean indexed) {
-		out.println("(' +");
-		String AndStmt = "";
-		for (Field field : table.getFields()) {
-			if (!AndStmt.equals(""))
-				out.println(AndStmt);
-			if (field.getType().getType() == DataType.DATETIME && getDateFromDB(field)) {
-				out.print(" {* " + field.getName() + " *} 'NOW()");
-				continue;
-			}
-			out.print("    ':" + field.getName());
-			AndStmt = ", ' + ";
-		}
-		out.println(")';");
-	}
-	
-	private void genCorrectException(PrintWriter out, Table table,
-			String name, boolean indexed,
-			List<Field> keyFields, boolean update) {
-		for (Constraint constraint : table.getConstraints()) {
-			if (!(constraint instanceof UniqueKey))
-				continue;
-			out.println("      if StrUtils.ContainsText(E.Message, '''"
-						+ constraint.getName() + "''') then");
-			out.println("      begin");
-			Field field = table.find(constraint.getFields()
-					.get(constraint.getFields().size() - 1).getName());
-			if(field == null)
-				throw new RuntimeException("Restrição ou índice inconsistente, a coluna `" + constraint.getFields()
-						.get(constraint.getFields().size() - 1).getName() + "` não faz parte da tabela `" + table.getName() + "`");
-			String uniqueFieldName = field.getName();
-			String varName = normalize(uniqueFieldName, false);
-			String action;
-			if (update)
-				action = "atualizar";
-			else
-				action = "inserir";
-			String ugc = getGenderChar(uniqueFieldName);
-			String lgc = ugc.toLowerCase();
-			out.println("        raise " + getExceptionName(name, constraint)
-					+ ".CreateFmt('Não foi possível " + action + " "
-					+ getGenderChar(name) + " " + normalize(name).toLowerCase()
-					+ ", ' +");
-			out.println("          '" + ugc + " "
-					+ upperFix(uniqueFieldName.toLowerCase()) + " \"" + getFormatFromType(field) + "\" já está cadastrad" + lgc + "', ["
-					+ getGetParam(name, field, varName) + "]);");
-			out.println("      end;");
-		}
-	}
-
-	private String getFormatFromType(Field field) {
-		switch (field.getType().getType()) {
-		case DataType.STRING:
-		case DataType.CHAR:
-		case DataType.TEXT:
-		case DataType.ENUM:
-			return "%s";
-		case DataType.FLOAT:
-		case DataType.DOUBLE:
-		case DataType.DECIMAL:
-			return "%f";
-		default:
-			return "%d";
-		}
-	}
-
 	@Override
-	public void genClass(PrintWriter out, Table table, String name,
+	protected void genBody(PrintWriter out, Table table, String name,
 			boolean indexed) {
 		PrimaryKey primaryKey = getPrimaryKey(table);
 		List<Field> keyFields = getFields(table, primaryKey);
@@ -682,6 +556,148 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		out.println("end;");
 	}
 
+	@Override
+	protected void genFooter(PrintWriter out, Table table, String name,
+			boolean indexed) {
+		out.println();
+		out.println("end.");
+
+	}
+
+	private static String getExceptionName(String name, Constraint constraint) {
+		String uniqueFieldName = constraint.getFields()
+					.get(constraint.getFields().size() - 1).getName();
+		String normalized = normalize(uniqueFieldName, false).replace("][", "_").replace("[", "").replace("]", "");
+		return "E" + name + normalized;
+	}
+
+	private void genWhereParams(PrintWriter out, Table table, String name,
+			boolean indexed, List<Field> keyFields) {
+		if (keyFields.size() > 0) {
+			out.println(" ' +");
+			out.print("    'WHERE ");
+		} else
+			out.println("';");
+		String AndStmt = "", space = "";
+		for (Field field : keyFields) {
+			if (!AndStmt.equals(""))
+				out.println(AndStmt);
+			out.print(space + field.getName() + " = :" + field.getName());
+			space = "    '";
+			AndStmt = " AND ' + ";
+		}
+		if (keyFields.size() > 0)
+			out.println("';");
+	}
+
+	private void genSetParams(PrintWriter out, Table table, String name,
+			boolean indexed, List<Field> keyFields) {
+		for (Field field : keyFields) {
+			String varName = normalize(field.getName(), false);
+			writeSetParam(out, name, field, varName, "  ");
+		}
+	}
+
+	private void genUpdateAssignFields(PrintWriter out, Table table,
+			String name, boolean indexed) {
+		String AndStmt = "";
+		for (Field field : table.getFields()) {
+			if (field.getType().getType() == DataType.BLOB) {
+				out.println("' +");
+				out.println(" // '" + field.getName() + " = :" + field.getName() + " ' + ");
+				out.print("    '");
+				continue;
+			}
+			if (field.getType().getType() == DataType.DATETIME && getDateFromDB(field)) {
+				out.println("' +");
+				out.println(" // '" + field.getName() + " = :" + field.getName() + " ' + ");
+				out.print("    '");
+				continue;
+			}
+			if (!AndStmt.equals(""))
+				out.println(AndStmt);
+			out.print("    '" + field.getName() + " = :" + field.getName());
+			AndStmt = ", ' + ";
+		}
+	}
+	
+	private List<Field> getAutoFields(Table table) {
+		List<Field> list = new ArrayList<>();
+		for (Field field : table.getFields()) {
+			if (field.getType().getType() == DataType.DATETIME && getDateFromDB(field)) {
+				list.add(field);
+			}
+		}
+		return list;
+	}
+
+	private void genInsertAssignFields(PrintWriter out, Table table,
+			String name, boolean indexed) {
+		out.println("(' +");
+		String AndStmt = "";
+		for (Field field : table.getFields()) {
+			if (!AndStmt.equals(""))
+				out.println(AndStmt);
+			if (field.getType().getType() == DataType.DATETIME && getDateFromDB(field)) {
+				out.print(" {* " + field.getName() + " *} 'NOW()");
+				continue;
+			}
+			out.print("    ':" + field.getName());
+			AndStmt = ", ' + ";
+		}
+		out.println(")';");
+	}
+	
+	private void genCorrectException(PrintWriter out, Table table,
+			String name, boolean indexed,
+			List<Field> keyFields, boolean update) {
+		for (Constraint constraint : table.getConstraints()) {
+			if (!(constraint instanceof UniqueKey))
+				continue;
+			out.println("      if StrUtils.ContainsText(E.Message, '''"
+						+ constraint.getName() + "''') then");
+			out.println("      begin");
+			Field field = table.find(constraint.getFields()
+					.get(constraint.getFields().size() - 1).getName());
+			if(field == null)
+				throw new RuntimeException("Restrição ou índice inconsistente, a coluna `" + constraint.getFields()
+						.get(constraint.getFields().size() - 1).getName() + "` não faz parte da tabela `" + table.getName() + "`");
+			String uniqueFieldName = field.getName();
+			String varName = normalize(uniqueFieldName, false);
+			String action;
+			if (update)
+				action = "atualizar";
+			else
+				action = "inserir";
+			String ugc = getGenderChar(uniqueFieldName);
+			String lgc = ugc.toLowerCase();
+			out.println("        raise " + getExceptionName(name, constraint)
+					+ ".CreateFmt('Não foi possível " + action + " "
+					+ getGenderChar(name) + " " + normalize(name).toLowerCase()
+					+ ", ' +");
+			out.println("          '" + ugc + " "
+					+ upperFix(uniqueFieldName.toLowerCase()) + " \"" + getFormatFromType(field) + "\" já está cadastrad" + lgc + "', ["
+					+ getGetParam(name, field, varName) + "]);");
+			out.println("      end;");
+		}
+	}
+
+	private String getFormatFromType(Field field) {
+		switch (field.getType().getType()) {
+		case DataType.STRING:
+		case DataType.CHAR:
+		case DataType.TEXT:
+		case DataType.ENUM:
+			return "%s";
+		case DataType.FLOAT:
+		case DataType.DOUBLE:
+		case DataType.DECIMAL:
+			return "%f";
+		default:
+			return "%d";
+		}
+	}
+	
 	private boolean getDateFromDB(Field field) {
 		return field.getName().contains("DataHora") || field.getName().contains("DataCadastro") || field.getName().contains("DataAtualizacao") || field.isNotNull();
 	}
@@ -771,14 +787,6 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 		}
 		return "Value";
 	}
-
-	@Override
-	public void genFooter(PrintWriter out, Table table, String name,
-			boolean indexed) {
-		out.println();
-		out.println("end.");
-
-	}
 	
 	private void writeSetParam(PrintWriter out, String name, Field field, String varName, String indent) {
 		out.println(indent + "Qry.ParamByName('" + field.getName() + "')."
@@ -817,14 +825,6 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 			return tableName + "' + IntToStr(" + getBaseClassName(name) + "." + name + "ID) + '";
 		} else
 			return tableName;
-	}
-
-	public boolean isInherited() {
-		return inherited;
-	}
-
-	public void setInherited(boolean inherited) {
-		this.inherited = inherited;
 	}
 	
 	

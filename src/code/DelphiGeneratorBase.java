@@ -10,7 +10,7 @@ import ast.EnumType;
 import ast.Field;
 import ast.ScriptNode;
 
-public abstract class DelphiGeneratorBase extends CodeGenerator {
+public abstract class DelphiGeneratorBase extends FileGenerator {
 	private static final String[] indexNames = { "Linha", "Coluna" };
 
 	public DelphiGeneratorBase(String outDir, ScriptNode script) {

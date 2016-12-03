@@ -204,7 +204,7 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 	}
 
 	@Override
-	public void genClass(PrintWriter out, Table table, String name,
+	public void genBody(PrintWriter out, Table table, String name,
 			boolean indexed) {
 		out.println("implementation");
 

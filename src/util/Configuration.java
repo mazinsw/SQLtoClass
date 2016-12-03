@@ -13,7 +13,8 @@ public class Configuration {
 	public static final int GENERATE_JAVA = 2;
 	public static final int PHP_DB_PDO = 0;
 	public static final int PHP_FLUENT_PDO = 1;
-	
+
+	private String projectFile;
 	private String file;
 	private String path;
 	private String pathDAO;
@@ -29,9 +30,19 @@ public class Configuration {
 	private boolean daoHerdado;
 	private boolean arrayAccess;
 	private boolean proccessTemplate;
+	private String templatePath;
 
 	public Configuration() {
-		load();
+		setProjectFile("config.properties");
+		setTemplatePath("template/");
+	}
+	
+	public String getProjectFile() {
+		return projectFile;
+	}
+
+	public void setProjectFile(String projectFile) {
+		this.projectFile = projectFile;
 	}
 
 	public String getFile() {
@@ -154,8 +165,16 @@ public class Configuration {
 		this.proccessTemplate = proccessTemplate;
 	}
 
+	public void setTemplatePath(String templatePath) {
+		this.templatePath = templatePath;
+	}
+
+	public String getTemplatePath() {
+		return templatePath;
+	}
+
 	public void load() {
-		File configFile = new File("config.properties");
+		File configFile = new File(projectFile);
 
 		try {
 			FileReader reader = new FileReader(configFile);
@@ -171,6 +190,8 @@ public class Configuration {
 			prefixDAO = props.getProperty("prefixDAO");
 			packageName = props.getProperty("packageName");
 			packageNameDAO = props.getProperty("packageNameDAO");
+			if (props.containsKey("templatePath"))
+				templatePath = props.getProperty("templatePath");
 			if (props.containsKey("generateDAO"))
 				generateDAO = props.getProperty("generateDAO").equals(String.valueOf(true));
 			else
@@ -218,6 +239,7 @@ public class Configuration {
 			props.setProperty("prefixDAO", prefixDAO);
 			props.setProperty("packageName", packageName);
 			props.setProperty("packageNameDAO", packageNameDAO);
+			props.setProperty("templatePath", templatePath);
 			props.setProperty("generateDAO", String.valueOf(generateDAO));
 			props.setProperty("DAOHerdado", String.valueOf(daoHerdado));
 			props.setProperty("ArrayAccess", String.valueOf(arrayAccess));

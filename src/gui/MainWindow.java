@@ -1,7 +1,6 @@
-package main;
+package gui;
 
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -19,6 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
@@ -27,19 +27,9 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import tools.Runner;
 import util.Configuration;
 import util.LogListener;
-import ast.ASTBuilder;
-import code.CodeGenerator;
-import code.DelphiGenerator;
-import code.DelphiGeneratorDAO;
-import code.JavaGenerator;
-import code.JavaGeneratorDAO;
-import code.PHPGeneratorBase;
-import code.PHPGeneratorDB;
-import code.PHPGeneratorFluentPDO;
-
-import javax.swing.SwingConstants;
 import util.Messages;
 
 public class MainWindow extends JFrame implements LogListener {
@@ -74,27 +64,11 @@ public class MainWindow extends JFrame implements LogListener {
 	private JCheckBox chckbxProcessarTemplates;
 	
 	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		// Locale.setDefault(new Locale("pt", "BR"));
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					MainWindow frame = new MainWindow();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
-	/**
 	 * Create the frame.
 	 */
 	public MainWindow() {
 		configuration = new Configuration();
+		configuration.load();
 		setResizable(false);
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -419,81 +393,35 @@ public class MainWindow extends JFrame implements LogListener {
 	}
 
 	private void actionExecutar() {
-		ASTBuilder builder = new ASTBuilder();
-		clearLog();
-		if(!builder.build(textFieldArquivo.getText())) {			
-			for (String	error: builder.getErrors()) {
-				addLog(error);
-			}
-			return;
-		}
-		CodeGenerator gen;
+		Runner runner = new Runner(this);
+		
+		configuration.setFile(textFieldArquivo.getText());
+		configuration.setPath(textFieldPastaSaida.getText());
+		configuration.setPrefix(textFieldPrefixo.getText());
+		configuration.setSuffix(textFieldSufixo.getText());
+		configuration.setPackageName(textFieldPacote.getText());
 		if(rdbtnDelphi.isSelected())
-			gen = new DelphiGenerator(textFieldPastaSaida.getText(), builder.getScript());
-		else if(rdbtnPhp.isSelected()) {
-			if(chckbxUsarFluentPDO.isSelected())
-				gen = new PHPGeneratorFluentPDO(textFieldPastaSaida.getText(), builder.getScript());
-			else
-				gen = new PHPGeneratorDB(textFieldPastaSaida.getText(), builder.getScript());
-			((PHPGeneratorBase)gen).setArrayAccess(chckbxAcessarComoArray.isSelected());
-			((PHPGeneratorBase)gen).setProccessTemplate(chckbxProcessarTemplates.isSelected());
-		} else {
-			gen = new JavaGenerator(textFieldPastaSaida.getText(), builder.getScript());
-			JavaGenerator javaGen = (JavaGenerator)gen;
-			javaGen.setPackageName(textFieldPacote.getText());
-		}
-		gen.setClassPrefix(textFieldPrefixo.getText());
-		gen.setClassSuffix(textFieldSufixo.getText());
-		gen.setLogListener(this);
-		try {
-			gen.start();
-			if(chckbxGerarDao.isSelected() && !rdbtnPhp.isSelected()) {
-				if(rdbtnDelphi.isSelected()) {
-					DelphiGeneratorDAO genDAO = new DelphiGeneratorDAO(textFieldPastaSaidaDAO.getText(), builder.getScript());
-					genDAO.setInherited(chckbxDAOHerdado.isSelected());
-					genDAO.setClassBasePrefix(textFieldPrefixo.getText());
-					genDAO.setClassBaseSuffix(textFieldSufixo.getText());
-					gen = genDAO;
-				} else {
-					JavaGeneratorDAO genDAO = new JavaGeneratorDAO(textFieldPastaSaidaDAO.getText(), builder.getScript());
-					genDAO.setClassBasePrefix(textFieldPrefixo.getText());
-					genDAO.setClassBaseSuffix(textFieldSufixo.getText());
-					genDAO.setPackageBaseName(textFieldPacote.getText());
-					genDAO.setPackageName(textFieldPacoteDAO.getText());
-					gen = genDAO;
-				}
-				gen.setClassPrefix(textFieldPrefixoDAO.getText());
-				gen.setClassSuffix(textFieldSufixoDAO.getText());
-				gen.start();
-			}
-			configuration.setFile(textFieldArquivo.getText());
-			configuration.setPath(textFieldPastaSaida.getText());
-			configuration.setPrefix(textFieldPrefixo.getText());
-			configuration.setSuffix(textFieldSufixo.getText());
-			configuration.setPackageName(textFieldPacote.getText());
-			if(rdbtnDelphi.isSelected())
-				configuration.setGenerator(Configuration.GENERATE_DELPHI);
-			else if(rdbtnPhp.isSelected())
-				configuration.setGenerator(Configuration.GENERATE_PHP);
-			else
-				configuration.setGenerator(Configuration.GENERATE_JAVA);
-			configuration.setGenerateDAO(chckbxGerarDao.isSelected());
-			if(chckbxUsarFluentPDO.isSelected())
-				configuration.setPHPPDO(Configuration.PHP_FLUENT_PDO);
-			else
-				configuration.setPHPPDO(Configuration.PHP_DB_PDO);
-			configuration.setDAOHerdado(chckbxDAOHerdado.isSelected());
-			configuration.setArrayAccess(chckbxAcessarComoArray.isSelected());
-			configuration.setProccessTemplate(chckbxProcessarTemplates.isSelected());
-			configuration.setPathDAO(textFieldPastaSaidaDAO.getText());
-			configuration.setPrefixDAO(textFieldPrefixoDAO.getText());
-			configuration.setSuffixDAO(textFieldSufixoDAO.getText());
-			configuration.setPackageNameDAO(textFieldPacoteDAO.getText());
-			configuration.save();
-		} catch (Exception e) {
-			addLog(e.getMessage());
-			e.printStackTrace();
-		}
+			configuration.setGenerator(Configuration.GENERATE_DELPHI);
+		else if(rdbtnPhp.isSelected())
+			configuration.setGenerator(Configuration.GENERATE_PHP);
+		else
+			configuration.setGenerator(Configuration.GENERATE_JAVA);
+		configuration.setGenerateDAO(chckbxGerarDao.isSelected());
+		if(chckbxUsarFluentPDO.isSelected())
+			configuration.setPHPPDO(Configuration.PHP_FLUENT_PDO);
+		else
+			configuration.setPHPPDO(Configuration.PHP_DB_PDO);
+		configuration.setDAOHerdado(chckbxDAOHerdado.isSelected());
+		configuration.setArrayAccess(chckbxAcessarComoArray.isSelected());
+		configuration.setProccessTemplate(chckbxProcessarTemplates.isSelected());
+		configuration.setPathDAO(textFieldPastaSaidaDAO.getText());
+		configuration.setPrefixDAO(textFieldPrefixoDAO.getText());
+		configuration.setSuffixDAO(textFieldSufixoDAO.getText());
+		configuration.setPackageNameDAO(textFieldPacoteDAO.getText());
+		
+		runner.setConfiguration(configuration);
+		clearLog();
+		runner.execute(true);
 	}
 
 	private void actionAbrirArquivo() {

@@ -1,10 +1,5 @@
 package code;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
@@ -30,19 +25,16 @@ public abstract class CodeGenerator implements LogListener {
 	private ScriptNode script;
 	private String outDir;
 
-	private Hashtable<String, String> indexedTables;
-	private String classPrefix;
-	private String classSuffix;
 	private LogListener logListener;
 	private int currentTableIndex;
 
 	public CodeGenerator(String outDir, ScriptNode script) {
-		this.outDir = outDir;
 		this.script = script;
-		indexedTables = new Hashtable<>();
+		this.outDir = outDir;
 		setLogListener(this);
 		currentTableIndex = -1;
 	}
+	
 	public String getOutputDirectory() {
 		return outDir;
 	}
@@ -61,47 +53,16 @@ public abstract class CodeGenerator implements LogListener {
 		return currentTableIndex;
 	}
 
-	public void start() throws FileNotFoundException {
+	public void start() throws Exception {
 		for (Node node : script.getStatements()) {
 			if (node instanceof Table) {
 				currentTableIndex++;
-				genFile((Table) node);
+				run((Table) node);
 			}
 		}
 	}
 
-	private void genFile(Table table) throws FileNotFoundException {
-		String name = normalize(table.getName());
-		boolean indexed = false;
-		if (isIndexed(name)) {
-			name = name.replaceAll("\\[[0-9]+\\]", "");
-			if (indexedTables.containsKey(name))
-				return;
-			indexedTables.put(name, name);
-			indexed = true;
-		}
-		String nameWithExt = getNameWithExtension(name);
-		String fileName = outDir + File.separatorChar + nameWithExt;
-		log(String.format(Messages.getString("CodeGenerator.string3"), nameWithExt)); //$NON-NLS-1$
-		PrintWriter out = new PrintWriter(new OutputStreamWriter(
-				new FileOutputStream(fileName), getEncoding()), true);
-		genHeader(out, table, name, indexed);
-		genClass(out, table, name, indexed);
-		genFooter(out, table, name, indexed);
-		out.close();
-		log(String.format(Messages.getString("CodeGenerator.string4"), nameWithExt)); //$NON-NLS-1$
-	}
-
-	public abstract void genHeader(PrintWriter out, Table table, String name,
-			boolean indexed);
-
-	public abstract void genClass(PrintWriter out, Table table, String name,
-			boolean indexed);
-
-	public abstract void genFooter(PrintWriter out, Table table, String name,
-			boolean indexed);
-
-	public abstract String getNameWithExtension(String name);
+	protected abstract void run(Table node) throws Exception;
 
 	public static String normalize(String name) {
 		return normalize(name, true);
@@ -112,7 +73,8 @@ public abstract class CodeGenerator implements LogListener {
 	}
 	
 	protected void log(String message) {
-		logListener.addMessage(message);
+		if(logListener != null)
+			logListener.addMessage(message);
 	}
 	
 
@@ -126,7 +88,7 @@ public abstract class CodeGenerator implements LogListener {
 	 *            separated with semicolon, example: 1:2;1:3, multidimensional
 	 *            array with bounds 1 to 2 and 1 to 3
 	 */
-	protected void processArray(Table table,
+	protected static void processArray(Table table,
 			Hashtable<String, String> indexedFields) {
 		List<Field> normalFields = new ArrayList<>();
 		for (Field field : table.getFields()) {
@@ -142,7 +104,7 @@ public abstract class CodeGenerator implements LogListener {
 						.matcher(varName);
 				m.find();
 			}
-			log(String.format(Messages.getString("CodeGenerator.string13"), varName, m.groupCount())); //$NON-NLS-1$
+			// log(String.format(Messages.getString("CodeGenerator.string13"), varName, m.groupCount())); //$NON-NLS-1$
 			varName = varName.replaceAll("\\[[0-9]+\\]", "");
 			String semicolon = "";
 			String newData = "";
@@ -294,9 +256,9 @@ public abstract class CodeGenerator implements LogListener {
 	}
 
 	public static String despluralize(String word) {
-		if (word.endsWith("oes"))
+		if (word.endsWith("oes") || word.endsWith("aes"))
 			word = word.substring(0, word.length() - 3) + "ao";
-		else if (word.endsWith("is"))
+		else if (word.endsWith("is") && word.length() > 4)
 			word = word.substring(0, word.length() - 2) + "l";
 		else if (word.endsWith("res") || word.endsWith("ses"))
 			word = word.substring(0, word.length() - 2);
@@ -327,58 +289,6 @@ public abstract class CodeGenerator implements LogListener {
 		}
 		return result.replace(' ', '_');
 	}
-	
-	public static boolean isFunctionChecker(String field) {
-		if(field.compareToIgnoreCase("cep") == 0)
-			return true;
-		if(field.compareToIgnoreCase("cpf") == 0)
-			return true;
-		if(field.compareToIgnoreCase("cnpj") == 0)
-			return true;
-		if(field.compareToIgnoreCase("fone") == 0)
-			return true;
-		if(field.compareToIgnoreCase("email") == 0)
-			return true;
-		if(field.compareToIgnoreCase("usuario") == 0)
-			return true;
-		return false;
-	}
-	
-	public static boolean canTrimField(String field) {
-		if(field.compareToIgnoreCase("senha") == 0)
-			return false;
-		if(field.compareToIgnoreCase("cpf") == 0)
-			return false;
-		if(field.compareToIgnoreCase("cnpj") == 0)
-			return false;
-		if(field.compareToIgnoreCase("fone") == 0)
-			return false;
-		return true;
-	}
-	
-	public static boolean numberOnlyField(String field) {
-		if(field.compareToIgnoreCase("cpf") == 0)
-			return true;
-		if(field.compareToIgnoreCase("cnpj") == 0)
-			return true;
-		if(field.compareToIgnoreCase("fone") == 0)
-			return true;
-		if(field.compareToIgnoreCase("ie") == 0)
-			return true;
-		return false;
-	}
-	
-	public static boolean skipTestField(String field) {
-		if(field.compareToIgnoreCase("senha") == 0)
-			return true;
-		if(field.contains("data"))
-			return true;
-		return false;
-	}
-
-	public static boolean skipFixField(String field) {
-		return false;
-	}
 
 	public static boolean isIndexed(String field) {
 		return field.matches("^[a-zA-Z]+[\\[[0-9]+\\]]+$");
@@ -391,18 +301,6 @@ public abstract class CodeGenerator implements LogListener {
 			list.add(Integer.valueOf(m.group(0)));
 		}
 		return list;
-	}
-	
-	public static boolean skipUpdateField(String field) {
-		if(field.contains("cadastro") && field.contains("data"))
-			return true;
-		if(field.contains("inicio") && field.contains("data"))
-			return true;
-		if(field.contains("abertura") && field.contains("data"))
-			return true;
-		if(field.contains("criacao") && field.contains("data"))
-			return true;
-		return false;
 	}
 	
 	public static boolean isVogal(char letter) {
@@ -421,37 +319,6 @@ public abstract class CodeGenerator implements LogListener {
 				|| nlc.endsWith("cnpj") || nlc.endsWith("cpf") || nlc.endsWith("in")|| nlc.endsWith("tema")|| nlc.endsWith("p") || nlc.length() == 1)
 			return "o";
 		return "a";
-	}
-	
-	public String getCamelCaseName(String name) {
-		String camelCase = "";
-		for (int i = 0; i < name.length(); i++) {
-			if(Character.isUpperCase(name.charAt(i))) {
-				camelCase += Character.toLowerCase(name.charAt(i));
-			} else {
-				camelCase += name.substring(i);
-				break;
-			}
-		}
-		return camelCase;
-	}
-
-	protected String getConstantName(String name) {
-		String cName = "";
-		boolean prevIsUpr = true;
-		for (int i = 0; i < name.length(); i++) {
-			if(Character.isLowerCase(name.charAt(i))) {
-				cName += name.charAt(i);
-				prevIsUpr = false;
-			} else {
-				if(!prevIsUpr) {
-					cName += "_";
-					prevIsUpr = true;
-				}
-				cName += name.charAt(i);
-			}
-		}
-		return cName.toUpperCase();
 	}
 
 	public List<Field> getFields(Table table, Constraint constraint) {
@@ -502,14 +369,14 @@ public abstract class CodeGenerator implements LogListener {
 		return null;
 	}
 
-	protected Field getPkField(Table table) {
+	protected Field getPrimary(Table table) {
 		Constraint constraint = getPrimaryKey(table);
 		if(constraint != null && constraint.getFields().size() == 1)
 			return table.find(constraint.getFields().get(0).getName());
 		return null;
 	}
 
-	protected Field getDescField(Table table) {
+	protected Field getDescriptor(Table table) {
 		Hashtable<String, String> values = new Hashtable<>();
 		Field descField = null;
 		for (Field field : table.getFields()) {
@@ -537,32 +404,12 @@ public abstract class CodeGenerator implements LogListener {
 			if(field.getType().isString())
 				return field;
 		}
-		return getPkField(table);
-	}
-
-	public void setClassPrefix(String classPrefix) {
-		this.classPrefix = classPrefix;
-	}
-	
-	public String getClassPrefix() {
-		return classPrefix;
-	}
-
-	public String getClassSuffix() {
-		return classSuffix;
-	}
-
-	public void setClassSuffix(String classSuffix) {
-		this.classSuffix = classSuffix;
+		return getPrimary(table);
 	}
 	
 	@Override
 	public void addMessage(String message) {
 		System.out.println(message);
-	}
-
-	public LogListener getLogListener() {
-		return logListener;
 	}
 
 	public void setLogListener(LogListener logListener) {

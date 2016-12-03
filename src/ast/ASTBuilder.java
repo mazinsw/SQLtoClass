@@ -550,11 +550,11 @@ public class ASTBuilder extends SQLBaseListener {
 	}
 
 	private void discard(Node node) {
-		System.out.print("Discarding: " + node.getClass().getName());
-		if (node instanceof NamedNode)
-			System.out.println(" = " + ((NamedNode) node).getName());
-		else
-			System.out.println();
+//		System.out.print("Discarding: " + node.getClass().getName());
+//		if (node instanceof NamedNode)
+//			System.out.println(" = " + ((NamedNode) node).getName());
+//		else
+//			System.out.println();
 	}
 
 	@Override

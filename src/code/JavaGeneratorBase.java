@@ -8,7 +8,7 @@ import ast.Field;
 import ast.ScriptNode;
 import ast.Table;
 
-public abstract class JavaGeneratorBase extends CodeGenerator {
+public abstract class JavaGeneratorBase extends FileGenerator {
 	private String packageName;
 	private static final String[] indexNames = { "linha", "coluna" };
 
@@ -17,7 +17,7 @@ public abstract class JavaGeneratorBase extends CodeGenerator {
 	}
 	
 	@Override
-	public void genHeader(PrintWriter out, Table table, String name,
+	protected void genHeader(PrintWriter out, Table table, String name,
 			boolean indexed) {
 		if(packageName != null && !packageName.equals(""))
 			out.println("package " + getPackageName() + ";");
@@ -247,9 +247,22 @@ public abstract class JavaGeneratorBase extends CodeGenerator {
 		}
 		return "Unknown";
 	}
+	
+	protected String getCamelCaseName(String name) {
+		String camelCase = "";
+		for (int i = 0; i < name.length(); i++) {
+			if(Character.isUpperCase(name.charAt(i))) {
+				camelCase += Character.toLowerCase(name.charAt(i));
+			} else {
+				camelCase += name.substring(i);
+				break;
+			}
+		}
+		return camelCase;
+	}
 
 	@Override
-	public String getNameWithExtension(String name) {
+	protected String getNameWithExtension(String name) {
 		return getClassName(name) + ".java";
 	}
 

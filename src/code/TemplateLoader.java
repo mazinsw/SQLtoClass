@@ -16,30 +16,40 @@ import ast.Table;
 
 public class TemplateLoader {
 	private Collection<File> files;
-	private File directory;
+	private File outputDirectory;
+	private File baseDirectory;
 	
-	public static final String UPR_WORDS = "URL|CPF|CNPJ|RG|IE|IM|UF|CEP|GUID|PID|NCM|CFOP|CEST|ICMS|IPI|PIS";
+	public static final String UPR_WORDS = "|URL|CPF|CNPJ|RG|IE|IM|UF|CEP|GUID|PID|NCM|CFOP|CEST|ICMS|IPI|PIS|";
 
 	public TemplateLoader() {
 		files = new ArrayList<>();
-		directory = new File("template/output/");
+		setBaseDirectory("template");
 	}
 	
+	public File getRelativeFile(String relativeName) {
+		return new File(baseDirectory.getAbsolutePath() + File.separator + relativeName);
+	}
+
 	public Collection<File> getFiles() {
 		return files;
 	}
+	
+	public void setBaseDirectory(String directory) {
+		this.baseDirectory = new File(directory);
+		this.outputDirectory = getRelativeFile("output");
+	}
 
 	public void load() {
-		files = FileUtils.listFilesAndDirs(directory, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
-		files.remove(directory);
+		files = FileUtils.listFilesAndDirs(outputDirectory, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
+		files.remove(outputDirectory);
 	}
 	
-	public File getBaseDirectory() {
-		return directory;
+	public File getOutputDirectory() {
+		return outputDirectory;
 	}
 	
 	public File rebase(File file, File base) {
-		return new File(file.getAbsolutePath().replace(directory.getAbsolutePath(), base.getAbsolutePath()));
+		return new File(file.getAbsolutePath().replace(outputDirectory.getAbsolutePath(), base.getAbsolutePath()));
 	}
 	
 	/**
@@ -63,7 +73,7 @@ public class TemplateLoader {
 	
 	public static String recase(String wordcase, String entry, boolean useWordDB) {
 		String result = entry;
-		if (useWordDB && TemplateLoader.UPR_WORDS.contains(entry.toUpperCase()))
+		if (useWordDB && TemplateLoader.UPR_WORDS.contains("|" + entry.toUpperCase() + "|"))
 			return entry.toUpperCase();
 		if(Character.isLowerCase(wordcase.charAt(0)) && wordcase.length() > 1 && Character.isUpperCase(wordcase.charAt(1)))
 			result = entry;
@@ -111,7 +121,7 @@ public class TemplateLoader {
 		}
 	}
 	
-	public static File getFileForField(Table table, Field field, Hashtable<String, String> attributes) throws Exception {
+	public File getFileForField(Table table, Field field, Hashtable<String, String> attributes) throws Exception {
 		String type = getTypeNameFromType(table, field);
 		String attribute = "unknow";
 		
@@ -127,52 +137,52 @@ public class TemplateLoader {
 			attribute = "image";
 		switch (attribute) {
 		case "reference":
-			return new File("template/field/reference.html");
+			return getRelativeFile("field/reference.html");
 		case "radio":
-			return new File("template/field/radio.html");
+			return getRelativeFile("field/radio.html");
 		case "image":
-			return new File("template/field/image.html");
+			return getRelativeFile("field/image.html");
 		case "masked":
-			return new File("template/field/masked.html");
+			return getRelativeFile("field/masked.html");
 		case "password":
-			return new File("template/field/password.html");
+			return getRelativeFile("field/password.html");
 		}
 		
 		switch (type) {
 		case "boolean":
-			return new File("template/field/boolean.html");
+			return getRelativeFile("field/boolean.html");
 		case "reference":
-			return new File("template/field/reference.html");
+			return getRelativeFile("field/reference.html");
 		case "currency":
-			return new File("template/field/currency.html");
+			return getRelativeFile("field/currency.html");
 		case "date":
-			return new File("template/field/date.html");
+			return getRelativeFile("field/date.html");
 		case "datetime":
-			return new File("template/field/datetime.html");
+			return getRelativeFile("field/datetime.html");
 		case "radio":
-			return new File("template/field/radio.html");
+			return getRelativeFile("field/radio.html");
 		case "enum":
-			return new File("template/field/enum.html");
+			return getRelativeFile("field/enum.html");
 		case "float":
 		case "double":
-			return new File("template/field/float.html");
+			return getRelativeFile("field/float.html");
 		case "image":
-			return new File("template/field/image.html");
+			return getRelativeFile("field/image.html");
 		case "blob":
-			return new File("template/field/blob.html");
+			return getRelativeFile("field/blob.html");
 		case "integer":
 		case "bigint":
-			return new File("template/field/integer.html");
+			return getRelativeFile("field/integer.html");
 		case "masked":
-			return new File("template/field/masked.html");
+			return getRelativeFile("field/masked.html");
 		case "password":
-			return new File("template/field/password.html");
+			return getRelativeFile("field/password.html");
 		case "text":
-			return new File("template/field/text.html");
+			return getRelativeFile("field/text.html");
 		case "string":
-			return new File("template/field/string.html");
+			return getRelativeFile("field/string.html");
 		case "time":
-			return new File("template/field/time.html");
+			return getRelativeFile("field/time.html");
 		default:
 			throw new Exception(String.format("Unknow template for type '%s'(%d)", type, field.getType().getType()));
 		}
