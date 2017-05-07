@@ -1,6 +1,6 @@
 package ast;
 
-public class Foreign extends Constraint {
+public class ForeignKey extends Constraint {
 	public static final int RESTRICT = 0;
 	public static final int CASCADE = 1;
 	private Index references;
@@ -8,7 +8,7 @@ public class Foreign extends Constraint {
 	private int updateAction;
 	private int deleteAction;
 	
-	public Foreign(String tableName) {
+	public ForeignKey(String tableName) {
 		references = new Index();
 		setTableName(tableName);
 	}

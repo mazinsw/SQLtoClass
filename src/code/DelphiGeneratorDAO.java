@@ -564,7 +564,7 @@ public class DelphiGeneratorDAO extends DelphiGeneratorBase {
 
 	}
 
-	private static String getExceptionName(String name, Constraint constraint) {
+	private String getExceptionName(String name, Constraint constraint) {
 		String uniqueFieldName = constraint.getFields()
 					.get(constraint.getFields().size() - 1).getName();
 		String normalized = normalize(uniqueFieldName, false).replace("][", "_").replace("[", "").replace("]", "");

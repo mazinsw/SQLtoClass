@@ -52,8 +52,8 @@ public class Table extends CommentedNode {
 
 	public String getReference(String name) {
 		for (Constraint constraint : constraints) {
-			if(constraint instanceof Foreign) {
-				Foreign foreign = (Foreign)constraint;
+			if(constraint instanceof ForeignKey) {
+				ForeignKey foreign = (ForeignKey)constraint;
 				if(foreign.find(name))
 					return foreign.getTableName();
 			}

@@ -18,8 +18,7 @@ public class TemplateLoader {
 	private Collection<File> files;
 	private File outputDirectory;
 	private File baseDirectory;
-	
-	public static final String UPR_WORDS = "|URL|CPF|CNPJ|RG|IE|IM|UF|CEP|GUID|PID|NCM|CFOP|CEST|ICMS|IPI|PIS|";
+	private String upperWords;
 
 	public TemplateLoader() {
 		files = new ArrayList<>();
@@ -67,14 +66,15 @@ public class TemplateLoader {
 		return preffix + text.replaceAll("\n", "\n" + preffix);
 	}
 	
-	public static String recase(String wordcase, String entry) {
+	public String recase(String wordcase, String entry) {
 		return recase(wordcase, entry, false);
 	}
 	
-	public static String recase(String wordcase, String entry, boolean useWordDB) {
+	public String recase(String wordcase, String entry, boolean useWordDB) {
 		String result = entry;
-		if (useWordDB && TemplateLoader.UPR_WORDS.contains("|" + entry.toUpperCase() + "|"))
-			return entry.toUpperCase();
+		if (useWordDB && canUpper(entry)) {
+			entry =  entry.toUpperCase();
+		}
 		if(Character.isLowerCase(wordcase.charAt(0)) && wordcase.length() > 1 && Character.isUpperCase(wordcase.charAt(1)))
 			result = entry;
 		else if(Character.isLowerCase(wordcase.charAt(0)))
@@ -196,6 +196,119 @@ public class TemplateLoader {
 			return defaultValue;
 		return array[index];
 	}
+
+	public String normalize(String name) {
+		return normalize(name, true);
+	}
+	
+	public String normalize(String name, boolean despluralize) {
+		if (name.matches("T[A-Z].*")) {
+			name = name.substring(1);
+		}
+		String result = "", lastWord = "";
+		boolean lastCaseIsUpper = false, lastIsVector = false, currentIsVector = false;
+		int i = 0;
+		while (i < name.length()) {
+			char ch = name.charAt(i);
+			String str = "" + ch;
+			currentIsVector = false;
+			if (ch == '_') {
+				int j = i + 1;
+				if (j >= name.length())
+					break;
+				do {
+					ch = name.charAt(j);
+					j++;
+				} while (ch == '_' && j < name.length());
+				if (j > name.length())
+					break;
+				ch = Character.toUpperCase(ch);
+				str = "" + ch;
+				lastCaseIsUpper = false;
+				i = j - 1;
+			} else if (((result.isEmpty() && lastWord.isEmpty()) || lastIsVector)
+					&& Character.isLowerCase(ch)) {
+				ch = Character.toUpperCase(ch);
+				str = "" + ch;
+			}
+			if (Character.isDigit(ch)) {
+				lastIsVector = true;
+				String digits = "";
+				int j = i;
+				do {
+					ch = name.charAt(j);
+					digits += ch;
+					j++;
+				} while (j < name.length() && Character.isDigit(name.charAt(j)));
+				str = "[" + digits + "]";
+				lastCaseIsUpper = false;
+				i = j - 1;
+				currentIsVector = true;
+			}
+			if (!lastCaseIsUpper
+					&& (Character.isUpperCase(ch) || currentIsVector)
+					&& !lastWord.isEmpty()) {
+				if (lastIsVector && !currentIsVector) {
+					if (despluralize)
+						result += upperFix(despluralize(lastWord)) + ".";
+					else
+						result += upperFix(lastWord) + ".";
+					lastIsVector = false;
+				} else {
+					if (despluralize)
+						result += upperFix(despluralize(lastWord));
+					else
+						result += upperFix(lastWord);
+				}
+				lastWord = str;
+				lastCaseIsUpper = true;
+			} else if (!lastIsVector) {
+				lastWord += ch;
+				lastCaseIsUpper = Character.isUpperCase(ch);
+			} else {
+				lastIsVector = false;
+				result += upperFix(lastWord) + ".";
+				lastWord = str;
+			}
+			i++;
+		}
+		if (!lastWord.isEmpty()) {
+			if (!currentIsVector && lastIsVector) {
+				if (despluralize)
+					result += "." + upperFix(despluralize(lastWord));
+				else
+					result += "." + upperFix(lastWord);
+			} else {
+				if (despluralize)
+					result += upperFix(despluralize(lastWord));
+				else
+					result += upperFix(lastWord);
+			}
+		}
+		return result;
+	}
+
+	public String upperFix(String word) {
+		if (canUpper(word)) {
+			word = word.toUpperCase();
+		}
+		return word;
+	}
+
+	public static String despluralize(String word) {
+		if (word.endsWith("oes") || word.endsWith("aes"))
+			word = word.substring(0, word.length() - 3) + "ao";
+		else if (word.endsWith("is") && word.length() > 4)
+			word = word.substring(0, word.length() - 2) + "l";
+		else if (word.endsWith("res") || word.endsWith("ses"))
+			word = word.substring(0, word.length() - 2);
+		else if (word.endsWith("es") || word.endsWith("as")
+				|| word.endsWith("os"))
+			word = word.substring(0, word.length() - 1);
+		else if (word.endsWith("ns"))
+			word = word.substring(0, word.length() - 2) + "m";
+		return word;
+	}
 	
 	private static String resolveSlashs(String cmm) {
 		String comment = "";
@@ -279,6 +392,30 @@ public class TemplateLoader {
 			values.put(preffix + key, cmd.substring(offset + 1));
 		}
 		return comment;
+	}
+
+	public String getUpperWords() {
+		return upperWords;
+	}
+
+	public void setUpperWords(String upperWords) {
+		if (upperWords != null && !upperWords.startsWith("|")) {
+			upperWords = "|" + upperWords;
+		}
+		if (upperWords != null && !upperWords.endsWith("|")) {
+			upperWords = upperWords + "|";
+		}
+		if (upperWords != null) {
+			upperWords = upperWords.toUpperCase();
+		}
+		this.upperWords = upperWords;
+	}
+	
+	public boolean canUpper(String entry) {
+		if (getUpperWords() == null) {
+			return false;
+		}
+		return getUpperWords().contains("|" + entry.toUpperCase() + "|");
 	}
 
 }

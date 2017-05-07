@@ -39,9 +39,11 @@ dropTable: 'DROP' 'TEMPORARY'? 'TABLE' ('IF' 'EXISTS')?
 dropTableName:idName;
 
 createTable: 'CREATE' 'TEMPORARY'? 'TABLE' ('IF' 'NOT' 'EXISTS')? tableName
-           '(' (createDefinition ',')* createDefinition ')' tableOptions;
+           '(' fieldList? ')' tableOptions;
 
 tableName: idName;
+
+fieldList: (createDefinition ',')* createDefinition;
 
 createDefinition: columnName columnDefinition #fieldStmt
     | ('CONSTRAINT' constraintName?)? 'PRIMARY' 'KEY' '(' (indexColName ',')* indexColName ')' #primaryKeyStmt

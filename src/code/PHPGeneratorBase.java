@@ -10,7 +10,7 @@ import ast.Constraint;
 import ast.DataType;
 import ast.EnumType;
 import ast.Field;
-import ast.Foreign;
+import ast.ForeignKey;
 import ast.OrderField;
 import ast.ScriptNode;
 import ast.Table;
@@ -20,7 +20,7 @@ public abstract class PHPGeneratorBase extends FileGenerator {
 
 	private boolean arrayAccess;
 	private static final String[] indexNames = { "$linha", "$coluna" };
-	private Hashtable<String, String> indexedFields;
+	private Hashtable<String, CommonField> indexedFields;
 
 	public PHPGeneratorBase(String outDir, ScriptNode script) {
 		super(outDir, script);
@@ -247,7 +247,7 @@ public abstract class PHPGeneratorBase extends FileGenerator {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
-				String data = indexedFields.get(varName);
+				String data = indexedFields.get(varName).getRange();
 				String varDecl = "\tprivate $" + unixTransform(varName) + " = array();";
 				out.println(varDecl);
 				usedFields.put(varName, new Pair<String, Field>(data, field));
@@ -282,7 +282,7 @@ public abstract class PHPGeneratorBase extends FileGenerator {
 				if (usedFields.containsKey(varName))
 					continue;
 				String unixVarName = unixTransform(varName);
-				String data = indexedFields.get(varName);
+				String data = indexedFields.get(varName).getRange();
 				usedFields.put(varName, new Pair<String, Field>(data, field));
 				String[] values = data.split(";");
 
@@ -352,7 +352,7 @@ public abstract class PHPGeneratorBase extends FileGenerator {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
-				String data = indexedFields.get(varName);
+				String data = indexedFields.get(varName).getRange();
 				usedFields.put(varName, new Pair<String, Field>(data, field));
 			} else
 				out.println("\t\t$" + unixName + "['" + field.getName().toLowerCase() + "'] = $this->get" + varName
@@ -418,7 +418,7 @@ public abstract class PHPGeneratorBase extends FileGenerator {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
-				String data = indexedFields.get(varName);
+				String data = indexedFields.get(varName).getRange();
 				usedFields.put(varName, new Pair<String, Field>(data, field));
 				String[] values = data.split(";");
 				String spacing = "\t\t";
@@ -534,7 +534,7 @@ public abstract class PHPGeneratorBase extends FileGenerator {
 			indexStr = ".$index";
 		// get from primary key or unique key
 		for (Constraint constraint : table.getConstraints()) {
-			if (constraint instanceof Foreign)
+			if (constraint instanceof ForeignKey)
 				continue;
 			String gch = getGenderChar(normalize(constraint.getFields().get(0).getName(), false));
 			String arrElem = "", sep = "", catFieldName = "", paramsFieldName = "";
@@ -569,9 +569,9 @@ public abstract class PHPGeneratorBase extends FileGenerator {
 			String[] values = new String[0];
 			Hashtable<String, String> fieldValues = new Hashtable<>();
 			TemplateLoader.extractComment(field.getComment(), fieldValues, "F.");
-			String beaultyName = TemplateLoader.recase("aa",
+			String beaultyName = getTemplateLoader().recase("aa",
 					TemplateLoader.getValueByIndex(fieldValues.get("F.N"), 0, field.getName()), true);
-			lgc = TemplateLoader.recase("aa",
+			lgc = getTemplateLoader().recase("aa",
 					TemplateLoader.getValueByIndex(fieldValues.get("F.G"), 0, getGenderChar(fieldName)));
 			ugc = lgc.toUpperCase();
 			if (indexedFields.containsKey(varName))
@@ -581,7 +581,7 @@ public abstract class PHPGeneratorBase extends FileGenerator {
 				if (usedFields.containsKey(varName))
 					continue;
 				unixVarName = unixTransform(varName);
-				String data = indexedFields.get(varName);
+				String data = indexedFields.get(varName).getRange();
 				usedFields.put(varName, new Pair<String, Field>(data, field));
 				values = data.split(";");
 				char ch = 'i';
@@ -755,18 +755,18 @@ public abstract class PHPGeneratorBase extends FileGenerator {
 			out.println("\tprivate static function handleException(&$e) {");
 			// get from primary key or unique key
 			for (Constraint constraint : table.getConstraints()) {
-				if (constraint instanceof Foreign)
+				if (constraint instanceof ForeignKey)
 					continue;
 				OrderField orderField = constraint.getFields().get(constraint.getFields().size() - 1);
 				Field oField = table.find(orderField.getName());
 				String beaultyNameF = despluralize(normalize(orderField.getName(), false));
 				Hashtable<String, String> fieldValues = new Hashtable<>();
 				TemplateLoader.extractComment(oField.getComment(), fieldValues, "F.");
-				beaultyNameF = TemplateLoader.recase("aa",
+				beaultyNameF = getTemplateLoader().recase("aa",
 						TemplateLoader.getValueByIndex(fieldValues.get("F.N"), 0, oField.getName()), true);
 				String lgcf;
 				String ugcf;
-				lgcf = TemplateLoader.recase("aa",
+				lgcf = getTemplateLoader().recase("aa",
 						TemplateLoader.getValueByIndex(fieldValues.get("F.G"), 0, getGenderChar(beaultyNameF)));
 				ugcf = lgcf.toUpperCase();
 				out.println("\t\tif(stripos($e->getMessage(), '" + constraint.getName() + "') !== false)");
@@ -811,7 +811,7 @@ public abstract class PHPGeneratorBase extends FileGenerator {
 					varName = varName.replaceAll("\\[[0-9]+\\]", "");
 					if (usedFields.containsKey(varName))
 						continue;
-					String data = indexedFields.get(varName);
+					String data = indexedFields.get(varName).getRange();
 					usedFields.put(varName, new Pair<String, Field>(data, field));
 				} else {
 					if (field.isAutoIncrement() || (pkName != null && pkName.equalsIgnoreCase(unixVarName)))
@@ -831,7 +831,7 @@ public abstract class PHPGeneratorBase extends FileGenerator {
 					varName = varName.replaceAll("\\[[0-9]+\\]", "");
 					if (usedFields.containsKey(varName))
 						continue;
-					String data = indexedFields.get(varName);
+					String data = indexedFields.get(varName).getRange();
 					usedFields.put(varName, new Pair<String, Field>(data, field));
 				} else {
 					if (field.isAutoIncrement() || (pkName != null && pkName.equalsIgnoreCase(unixVarName)))
@@ -924,7 +924,7 @@ public abstract class PHPGeneratorBase extends FileGenerator {
 
 		// get from primary key or unique key
 		for (Constraint constraint : table.getConstraints()) {
-			if (!(constraint instanceof Foreign))
+			if (!(constraint instanceof ForeignKey))
 				continue;
 			String gch = getGenderChar(normalize(constraint.getFields().get(0).getName(), false));
 			String arrElem = "", sep = "", catFieldName = "", paramsFieldName = "";

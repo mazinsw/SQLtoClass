@@ -45,7 +45,7 @@ public class JavaGenerator extends JavaGeneratorBase {
 	@Override
 	protected void genBody(PrintWriter out, Table table, String name,
 			boolean indexed) {
-		Hashtable<String, String> indexedFields = new Hashtable<>();
+		Hashtable<String, CommonField> indexedFields = new Hashtable<>();
 		Hashtable<String, Pair<String, Field>> usedFields = new Hashtable<>();
 		String baseType = getClassName(name);
 		String baseVarName = getCamelCaseName(baseType);
@@ -97,7 +97,7 @@ public class JavaGenerator extends JavaGeneratorBase {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
-				String data = indexedFields.get(varName);
+				String data = indexedFields.get(varName).getRange();
 				out.println("\tprivate " + convertType(name, field)
 						+ genArray(data) + " " + getCamelCaseName(varName)
 						+ ";");
@@ -121,7 +121,7 @@ public class JavaGenerator extends JavaGeneratorBase {
 					varName = varName.replaceAll("\\[[0-9]+\\]", "");
 					if (usedFields.containsKey(varName))
 						continue;
-					String data = indexedFields.get(varName);
+					String data = indexedFields.get(varName).getRange();
 					out.println("\t\t" + getCamelCaseName(varName) + " = new "
 							+ convertType(name, field) + genArray(data, true)
 							+ ";");
@@ -143,7 +143,7 @@ public class JavaGenerator extends JavaGeneratorBase {
 					varName = varName.replaceAll("\\[[0-9]+\\]", "");
 					if (usedFields.containsKey(varName))
 						continue;
-					String data = indexedFields.get(varName);
+					String data = indexedFields.get(varName).getRange();
 					out.println("\t\t" + getCamelCaseName(varName) + " = new "
 							+ convertType(name, field) + genArray(data, true)
 							+ ";");
@@ -168,7 +168,7 @@ public class JavaGenerator extends JavaGeneratorBase {
 				if (usedFields.containsKey(varName))
 					continue;
 				javaVarName = getCamelCaseName(varName);
-				String data = indexedFields.get(varName);
+				String data = indexedFields.get(varName).getRange();
 				usedFields.put(varName, new Pair<String, Field>(data, field));
 				values = data.split(";");
 				char ch = 'i';
@@ -266,7 +266,7 @@ public class JavaGenerator extends JavaGeneratorBase {
 				if (usedFields.containsKey(varName))
 					continue;
 				String javaVarName = getCamelCaseName(varName);
-				String data = indexedFields.get(varName);
+				String data = indexedFields.get(varName).getRange();
 				String[] values = data.split(";");
 
 				out.println();
@@ -351,7 +351,7 @@ public class JavaGenerator extends JavaGeneratorBase {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
-				String data = indexedFields.get(varName);
+				String data = indexedFields.get(varName).getRange();
 				usedFields.put(varName, new Pair<String, Field>(data, field));
 			} else {
 				String javaVarName = getCamelCaseName(varName);

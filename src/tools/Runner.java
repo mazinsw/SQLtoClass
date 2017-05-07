@@ -96,6 +96,7 @@ public class Runner {
 			fgen.setClassSuffix(configuration.getSuffix());
 			gen = fgen;
 		}
+		gen.getTemplateLoader().setUpperWords(configuration.getUpperWords());
 		gen.setLogListener(log);
 		try {
 			gen.start();

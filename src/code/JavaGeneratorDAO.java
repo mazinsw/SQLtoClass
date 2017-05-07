@@ -10,7 +10,7 @@ import util.Pair;
 import ast.Constraint;
 import ast.DataType;
 import ast.Field;
-import ast.Foreign;
+import ast.ForeignKey;
 import ast.OrderField;
 import ast.ScriptNode;
 import ast.Table;
@@ -62,7 +62,7 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 	@Override
 	protected void genBody(PrintWriter out, Table table, String name,
 			boolean indexed) {
-		Hashtable<String, String> indexedFields = new Hashtable<>();
+		Hashtable<String, CommonField> indexedFields = new Hashtable<>();
 		Hashtable<String, Pair<String, Field>> usedFields = new Hashtable<>();
 		processArray(table, indexedFields);
 		String baseType = getBaseClassName(name);
@@ -150,7 +150,7 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 		out.println("\t\treturn null; // default order");
 		out.println("\t}");
 		
-		List<Foreign> fkList = getForeignKeys(table);
+		List<ForeignKey> fkList = getForeignKeys(table);
 		List<Constraint> cstList = new ArrayList<>();
 		cstList.addAll(fkList);
 		if(uniqueKey != null)
@@ -431,7 +431,7 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 				if (usedFields.containsKey(varName))
 					continue;
 				javaVarName = getCamelCaseName(varName);
-				String data = indexedFields.get(varName);
+				String data = indexedFields.get(varName).getRange();
 				usedFields.put(varName, new Pair<String, Field>(data, field));
 				values = data.split(";");
 				char ch = 'i';
@@ -545,7 +545,7 @@ public class JavaGeneratorDAO extends JavaGeneratorBase {
 				if (usedFields.containsKey(varName))
 					continue;
 				javaVarName = getCamelCaseName(varName);
-				String data = indexedFields.get(varName);
+				String data = indexedFields.get(varName).getRange();
 				usedFields.put(varName, new Pair<String, Field>(data, field));
 				values = data.split(";");
 				char ch = 'i';

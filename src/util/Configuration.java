@@ -22,6 +22,7 @@ public class Configuration {
 	private String prefix;
 	private String suffixDAO;
 	private String prefixDAO;
+	private String upperWords;
 	private boolean generateDAO;
 	private int generator;
 	private int phpPDO;
@@ -173,6 +174,14 @@ public class Configuration {
 		return templatePath;
 	}
 
+	public String getUpperWords() {
+		return upperWords;
+	}
+
+	public void setUpperWords(String upperWords) {
+		this.upperWords = upperWords;
+	}
+
 	public void load() {
 		File configFile = new File(projectFile);
 
@@ -190,6 +199,7 @@ public class Configuration {
 			prefixDAO = props.getProperty("prefixDAO");
 			packageName = props.getProperty("packageName");
 			packageNameDAO = props.getProperty("packageNameDAO");
+			setUpperWords(props.getProperty("upperWords"));
 			if (props.containsKey("templatePath"))
 				templatePath = props.getProperty("templatePath");
 			if (props.containsKey("generateDAO"))
@@ -240,6 +250,7 @@ public class Configuration {
 			props.setProperty("packageName", packageName);
 			props.setProperty("packageNameDAO", packageNameDAO);
 			props.setProperty("templatePath", templatePath);
+			props.setProperty("upperWords", getUpperWords());
 			props.setProperty("generateDAO", String.valueOf(generateDAO));
 			props.setProperty("DAOHerdado", String.valueOf(daoHerdado));
 			props.setProperty("ArrayAccess", String.valueOf(arrayAccess));

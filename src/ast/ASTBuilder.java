@@ -444,7 +444,7 @@ public class ASTBuilder extends SQLBaseListener {
 	@Override
 	public void enterForeignStmt(ForeignStmtContext ctx) {
 		super.enterForeignStmt(ctx);
-		Foreign fk = new Foreign("[Unknow]");
+		ForeignKey fk = new ForeignKey("[Unknow]");
 		Table table = (Table) stack.peek();
 		table.addConstraint(fk);
 		stack.push(fk);
@@ -459,7 +459,7 @@ public class ASTBuilder extends SQLBaseListener {
 	@Override
 	public void enterReferenceDefinition(ReferenceDefinitionContext ctx) {
 		super.enterReferenceDefinition(ctx);
-		Foreign fk = (Foreign) stack.peek();
+		ForeignKey fk = (ForeignKey) stack.peek();
 		stack.push(fk.getReferences());
 	}
 
@@ -544,7 +544,7 @@ public class ASTBuilder extends SQLBaseListener {
 		super.exitReferenceTable(ctx);
 		NamedNode namedNode = (NamedNode) stack.pop();
 		Index index = (Index) stack.pop();
-		Foreign fk = (Foreign) stack.peek();
+		ForeignKey fk = (ForeignKey) stack.peek();
 		fk.setTableName(namedNode.getName());
 		stack.push(index);
 	}

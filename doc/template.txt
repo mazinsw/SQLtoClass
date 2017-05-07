@@ -32,17 +32,23 @@ table.class.file = [deprecated]file name of class
 table.if(attribute) = table condition, attributes: comment, inherited, package, path
 table.exists(type|attribute) = check if the table contains a field with matching type or attribute
 	example: $[table.exists(comment)] = check if table has commentary
-table.each = for each comment line
-*	example: table.each(index), for each all index including unique and primary
-*	example: table.each(unique), for each unique index including primary
-*	example: table.each(constraint), for each all constraint
+table.each = for each all tables
+	example: table.each(index), for each all index
+	example: table.each(unique), for each unique index including primary
+	example: table.each(primary), for each primary key index
+	example: table.each(constraint), for each all constraint including primary and unique index
+	example: table.each(foreign), for each all foreign key
 	example: table.each(comment), for each comment line wrapped
-*index.name = index name
-*index.each(type|attribute) = for each field of index
-*unique.name = unique index name
-*unique.each(type|attribute) = for each field of unique index
-*constraint.name = constraint name
-*constraint.each(type|attribute) = for each field of constraint
+index.name = index name
+index.each(type|attribute) = for each field of index
+unique.name = unique index name
+unique.each(type|attribute) = for each field of unique index
+primarykey.name = primary key index
+primarykey.each(type|attribute) = for each field of primary key index
+constraint.name = constraint name
+constraint.each(type|attribute) = for each field of constraint
+foreign.name = foreign key name
+foreign.each(type|attribute) = for each field of foreign key
 inherited =  inherited table
 primary = primary key field have all field properties, when primary key have only one field
 descriptor = main field of table, have all field properties
@@ -64,6 +70,9 @@ field.mask = mask informed on model for the field
 field.style = css style of field
 field.gender = field gender
 field.chars = all word first characters of field name
+field.array.count = number of common fields, i.e, same name with different number
+field.array.index = current index of common field, start from 0
+field.array.number = current number of common field, start from 1
 field.size = Size of the field in bytes
 *field.length = Length of the string field
 field.each = for each field process content
@@ -75,11 +84,15 @@ field.each = for each field process content
 	example: field.each(all), for each all table field
 field.end = end each loop
 field.if(type|attribute) = test if field type or has attributes
-	types: reference, primary, repeated, null, default, descriptor, searchable, comment, unique, radio, masked, array, image, integer, bigint, string, text, boolean, currency, double, float, date, datetime, time, enum, blob
+	types: reference, primary, repeated, null, default, info, descriptor, searchable, comment, unique, radio, masked, array, image, integer, bigint, string, text, boolean, currency, double, float, date, datetime, time, enum, blob
 	example: field.if(reference)
 field.else = when if condition is false (must be the last before field.end)
 field.else.if(type|attribute) = when if condition is false and make a test if field type or has attributes
 field.end = end if
+field.match(regex) = test if regex match field SQL name
+field.end = end match
+field.contains(text) = test if field SQL name contains "text"
+field.end = end contains
 field.option = enum item value
 field.option.unix = enum item value as unix name
 field.option.norm = enum item value normalized

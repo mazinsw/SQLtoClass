@@ -62,7 +62,7 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 		}
 		out.println("  T" + getClassName(name) + " = class");
 		out.println("  private");
-		Hashtable<String, String> indexedFields = new Hashtable<>();
+		Hashtable<String, CommonField> indexedFields = new Hashtable<>();
 		Hashtable<String, String> usedFields = new Hashtable<>();
 		List<String> getAndSetters = new ArrayList<>();
 
@@ -78,7 +78,7 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
-				String data = indexedFields.get(varName);
+				String data = indexedFields.get(varName).getRange();
 				String varDecl = "    F" + varName + ": array["
 						+ genArray(data) + "] of " + convertType(name, field)
 						+ ";";
@@ -131,7 +131,7 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
-				String data = indexedFields.get(varName);
+				String data = indexedFields.get(varName).getRange();
 				usedFields.put(varName, data);
 				if (fieldComment != null
 						&& !fieldComment.isEmpty()) {
@@ -208,7 +208,7 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 			boolean indexed) {
 		out.println("implementation");
 
-		Hashtable<String, String> indexedFields = new Hashtable<>();
+		Hashtable<String, CommonField> indexedFields = new Hashtable<>();
 		Hashtable<String, String> usedFields = new Hashtable<>();
 		Hashtable<String, String> enumFields = new Hashtable<>();
 
@@ -292,7 +292,8 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 			out.println("var");
 			String varList = "";
 			int sz = 0;
-			for (String data : indexedFields.values()) {
+			for (CommonField commonField : indexedFields.values()) {
+				 String data = commonField.getRange();
 				int i = data.split(";").length;
 				if (sz < i)
 					sz = i;
@@ -317,7 +318,7 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 				varName = varName.replaceAll("\\[[0-9]+\\]", "");
 				if (usedFields.containsKey(varName))
 					continue;
-				String data = indexedFields.get(varName);
+				String data = indexedFields.get(varName).getRange();
 				usedFields.put(varName, data);
 				String[] values = data.split(";");
 				String spacing = "  ";
@@ -396,7 +397,7 @@ public class DelphiGenerator extends DelphiGeneratorBase {
 			varName = varName.replaceAll("\\[[0-9]+\\]", "");
 			if (usedFields.containsKey(varName))
 				continue;
-			String data = indexedFields.get(varName);
+			String data = indexedFields.get(varName).getRange();
 			usedFields.put(varName, data);
 			String[] values = data.split(";");
 

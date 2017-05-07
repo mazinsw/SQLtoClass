@@ -131,6 +131,13 @@ public class Main implements LogListener {
 				config.setTemplatePath(args[i + 1]);
 				i++;
 				break;
+			case "-uw":
+			case "--upper-words":
+				if(i + 1 >= args.length)
+					return showHelp(400, cmd);
+				config.setUpperWords(args[i + 1]);
+				i++;
+				break;
 			case "-sv":
 			case "--save":
 				if(i + 1 >= args.length)
@@ -201,6 +208,7 @@ public class Main implements LogListener {
 		System.out.println("\t(-sfd|--suffix-dao) suffix: set the suffix of DAO class name");
 		System.out.println("\t(-pk|--package) package: set the package name (for Java)");
 		System.out.println("\t(-pkd|--package-dao) package: set the package name for DAO classes (for Java)");
+		System.out.println("\t(-uw|--upper-words) word1|word2: set the uppercase database name");
 		System.out.println("\t(-l|--lang|--language) (delphi|pascal|java|php): set the language to generate code");
 		System.out.println("\t(-sv|--save) project.properties: save configuration to file when finishes");
 		System.out.println("\t(-n|--inherited): generate DAO inherited (for Delphi and Pascal)");

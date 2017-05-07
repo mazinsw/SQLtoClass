@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 import ast.Constraint;
 import ast.Field;
-import ast.Foreign;
+import ast.ForeignKey;
 import ast.Node;
 import ast.OrderField;
 import ast.PrimaryKey;
@@ -24,6 +24,9 @@ import util.Messages;
 public abstract class CodeGenerator implements LogListener {
 	private ScriptNode script;
 	private String outDir;
+	private List<Table> tables;
+	private TemplateLoader templateLoader;
+
 
 	private LogListener logListener;
 	private int currentTableIndex;
@@ -31,40 +34,59 @@ public abstract class CodeGenerator implements LogListener {
 	public CodeGenerator(String outDir, ScriptNode script) {
 		this.script = script;
 		this.outDir = outDir;
+		this.tables = new ArrayList<>();
+		this.currentTableIndex = -1;
+		this.templateLoader = new TemplateLoader();
 		setLogListener(this);
-		currentTableIndex = -1;
+		addTables();
 	}
 	
+	public TemplateLoader getTemplateLoader() {
+		return templateLoader;
+	}
+	
+	private void addTables() {
+		for (Node node : script.getStatements()) {
+			if (node instanceof Table) {
+				tables.add((Table)node);
+			}
+		}
+	}
+
 	public String getOutputDirectory() {
 		return outDir;
 	}
 
+	public List<Table> getTables() {
+		return tables;
+	}
+
 	public Table findTable(String name) {
-		if(name == null)
+		if (name == null) {
 			return null;
-		for (Node node : script.getStatements()) {
-			if (node instanceof Table && ((Table) node).getName().equalsIgnoreCase(name))
-				return (Table) node;
+		}
+		for (Table table : getTables()) {
+			if (table.getName().equalsIgnoreCase(name)) {
+				return table;
+			}
 		}
 		return null;
 	}
 	
 	public int getCurrentTableIndex() {
-		return currentTableIndex;
+		return this.currentTableIndex;
 	}
 
 	public void start() throws Exception {
-		for (Node node : script.getStatements()) {
-			if (node instanceof Table) {
-				currentTableIndex++;
-				run((Table) node);
-			}
+		for (int i = 0; i < getTables().size(); i++) {
+			this.currentTableIndex = i;
+			run(getTables().get(i));
 		}
 	}
 
 	protected abstract void run(Table node) throws Exception;
 
-	public static String normalize(String name) {
+	public String normalize(String name) {
 		return normalize(name, true);
 	}
 	
@@ -88,9 +110,11 @@ public abstract class CodeGenerator implements LogListener {
 	 *            separated with semicolon, example: 1:2;1:3, multidimensional
 	 *            array with bounds 1 to 2 and 1 to 3
 	 */
-	protected static void processArray(Table table,
-			Hashtable<String, String> indexedFields) {
+	protected void processArray(Table table,
+			Hashtable<String, CommonField> indexedFields) {
 		List<Field> normalFields = new ArrayList<>();
+		
+		indexedFields.clear();
 		for (Field field : table.getFields()) {
 			String varName = normalize(field.getName(), false);
 			if (!isIndexed(varName)) {
@@ -108,8 +132,12 @@ public abstract class CodeGenerator implements LogListener {
 			varName = varName.replaceAll("\\[[0-9]+\\]", "");
 			String semicolon = "";
 			String newData = "";
+			CommonField commonField = new CommonField();
+			commonField.addField(field);
 			if (indexedFields.containsKey(varName)) {
-				String data = indexedFields.get(varName);
+				commonField = indexedFields.get(varName);
+				commonField.addField(field);
+				String data = commonField.getRange();
 				String[] values = data.split(";");
 				for (int i = 0; i < values.length; i++) {
 					String string = values[i];
@@ -127,8 +155,9 @@ public abstract class CodeGenerator implements LogListener {
 					newData += semicolon + minIndex + ":" + maxIndex;
 					semicolon = ";";
 				}
-				if (!newData.equals(data))
-					indexedFields.put(varName, newData);
+				if (!newData.equals(data)) {
+					commonField.setRange(newData);
+				}
 				continue;
 			}
 			for (int i = 0; i < m.groupCount(); i++) {
@@ -136,14 +165,18 @@ public abstract class CodeGenerator implements LogListener {
 				newData += semicolon + indexStr + ":" + indexStr;
 				semicolon = ";";
 			}
-			indexedFields.put(varName, newData);
+			commonField.setRange(newData);
+			if (!indexedFields.containsKey(varName)) {
+				indexedFields.put(varName, commonField);
+			}
 		}
 		// increment array for fields with same name
 		for (Field field : normalFields) {
 			String varName = normalize(field.getName(), false);
 			if (!indexedFields.containsKey(varName))
 				continue;
-			String data = indexedFields.get(varName);
+			CommonField commonField = indexedFields.get(varName);
+			String data = commonField.getRange();
 			String[] values = data.split(";");
 			String semicolon = "";
 			String newData = "";
@@ -157,117 +190,20 @@ public abstract class CodeGenerator implements LogListener {
 				newData += semicolon + minIndex + ":" + maxIndex;
 				semicolon = ";";
 			}
-			indexedFields.put(varName, newData);
+			commonField.setRange(newData);
 		}
 	}
 
-
-	public static String normalize(String name, boolean despluralize) {
-		if (name.matches("T[A-Z].*"))
-			name = name.substring(1);
-		String result = "", lastWord = "";
-		boolean lastCaseIsUpper = false, lastIsVector = false, currentIsVector = false;
-		int i = 0;
-		while (i < name.length()) {
-			char ch = name.charAt(i);
-			String str = "" + ch;
-			currentIsVector = false;
-			if (ch == '_') {
-				int j = i + 1;
-				if (j >= name.length())
-					break;
-				do {
-					ch = name.charAt(j);
-					j++;
-				} while (ch == '_' && j < name.length());
-				if (j > name.length())
-					break;
-				ch = Character.toUpperCase(ch);
-				str = "" + ch;
-				lastCaseIsUpper = false;
-				i = j - 1;
-			} else if (((result.isEmpty() && lastWord.isEmpty()) || lastIsVector)
-					&& Character.isLowerCase(ch)) {
-				ch = Character.toUpperCase(ch);
-				str = "" + ch;
-			}
-			if (Character.isDigit(ch)) {
-				lastIsVector = true;
-				String digits = "";
-				int j = i;
-				do {
-					ch = name.charAt(j);
-					digits += ch;
-					j++;
-				} while (j < name.length() && Character.isDigit(name.charAt(j)));
-				str = "[" + digits + "]";
-				lastCaseIsUpper = false;
-				i = j - 1;
-				currentIsVector = true;
-			}
-			if (!lastCaseIsUpper
-					&& (Character.isUpperCase(ch) || currentIsVector)
-					&& !lastWord.isEmpty()) {
-				if (lastIsVector && !currentIsVector) {
-					if (despluralize)
-						result += upperFix(despluralize(lastWord)) + ".";
-					else
-						result += upperFix(lastWord) + ".";
-					lastIsVector = false;
-				} else {
-					if (despluralize)
-						result += upperFix(despluralize(lastWord));
-					else
-						result += upperFix(lastWord);
-				}
-				lastWord = str;
-				lastCaseIsUpper = true;
-			} else if (!lastIsVector) {
-				lastWord += ch;
-				lastCaseIsUpper = Character.isUpperCase(ch);
-			} else {
-				lastIsVector = false;
-				result += upperFix(lastWord) + ".";
-				lastWord = str;
-			}
-			i++;
-		}
-		if (!lastWord.isEmpty()) {
-			if (!currentIsVector && lastIsVector) {
-				if (despluralize)
-					result += "." + upperFix(despluralize(lastWord));
-				else
-					result += "." + upperFix(lastWord);
-			} else {
-				if (despluralize)
-					result += upperFix(despluralize(lastWord));
-				else
-					result += upperFix(lastWord);
-			}
-		}
-		return result;
+	public String normalize(String name, boolean despluralize) {
+		return getTemplateLoader().normalize(name, despluralize);
 	}
 
-	public static String upperFix(String word) {
-		String upr = word.toUpperCase();
-		if (TemplateLoader.UPR_WORDS.contains(upr))
-			word = upr;
-		return word;
+	public String upperFix(String word) {
+		return getTemplateLoader().upperFix(word);
 	}
 
 	public static String despluralize(String word) {
-		if (word.endsWith("oes") || word.endsWith("aes"))
-			word = word.substring(0, word.length() - 3) + "ao";
-		else if (word.endsWith("is") && word.length() > 4)
-			word = word.substring(0, word.length() - 2) + "l";
-		else if (word.endsWith("res") || word.endsWith("ses"))
-			word = word.substring(0, word.length() - 2);
-		else if (word.endsWith("es") || word.endsWith("as")
-				|| word.endsWith("os"))
-			word = word.substring(0, word.length() - 1);
-		else if (word.endsWith("ns"))
-			word = word.substring(0, word.length() - 2) + "m";
-		return word;
+		return TemplateLoader.despluralize(word);
 	}
 
 	public static String unixTransform(String word) {
@@ -350,12 +286,12 @@ public abstract class CodeGenerator implements LogListener {
 		return list;
 	}
 
-	public List<Foreign> getForeignKeys(Table table) {
-		List<Foreign> list = new ArrayList<>();
+	public List<ForeignKey> getForeignKeys(Table table) {
+		List<ForeignKey> list = new ArrayList<>();
 		for (Constraint constraint : table.getConstraints()) {
-			if (!(constraint instanceof Foreign))
+			if (!(constraint instanceof ForeignKey))
 				continue;
-			list.add((Foreign)constraint);
+			list.add((ForeignKey)constraint);
 		}
 		return list;
 	}
