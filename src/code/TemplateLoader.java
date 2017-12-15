@@ -70,19 +70,32 @@ public class TemplateLoader {
 		return recase(wordcase, entry, false);
 	}
 	
+	public static String camelCase(String name) {
+		String camelCase = "";
+		for (int i = 0; i < name.length(); i++) {
+			if(Character.isUpperCase(name.charAt(i))) {
+				camelCase += Character.toLowerCase(name.charAt(i));
+			} else {
+				camelCase += name.substring(i);
+				break;
+			}
+		}
+		return camelCase;
+	}
+	
 	public String recase(String wordcase, String entry, boolean useWordDB) {
 		String result = entry;
 		if (useWordDB && canUpper(entry)) {
 			entry =  entry.toUpperCase();
 		}
 		if(Character.isLowerCase(wordcase.charAt(0)) && wordcase.length() > 1 && Character.isUpperCase(wordcase.charAt(1)))
-			result = entry;
+			result = camelCase(entry);
 		else if(Character.isLowerCase(wordcase.charAt(0)))
 			result = result.toLowerCase();
 		else if(wordcase.length() > 1 && Character.isUpperCase(wordcase.charAt(1)))
 			result = result.toUpperCase();
 		else
-			result = result.substring(0, 1).toUpperCase() + result.toLowerCase().substring(1);
+			result = entry;
 		return result;
 	}
 	

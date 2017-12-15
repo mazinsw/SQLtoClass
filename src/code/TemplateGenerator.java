@@ -355,6 +355,9 @@ public class TemplateGenerator extends CodeGenerator {
 								if (!command.equalsIgnoreCase("index")) {
 									sourceIndex = constraint;
 								}
+								if (command.equalsIgnoreCase("primarykey")) {
+									sourceIndex = getPrimaryKey(table);
+								}
 								if (sourceIndex != null) {
 									for (OrderField ofield : sourceIndex.getFields()) {
 										Field afield = table.find(ofield.getName());
@@ -443,6 +446,9 @@ public class TemplateGenerator extends CodeGenerator {
 														false))));
 							} else if (option.equals("norm")) {
 								replace = getTemplateLoader().recase(command, varName, true);
+							} else if (option.equals("norm.singular")) {
+								String varNameDef = normalized(field.getName(), true);
+								replace = getTemplateLoader().recase(command, varNameDef, true);
 							} else if (option.equals("chars")) {
 								replace = firstLetters(varName);
 							} else if (option.equals("comment")) {
@@ -481,7 +487,7 @@ public class TemplateGenerator extends CodeGenerator {
 						TemplateLoader.extractComment(table.getComment(), refValues, "T.");
 						if(pkField != null) {
 							TemplateLoader.extractComment(pkField.getComment(), refValues, "F.");
-							replace = applyTemplate("$[" + getTemplateLoader().recase(command, "fIeld")
+							replace = applyTemplate("$[" + getTemplateLoader().recase(command, "Field")
 									+ (option.isEmpty() ? "" : ".") + option + "]", table, indexedFields, pkField, index, constraint, refValues, eachIndex);
 						}
 					} else if (command.equalsIgnoreCase("descriptor")) {
@@ -490,7 +496,7 @@ public class TemplateGenerator extends CodeGenerator {
 						TemplateLoader.extractComment(table.getComment(), refValues, "T.");
 						if(descField != null) {
 							TemplateLoader.extractComment(descField.getComment(), refValues, "F.");
-							replace = applyTemplate("$[" + getTemplateLoader().recase(command, "fIeld")
+							replace = applyTemplate("$[" + getTemplateLoader().recase(command, "Field")
 									+ (option.isEmpty() ? "" : ".") + option + "]", table, indexedFields, descField, index, constraint, refValues, eachIndex);
 						}
 					} else if (command.equalsIgnoreCase("table")) {
@@ -525,7 +531,12 @@ public class TemplateGenerator extends CodeGenerator {
 							replace = getTemplateLoader().recase(command, TemplateLoader.getValueByIndex(values.get("T.U"), 0, unixName));
 						else if (option.equals("norm"))
 							replace = getTemplateLoader().recase(command, name, true);
-						else if (option.equals("chars"))
+						else if (option.equals("norm.default")) {
+							String nameDef = normalize(table.getName(), false);
+							String[] partDef = nameDef.split("\\.");
+							nameDef = partDef[partDef.length - 1];
+							replace = getTemplateLoader().recase(command, nameDef, true);
+						} else if (option.equals("chars"))
 							replace = firstLetters(name);
 						else if (option.equals("size"))
 							replace = Integer.toString(field.getType().getSize());
@@ -544,13 +555,13 @@ public class TemplateGenerator extends CodeGenerator {
 							Hashtable<String, String> refValues = new Hashtable<>();
 							TemplateLoader.extractComment(table.getComment(), refValues, "T.");
 							TemplateLoader.extractComment(pkField.getComment(), refValues, "F.");
-							replace = applyTemplate("$[" + getTemplateLoader().recase(command, "fIeld")
+							replace = applyTemplate("$[" + getTemplateLoader().recase(command, "Field")
 									+ option.replaceFirst("pk", "") + "]", table, indexedFields, pkField, index, constraint, refValues, eachIndex);
 						} else if (option.startsWith("desc") && descField != null) {
 							Hashtable<String, String> refValues = new Hashtable<>();
 							TemplateLoader.extractComment(table.getComment(), refValues, "T.");
 							TemplateLoader.extractComment(descField.getComment(), refValues, "F.");
-							replace = applyTemplate("$[" + getTemplateLoader().recase(command, "fIeld")
+							replace = applyTemplate("$[" + getTemplateLoader().recase(command, "Field")
 									+ option.replaceFirst("desc", "") + "]", table, indexedFields, descField, index, constraint, refValues, eachIndex);
 						} else if (option.equals("style"))
 							replace = getTemplateLoader().recase(command,
@@ -563,7 +574,7 @@ public class TemplateGenerator extends CodeGenerator {
 							if (refTable != null) {
 								Hashtable<String, String> refValues = new Hashtable<>();
 								TemplateLoader.extractComment(refTable.getComment(), refValues, "T.");
-								replace = applyTemplate("$[" + getTemplateLoader().recase(command, "tAble")
+								replace = applyTemplate("$[" + getTemplateLoader().recase(command, "Table")
 										+ (option.isEmpty() ? "" : ".") + option + "]", refTable, indexedFields, null, index, constraint,
 										refValues, 0);
 							}
@@ -574,7 +585,7 @@ public class TemplateGenerator extends CodeGenerator {
 						if (refTable != null) {
 							Hashtable<String, String> refValues = new Hashtable<>();
 							TemplateLoader.extractComment(refTable.getComment(), refValues, "T.");
-							replace = applyTemplate("$[" + getTemplateLoader().recase(command, "tAble")
+							replace = applyTemplate("$[" + getTemplateLoader().recase(command, "Table")
 									+ (option.isEmpty() ? "" : ".") + option + "]", refTable, indexedFields, null, index, constraint,
 									refValues, 0);
 						}
@@ -714,7 +725,11 @@ public class TemplateGenerator extends CodeGenerator {
 	}
 
 	private String normalized(String name) {
-		name = normalize(name, false);
+		return normalized(name, false);
+	}
+
+	private String normalized(String name, boolean despluralize) {
+		name = normalize(name, despluralize);
 		return name.replaceAll("\\[[0-9]+\\]", "");
 	}
 	

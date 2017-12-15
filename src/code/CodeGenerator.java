@@ -197,6 +197,10 @@ public abstract class CodeGenerator implements LogListener {
 	public String normalize(String name, boolean despluralize) {
 		return getTemplateLoader().normalize(name, despluralize);
 	}
+	
+	public String getCamelCaseName(String name) {
+		return TemplateLoader.camelCase(name);
+	}
 
 	public String upperFix(String word) {
 		return getTemplateLoader().upperFix(word);

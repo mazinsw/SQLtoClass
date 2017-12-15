@@ -247,19 +247,6 @@ public abstract class JavaGeneratorBase extends FileGenerator {
 		}
 		return "Unknown";
 	}
-	
-	protected String getCamelCaseName(String name) {
-		String camelCase = "";
-		for (int i = 0; i < name.length(); i++) {
-			if(Character.isUpperCase(name.charAt(i))) {
-				camelCase += Character.toLowerCase(name.charAt(i));
-			} else {
-				camelCase += name.substring(i);
-				break;
-			}
-		}
-		return camelCase;
-	}
 
 	@Override
 	protected String getNameWithExtension(String name) {

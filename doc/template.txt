@@ -6,7 +6,8 @@ commands:
 table = database table name
 table.unix = Table name in unix format
 table.unix.plural = database table name on plural
-table.norm = Table name normalized
+table.norm = Table name normalized and despluralized
+table.norm.default = Table name normalized without despluralize
 table.name = Beautiful name of table
 table.name.plural = Beautiful name of table on plural
 table.info = Describe the table functionality
@@ -59,6 +60,7 @@ reference = referenced table by field or constraint, have all table commands
 field = name of table field
 field.unix = name of field in unix format
 field.norm = name of field normalized
+table.norm.singular = Table name normalized on singular
 field.name = Beautiful name of table field
 field.info = Describe the field functionality
 field.comment = Comment of the field or each comment line wrapped when in loop
