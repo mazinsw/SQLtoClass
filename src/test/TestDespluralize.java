@@ -18,6 +18,7 @@ public class TestDespluralize {
 		assertEquals("Pais", CodeGenerator.despluralize("Pais"));
 		assertEquals("Canal", CodeGenerator.despluralize("Canais"));
 		assertEquals("Pao", CodeGenerator.despluralize("Paes"));
+		assertEquals("Download", CodeGenerator.despluralize("Downloads"));
 	}
 
 }

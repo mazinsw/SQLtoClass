@@ -316,7 +316,7 @@ public class TemplateLoader {
 		else if (word.endsWith("res") || word.endsWith("ses"))
 			word = word.substring(0, word.length() - 2);
 		else if (word.endsWith("es") || word.endsWith("as")
-				|| word.endsWith("os"))
+				|| word.endsWith("os") || word.endsWith("ds"))
 			word = word.substring(0, word.length() - 1);
 		else if (word.endsWith("ns"))
 			word = word.substring(0, word.length() - 2) + "m";

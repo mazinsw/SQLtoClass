@@ -119,7 +119,7 @@ public class TemplateGenerator extends CodeGenerator {
 				// execute
 				if (state >= 2 && !command.isEmpty()) {
 					String replace = "";
-					// field.if or table.if or table.exists, field.each or table.each
+					// field.[if|exists|each] or table.[if|exists|each] or descriptor.if or primary.if
 					if (option.startsWith("each") || option.startsWith("if") || option.startsWith("exists") || 
 							option.startsWith("match") || option.startsWith("contains")) {
 						if (i + 1 < source.length() && source.charAt(i + 1) == '\r') {
@@ -152,7 +152,7 @@ public class TemplateGenerator extends CodeGenerator {
 						if (offsetStack.size() > 1) {
 							replace = source.substring(startoffset, i + 1);
 						}
-						// field.end or table.end, field.else.[if(filter)] or table.else.[if(filter)]
+						// [field|table|primary|descriptor].end or [field|table|primary|descriptor].else[.if(filter)]
 					} else if (option.equals("end") || option.startsWith("else")) {
 						if (i + 1 < source.length() && source.charAt(i + 1) == '\r') {
 							i++;
@@ -216,6 +216,12 @@ public class TemplateGenerator extends CodeGenerator {
 										}
 									} else {
 										String[] filters = filter.split("\\|");
+										Field testField = field;
+										if (command.equalsIgnoreCase("descriptor")) {
+											testField = getDescriptor(table);
+										} else if (command.equalsIgnoreCase("primary")) {
+											testField = getPrimary(table);
+										}
 										for (String uFilter : filters) {
 											if (stmt.equals("exists")) {
 												Hashtable<String, String> tableValues = new Hashtable<>();
@@ -235,14 +241,15 @@ public class TemplateGenerator extends CodeGenerator {
 														break;
 													}
 												}
-											} else if (field != null && uFilter
-													.equals(TemplateLoader.getTypeNameFromType(table, field))) {
+											} else if (testField != null && uFilter
+													.equals(TemplateLoader.getTypeNameFromType(table, testField))) {
 												doReplace = true;
-											} else if (hasAttribute(command, table, indexedFields, field, uFilter, values, eachIndex, false)) {
+											} else if (hasAttribute(command, table, indexedFields, testField, uFilter, values, eachIndex, false)) {
 												doReplace = true;
 											}
-											if (doReplace)
+											if (doReplace) {
 												break;
+											}
 										}
 									}
 								}
@@ -434,6 +441,24 @@ public class TemplateGenerator extends CodeGenerator {
 						} else if (option.equals("gender")) {
 							replace = getTemplateLoader().recase(command, TemplateLoader.getValueByIndex(values.get("F.G"),
 									0, getGenderChar(despluralize(field.getName()).toLowerCase())));
+						} else if (option.equals("letter")) {
+							replace = getTemplateLoader().recase(command, field.getName().substring(0, 1));
+						} else if (option.equals("info")) {
+							replace = getTemplateLoader().recase(command,
+									TemplateLoader.getValueByIndex(values.get("F.F"), 0,
+											TemplateLoader.getValueByIndex(values.get("F.N"), 0, field.getName())));
+						} else if (option.equals("get")) {
+							replace = getFunctionSuffix(field, "get");
+						} else if (option.equals("set")) {
+							replace = getFunctionSuffix(field, "set");
+						} else if (option.equals("norm.singular")) {
+							String varNameDef = normalized(field.getName(), true);
+							replace = getTemplateLoader().recase(command, varNameDef, true);
+						} else if (option.equals("comment")) {
+							replace = TemplateLoader.extractComment(field.getComment());
+						} else if (option.equals("name")) {
+							replace = getTemplateLoader().recase(command,
+									TemplateLoader.getValueByIndex(values.get("F.N"), 0, field.getName()), true);
 						} else {
 							String varName = normalized(field.getName());
 							if (option.equals("unix"))
@@ -446,16 +471,8 @@ public class TemplateGenerator extends CodeGenerator {
 														false))));
 							} else if (option.equals("norm")) {
 								replace = getTemplateLoader().recase(command, varName, true);
-							} else if (option.equals("norm.singular")) {
-								String varNameDef = normalized(field.getName(), true);
-								replace = getTemplateLoader().recase(command, varNameDef, true);
 							} else if (option.equals("chars")) {
 								replace = firstLetters(varName);
-							} else if (option.equals("comment")) {
-								replace = TemplateLoader.extractComment(field.getComment());
-							} else if (option.equals("name")) {
-								replace = getTemplateLoader().recase(command,
-										TemplateLoader.getValueByIndex(values.get("F.N"), 0, field.getName()), true);
 							} else if (option.startsWith("array.")) {
 								if (!indexedFields.containsKey(varName)) {
 									log(String.format("Field '%s' of table '%s' is not an array", field.getName(),
@@ -470,16 +487,9 @@ public class TemplateGenerator extends CodeGenerator {
 									CommonField commonField = indexedFields.get(varName);
 									replace = String.valueOf(commonField.indexOf(field) + 1);
 								}
-							} else if (option.equals("info")) {
-								replace = getTemplateLoader().recase(command,
-										TemplateLoader.getValueByIndex(values.get("F.F"), 0,
-												TemplateLoader.getValueByIndex(values.get("F.N"), 0, field.getName())));
-							} else if (option.equals("get")) {
-								replace = getFunctionSuffix(field, "get");
-							} else if (option.equals("set")) {
-								replace = getFunctionSuffix(field, "set");
-							} else
+							} else {
 								replace = getTemplateLoader().recase(command, field.getName());
+							}
 						}
 					} else if (command.equalsIgnoreCase("primary")) {
 						Field pkField = getPrimary(table);
@@ -517,41 +527,43 @@ public class TemplateGenerator extends CodeGenerator {
 						} else if (option.equals("gender")) {
 							replace = getTemplateLoader().recase(command, TemplateLoader.getValueByIndex(values.get("T.G"),
 									0, getGenderChar(despluralize(name).toLowerCase())));
-						} else if (option.equals("name"))
+						} else if (option.equals("letter")) {
+							replace = getTemplateLoader().recase(command, name.substring(0, 1));
+						} else if (option.equals("name")) {
 							replace = getTemplateLoader().recase(command,
 									TemplateLoader.getValueByIndex(values.get("T.N"), 0, despluralize(name)), true);
-						else if (option.equals("name.plural"))
+						} else if (option.equals("name.plural")) {
 							replace = getTemplateLoader().recase(command,
 									TemplateLoader.getValueByIndex(values.get("T.N"), 1, despluralize(name) + "s"),
 									true);
-						else if (option.equals("info"))
+						} else if (option.equals("info")) {
 							replace = getTemplateLoader().recase(command, TemplateLoader.getValueByIndex(values.get("T.F"),
 									0, TemplateLoader.getValueByIndex(values.get("T.N"), 0, despluralize(name))));
-						else if (option.equals("unix"))
+						} else if (option.equals("unix")) {
 							replace = getTemplateLoader().recase(command, TemplateLoader.getValueByIndex(values.get("T.U"), 0, unixName));
-						else if (option.equals("norm"))
+						} else if (option.equals("norm")) {
 							replace = getTemplateLoader().recase(command, name, true);
-						else if (option.equals("norm.default")) {
+						} else if (option.equals("norm.default")) {
 							String nameDef = normalize(table.getName(), false);
 							String[] partDef = nameDef.split("\\.");
 							nameDef = partDef[partDef.length - 1];
 							replace = getTemplateLoader().recase(command, nameDef, true);
-						} else if (option.equals("chars"))
+						} else if (option.equals("chars")) {
 							replace = firstLetters(name);
-						else if (option.equals("size"))
+						} else if (option.equals("size")) {
 							replace = Integer.toString(field.getType().getSize());
-						else if (option.equals("length")) {
+						} else if (option.equals("length")) {
 							// TODO implement field length
 							replace = "length.undefined";// Integer.toString(field.getType().getSize());
-						} else if (option.equals("comment"))
+						} else if (option.equals("comment")) {
 							replace = TemplateLoader.extractComment(table.getComment());
-						else if (option.equals("unix.plural"))
+						} else if (option.equals("unix.plural")) {
 							replace = getTemplateLoader().recase(command, TemplateLoader
 									.getValueByIndex(values.get("T.U"), 1,
 											unixTransform(normalize(
 													TemplateLoader.getValueByIndex(values.get("T.N"), 1, name + "s"),
 													false))));
-						else if (option.startsWith("pk") && pkField != null) {
+						} else if (option.startsWith("pk") && pkField != null) {
 							Hashtable<String, String> refValues = new Hashtable<>();
 							TemplateLoader.extractComment(table.getComment(), refValues, "T.");
 							TemplateLoader.extractComment(pkField.getComment(), refValues, "F.");
@@ -563,11 +575,12 @@ public class TemplateGenerator extends CodeGenerator {
 							TemplateLoader.extractComment(descField.getComment(), refValues, "F.");
 							replace = applyTemplate("$[" + getTemplateLoader().recase(command, "Field")
 									+ option.replaceFirst("desc", "") + "]", table, indexedFields, descField, index, constraint, refValues, eachIndex);
-						} else if (option.equals("style"))
+						} else if (option.equals("style")) {
 							replace = getTemplateLoader().recase(command,
 									TemplateLoader.getValueByIndex(values.get("T.L"), 0, ""));
-						else
+						} else {
 							replace = table.getName();
+						}
 					} else if (command.equalsIgnoreCase("reference")) {
 						if (field != null) {
 							Table refTable = findTable(table.getReference(field.getName()));
