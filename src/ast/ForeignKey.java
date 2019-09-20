@@ -1,8 +1,11 @@
 package ast;
 
 public class ForeignKey extends Constraint {
-	public static final int RESTRICT = 0;
-	public static final int CASCADE = 1;
+	public static final int NO_ACTION = 0;
+	public static final int RESTRICT = 1;
+	public static final int CASCADE = 2;
+	public static final int SET_NULL = 3;
+
 	private Index references;
 	private String tableName;
 	private int updateAction;
@@ -33,6 +36,24 @@ public class ForeignKey extends Constraint {
 		this.updateAction = updateAction;
 	}
 
+	public void setUpdateAction(String action) {
+		switch (action) {
+		case "CASCADE":
+			updateAction = CASCADE;
+			break;
+		case "RESTRICT":
+			updateAction = RESTRICT;
+			break;
+		default:
+			if (action.contains("SET") && action.contains("NULL")) {
+				updateAction = SET_NULL;
+			} else {
+				updateAction = NO_ACTION;
+			}
+			break;
+		}
+	}
+
 	public int getDeleteAction() {
 		return deleteAction;
 	}
@@ -41,11 +62,57 @@ public class ForeignKey extends Constraint {
 		this.deleteAction = deleteAction;
 	}
 
+	public void setDeleteAction(String action) {
+		switch (action) {
+		case "CASCADE":
+			deleteAction = CASCADE;
+			break;
+		case "RESTRICT":
+			deleteAction = RESTRICT;
+			break;
+		default:
+			if (action.contains("SET") && action.contains("NULL")) {
+				deleteAction = SET_NULL;
+			} else {
+				deleteAction = NO_ACTION;
+			}
+			break;
+		}
+	}
+
 	public boolean find(String name) {
 		for (OrderField orderField : getFields()) {
 			if(orderField.getName().equals(name))
 				return true;
 		}
 		return false;
+	}
+
+	public String getDeleteActionText() {
+		switch (deleteAction) {
+		case CASCADE:
+			return "CASCADE";
+		case RESTRICT:
+			return "RESTRICT";
+		case SET_NULL:
+			return "SET NULL";
+
+		default:
+			return "NO ACTION";
+		}
+	}
+
+	public String getUpdateActionText() {
+		switch (updateAction) {
+		case CASCADE:
+			return "CASCADE";
+		case RESTRICT:
+			return "RESTRICT";
+		case SET_NULL:
+			return "SET NULL";
+
+		default:
+			return "NO ACTION";
+		}
 	}
 }

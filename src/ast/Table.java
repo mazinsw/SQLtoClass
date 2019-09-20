@@ -50,14 +50,21 @@ public class Table extends CommentedNode {
 		return null;
 	}
 
-	public String getReference(String name) {
+	public ForeignKey findForeignKey(String fieldName) {
 		for (Constraint constraint : constraints) {
 			if(constraint instanceof ForeignKey) {
 				ForeignKey foreign = (ForeignKey)constraint;
-				if(foreign.find(name))
-					return foreign.getTableName();
+				if(foreign.find(fieldName))
+					return foreign;
 			}
 		}
+		return null;
+	}
+
+	public String getReference(String fieldName) {
+		ForeignKey foreign = findForeignKey(fieldName);
+		if(foreign != null)
+			return foreign.getTableName();
 		return null;
 	}
 

@@ -2,10 +2,10 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.4.jar" sourcepath="D:/Downloads/commons-io-2.4-sources.jar"/>
-	<classpathentry kind="lib" path="lib/antlr-runtime-4.5.3.jar" sourcepath="C:/Program Files/Java/jdk1.7.0_75/antlr4-4.5.3.zip"/>
 	<classpathentry kind="lib" path="lib/commons-lang3-3.4.jar"/>
 	<classpathentry kind="lib" path="lib/juniversalchardet-1.0.3.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/antlr-runtime-4.7.2.jar" sourcepath="lib/antlr-4.7.2-complete.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

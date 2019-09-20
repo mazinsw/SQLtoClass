@@ -18,4 +18,9 @@ public class IntegerValue extends Value {
 	public void setValue(int value) {
 		this.value = value;
 	}
+	
+	@Override
+	public String toString() {
+		return String.valueOf(value);
+	}
 }

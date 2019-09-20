@@ -1,8 +1,0 @@
-<div class="form-control">
-	<label for="$[field]">$[Field.name]:</label>
-	<select id="$[field]" name="$[field]">
-$[field.each(option)]
-		<option value="$[field.option]" <?php echo $$[table.unix]->$[field.get] == '$[field.option]'?'selected':'';?>>$[Field.option.name]</option>
-$[field.end]
-	</select>
-</div>

@@ -5,12 +5,13 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import code.TemplateLoader;
+import util.Configuration;
 
 public class TestNormalize {
 
 	@Test
 	public void test() {
-		TemplateLoader templateLoader = new TemplateLoader();
+		TemplateLoader templateLoader = new TemplateLoader(new Configuration());
 		assertEquals("TesteBom", templateLoader.normalize("TestesBons"));
 		assertEquals("TesteBom", templateLoader.normalize("testes_bons"));
 		assertEquals("Usuario", templateLoader.normalize("TUsuarios"));

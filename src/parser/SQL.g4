@@ -71,8 +71,11 @@ fieldComment: STRING;
 
 referenceDefinition:
       'REFERENCES' referenceTable '(' (indexColName ',')* indexColName ')'
-      ('ON' 'DELETE' referenceOption)?
-      ('ON' 'UPDATE' referenceOption)?;
+      ('ON' 'DELETE' referenceDeleteOption)?
+      ('ON' 'UPDATE' referenceUpdateOption)?;
+
+referenceDeleteOption: referenceOption;
+referenceUpdateOption: referenceOption;
 
 referenceTable:idName;
 
@@ -137,13 +140,13 @@ idName: '`' NAME '`'
       | '"' NAME '"'
       | NAME;
 
-NAME: [A-Za-z_][0-9A-Za-z_\.]*;
+NAME: [A-Za-z_][0-9A-Za-z_.]*;
 INT: [0-9]+;
 FLOAT: [0-9]* '.' [0-9]+;
 STRING: ('\'' (~('\'' | '\\') | '\\' ('\'' | '"' | '\\' | 'r' | 'n' | 't'))* '\'') | ('"' (~('"' | '\\') | '\\' ('\'' | '"' | '\\' | 'r' | 'n'))* '"');
 
 
-/* comentários, espaços e final de linha */
+/* comentÃ¡rios, espaÃ§os e final de linha */
 COMMENT: '/*' .*? '*/' -> skip;
 SINGLE_COMMENT: '--' ~[\r\n]* -> skip;
 WS: [\t\r\n ]+ -> skip;

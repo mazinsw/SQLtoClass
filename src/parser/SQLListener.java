@@ -1,4 +1,4 @@
-// Generated from .\src\parser\SQL.g4 by ANTLR 4.5.3
+// Generated from ./src/parser/SQL.g4 by ANTLR 4.7.2
 package parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -317,6 +317,26 @@ public interface SQLListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitReferenceDefinition(SQLParser.ReferenceDefinitionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#referenceDeleteOption}.
+	 * @param ctx the parse tree
+	 */
+	void enterReferenceDeleteOption(SQLParser.ReferenceDeleteOptionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#referenceDeleteOption}.
+	 * @param ctx the parse tree
+	 */
+	void exitReferenceDeleteOption(SQLParser.ReferenceDeleteOptionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#referenceUpdateOption}.
+	 * @param ctx the parse tree
+	 */
+	void enterReferenceUpdateOption(SQLParser.ReferenceUpdateOptionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#referenceUpdateOption}.
+	 * @param ctx the parse tree
+	 */
+	void exitReferenceUpdateOption(SQLParser.ReferenceUpdateOptionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SQLParser#referenceTable}.
 	 * @param ctx the parse tree

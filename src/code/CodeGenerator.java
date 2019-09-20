@@ -18,25 +18,20 @@ import ast.PrimaryKey;
 import ast.ScriptNode;
 import ast.Table;
 import ast.UniqueKey;
+import util.Configuration;
 import util.LogListener;
 import util.Messages;
 
 public abstract class CodeGenerator implements LogListener {
 	private ScriptNode script;
-	private String outDir;
 	private List<Table> tables;
 	private TemplateLoader templateLoader;
-
-
 	private LogListener logListener;
-	private int currentTableIndex;
 
-	public CodeGenerator(String outDir, ScriptNode script) {
+	public CodeGenerator(ScriptNode script, Configuration config) {
 		this.script = script;
-		this.outDir = outDir;
 		this.tables = new ArrayList<>();
-		this.currentTableIndex = -1;
-		this.templateLoader = new TemplateLoader();
+		this.templateLoader = new TemplateLoader(config);
 		setLogListener(this);
 		addTables();
 	}
@@ -51,10 +46,6 @@ public abstract class CodeGenerator implements LogListener {
 				tables.add((Table)node);
 			}
 		}
-	}
-
-	public String getOutputDirectory() {
-		return outDir;
 	}
 
 	public List<Table> getTables() {
@@ -72,19 +63,12 @@ public abstract class CodeGenerator implements LogListener {
 		}
 		return null;
 	}
-	
-	public int getCurrentTableIndex() {
-		return this.currentTableIndex;
-	}
 
 	public void start() throws Exception {
-		for (int i = 0; i < getTables().size(); i++) {
-			this.currentTableIndex = i;
-			run(getTables().get(i));
-		}
+		run();
 	}
 
-	protected abstract void run(Table node) throws Exception;
+	protected abstract void run() throws Exception;
 
 	public String normalize(String name) {
 		return normalize(name, true);
@@ -192,6 +176,15 @@ public abstract class CodeGenerator implements LogListener {
 			}
 			commonField.setRange(newData);
 		}
+	}
+	
+	public static String capture(String pattern, String subject, int group) {
+		Pattern patternObj = Pattern.compile(pattern);
+		Matcher matcher = patternObj.matcher(subject);
+		if (matcher.matches() && matcher.groupCount() >= group) {
+		    return matcher.group(group);
+		}
+		return "";
 	}
 
 	public String normalize(String name, boolean despluralize) {

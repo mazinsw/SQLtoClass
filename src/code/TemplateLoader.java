@@ -1,6 +1,7 @@
 package code;
 
 import java.io.File;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
@@ -13,44 +14,34 @@ import org.apache.commons.lang3.text.WordUtils;
 import ast.DataType;
 import ast.Field;
 import ast.Table;
+import util.Configuration;
 
 public class TemplateLoader {
 	private Collection<File> files;
-	private File outputDirectory;
-	private File baseDirectory;
+	private File templateDirectory;
+	private File ouputDirectory;
 	private String upperWords;
 
-	public TemplateLoader() {
+	public TemplateLoader(Configuration config) {
 		files = new ArrayList<>();
-		setBaseDirectory("template");
-	}
-	
-	public File getRelativeFile(String relativeName) {
-		return new File(baseDirectory.getAbsolutePath() + File.separator + relativeName);
+		this.templateDirectory = new File(config.getTemplatePath());
+		this.ouputDirectory = new File(config.getOutputPath());
+		this.setUpperWords(config.getUpperWords());
 	}
 
 	public Collection<File> getFiles() {
 		return files;
 	}
-	
-	public void setBaseDirectory(String directory) {
-		this.baseDirectory = new File(directory);
-		this.outputDirectory = getRelativeFile("output");
-	}
 
 	public void load() {
-		files = FileUtils.listFilesAndDirs(outputDirectory, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
-		files.remove(outputDirectory);
+		files = FileUtils.listFilesAndDirs(templateDirectory, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
+		files.remove(templateDirectory);
 	}
 	
-	public File getOutputDirectory() {
-		return outputDirectory;
+	public File rebase(File file) {
+		return new File(file.getAbsolutePath().replace(templateDirectory.getAbsolutePath(), ouputDirectory.getAbsolutePath()));
 	}
-	
-	public File rebase(File file, File base) {
-		return new File(file.getAbsolutePath().replace(outputDirectory.getAbsolutePath(), base.getAbsolutePath()));
-	}
-	
+
 	/**
 	 * Return wrap text with max length characters
 	 * 
@@ -134,73 +125,6 @@ public class TemplateLoader {
 		}
 	}
 	
-	public File getFileForField(Table table, Field field, Hashtable<String, String> attributes) throws Exception {
-		String type = getTypeNameFromType(table, field);
-		String attribute = "unknow";
-		
-		if(table.getReference(field.getName()) != null)
-			attribute = "reference";
-		else if(attributes.containsKey("F.R"))
-			attribute = "radio";
-		else if(attributes.containsKey("F.M"))
-			attribute = "masked";
-		else if(attributes.containsKey("F.P"))
-			attribute = "password";
-		else if(attributes.containsKey("F.I"))
-			attribute = "image";
-		switch (attribute) {
-		case "reference":
-			return getRelativeFile("field/reference.html");
-		case "radio":
-			return getRelativeFile("field/radio.html");
-		case "image":
-			return getRelativeFile("field/image.html");
-		case "masked":
-			return getRelativeFile("field/masked.html");
-		case "password":
-			return getRelativeFile("field/password.html");
-		}
-		
-		switch (type) {
-		case "boolean":
-			return getRelativeFile("field/boolean.html");
-		case "reference":
-			return getRelativeFile("field/reference.html");
-		case "currency":
-			return getRelativeFile("field/currency.html");
-		case "date":
-			return getRelativeFile("field/date.html");
-		case "datetime":
-			return getRelativeFile("field/datetime.html");
-		case "radio":
-			return getRelativeFile("field/radio.html");
-		case "enum":
-			return getRelativeFile("field/enum.html");
-		case "float":
-		case "double":
-			return getRelativeFile("field/float.html");
-		case "image":
-			return getRelativeFile("field/image.html");
-		case "blob":
-			return getRelativeFile("field/blob.html");
-		case "integer":
-		case "bigint":
-			return getRelativeFile("field/integer.html");
-		case "masked":
-			return getRelativeFile("field/masked.html");
-		case "password":
-			return getRelativeFile("field/password.html");
-		case "text":
-			return getRelativeFile("field/text.html");
-		case "string":
-			return getRelativeFile("field/string.html");
-		case "time":
-			return getRelativeFile("field/time.html");
-		default:
-			throw new Exception(String.format("Unknow template for type '%s'(%d)", type, field.getType().getType()));
-		}
-	}
-	
 	public static String getValueByIndex(String separatedValues, int index, String defaultValue) {
 		if(separatedValues == null)
 			return defaultValue;
@@ -218,6 +142,8 @@ public class TemplateLoader {
 		if (name.matches("T[A-Z].*")) {
 			name = name.substring(1);
 		}
+		name = Normalizer.normalize(name, Normalizer.Form.NFD);
+		name = name.replaceAll("\\p{M}", "");
 		String result = "", lastWord = "";
 		boolean lastCaseIsUpper = false, lastIsVector = false, currentIsVector = false;
 		int i = 0;
@@ -225,7 +151,7 @@ public class TemplateLoader {
 			char ch = name.charAt(i);
 			String str = "" + ch;
 			currentIsVector = false;
-			if (ch == '_') {
+			if (ch == '_' || ch == ' ') {
 				int j = i + 1;
 				if (j >= name.length())
 					break;

@@ -1,4 +1,4 @@
-// Generated from .\src\parser\SQL.g4 by ANTLR 4.5.3
+// Generated from ./src/parser/SQL.g4 by ANTLR 4.7.2
 package parser;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
@@ -11,7 +11,7 @@ import org.antlr.v4.runtime.misc.*;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class SQLLexer extends Lexer {
-	static { RuntimeMetaData.checkVersion("4.5.3", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.7.2", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -29,48 +29,61 @@ public class SQLLexer extends Lexer {
 		T__66=67, T__67=68, T__68=69, T__69=70, T__70=71, T__71=72, T__72=73, 
 		T__73=74, NAME=75, INT=76, FLOAT=77, STRING=78, COMMENT=79, SINGLE_COMMENT=80, 
 		WS=81;
+	public static String[] channelNames = {
+		"DEFAULT_TOKEN_CHANNEL", "HIDDEN"
+	};
+
 	public static String[] modeNames = {
 		"DEFAULT_MODE"
 	};
 
-	public static final String[] ruleNames = {
-		"T__0", "T__1", "T__2", "T__3", "T__4", "T__5", "T__6", "T__7", "T__8", 
-		"T__9", "T__10", "T__11", "T__12", "T__13", "T__14", "T__15", "T__16", 
-		"T__17", "T__18", "T__19", "T__20", "T__21", "T__22", "T__23", "T__24", 
-		"T__25", "T__26", "T__27", "T__28", "T__29", "T__30", "T__31", "T__32", 
-		"T__33", "T__34", "T__35", "T__36", "T__37", "T__38", "T__39", "T__40", 
-		"T__41", "T__42", "T__43", "T__44", "T__45", "T__46", "T__47", "T__48", 
-		"T__49", "T__50", "T__51", "T__52", "T__53", "T__54", "T__55", "T__56", 
-		"T__57", "T__58", "T__59", "T__60", "T__61", "T__62", "T__63", "T__64", 
-		"T__65", "T__66", "T__67", "T__68", "T__69", "T__70", "T__71", "T__72", 
-		"T__73", "NAME", "INT", "FLOAT", "STRING", "COMMENT", "SINGLE_COMMENT", 
-		"WS"
-	};
+	private static String[] makeRuleNames() {
+		return new String[] {
+			"T__0", "T__1", "T__2", "T__3", "T__4", "T__5", "T__6", "T__7", "T__8", 
+			"T__9", "T__10", "T__11", "T__12", "T__13", "T__14", "T__15", "T__16", 
+			"T__17", "T__18", "T__19", "T__20", "T__21", "T__22", "T__23", "T__24", 
+			"T__25", "T__26", "T__27", "T__28", "T__29", "T__30", "T__31", "T__32", 
+			"T__33", "T__34", "T__35", "T__36", "T__37", "T__38", "T__39", "T__40", 
+			"T__41", "T__42", "T__43", "T__44", "T__45", "T__46", "T__47", "T__48", 
+			"T__49", "T__50", "T__51", "T__52", "T__53", "T__54", "T__55", "T__56", 
+			"T__57", "T__58", "T__59", "T__60", "T__61", "T__62", "T__63", "T__64", 
+			"T__65", "T__66", "T__67", "T__68", "T__69", "T__70", "T__71", "T__72", 
+			"T__73", "NAME", "INT", "FLOAT", "STRING", "COMMENT", "SINGLE_COMMENT", 
+			"WS"
+		};
+	}
+	public static final String[] ruleNames = makeRuleNames();
 
-	private static final String[] _LITERAL_NAMES = {
-		null, "';'", "'DROP'", "'DATABASE'", "'SCHEMA'", "'IF'", "'EXISTS'", "'CREATE'", 
-		"'NOT'", "'DEFAULT'", "'CHARACTER'", "'SET'", "'='", "'COLLATE'", "'COMMENT'", 
-		"','", "'@'", "'USE'", "'TEMPORARY'", "'TABLE'", "'RESTRICT'", "'CASCADE'", 
-		"'('", "')'", "'CONSTRAINT'", "'PRIMARY'", "'KEY'", "'INDEX'", "'UNIQUE'", 
-		"'FOREIGN'", "'AUTO_INCREMENT'", "'NULL'", "'REFERENCES'", "'ON'", "'DELETE'", 
-		"'UPDATE'", "'ASC'", "'DESC'", "'BIT'", "'TINYINT'", "'UNSIGNED'", "'ZEROFILL'", 
-		"'SMALLINT'", "'MEDIUMINT'", "'INT'", "'INTEGER'", "'BIGINT'", "'REAL'", 
-		"'DOUBLE'", "'FLOAT'", "'DECIMAL'", "'NUMERIC'", "'DATE'", "'TIME'", "'TIMESTAMP'", 
-		"'DATETIME'", "'YEAR'", "'CHAR'", "'VARCHAR'", "'BINARY'", "'VARBINARY'", 
-		"'TINYBLOB'", "'BLOB'", "'MEDIUMBLOB'", "'LONGBLOB'", "'TINYTEXT'", "'TEXT'", 
-		"'MEDIUMTEXT'", "'LONGTEXT'", "'ENUM'", "'NO'", "'ACTION'", "'`'", "'''", 
-		"'\"'"
-	};
-	private static final String[] _SYMBOLIC_NAMES = {
-		null, null, null, null, null, null, null, null, null, null, null, null, 
-		null, null, null, null, null, null, null, null, null, null, null, null, 
-		null, null, null, null, null, null, null, null, null, null, null, null, 
-		null, null, null, null, null, null, null, null, null, null, null, null, 
-		null, null, null, null, null, null, null, null, null, null, null, null, 
-		null, null, null, null, null, null, null, null, null, null, null, null, 
-		null, null, null, "NAME", "INT", "FLOAT", "STRING", "COMMENT", "SINGLE_COMMENT", 
-		"WS"
-	};
+	private static String[] makeLiteralNames() {
+		return new String[] {
+			null, "';'", "'DROP'", "'DATABASE'", "'SCHEMA'", "'IF'", "'EXISTS'", 
+			"'CREATE'", "'NOT'", "'DEFAULT'", "'CHARACTER'", "'SET'", "'='", "'COLLATE'", 
+			"'COMMENT'", "','", "'@'", "'USE'", "'TEMPORARY'", "'TABLE'", "'RESTRICT'", 
+			"'CASCADE'", "'('", "')'", "'CONSTRAINT'", "'PRIMARY'", "'KEY'", "'INDEX'", 
+			"'UNIQUE'", "'FOREIGN'", "'AUTO_INCREMENT'", "'NULL'", "'REFERENCES'", 
+			"'ON'", "'DELETE'", "'UPDATE'", "'ASC'", "'DESC'", "'BIT'", "'TINYINT'", 
+			"'UNSIGNED'", "'ZEROFILL'", "'SMALLINT'", "'MEDIUMINT'", "'INT'", "'INTEGER'", 
+			"'BIGINT'", "'REAL'", "'DOUBLE'", "'FLOAT'", "'DECIMAL'", "'NUMERIC'", 
+			"'DATE'", "'TIME'", "'TIMESTAMP'", "'DATETIME'", "'YEAR'", "'CHAR'", 
+			"'VARCHAR'", "'BINARY'", "'VARBINARY'", "'TINYBLOB'", "'BLOB'", "'MEDIUMBLOB'", 
+			"'LONGBLOB'", "'TINYTEXT'", "'TEXT'", "'MEDIUMTEXT'", "'LONGTEXT'", "'ENUM'", 
+			"'NO'", "'ACTION'", "'`'", "'''", "'\"'"
+		};
+	}
+	private static final String[] _LITERAL_NAMES = makeLiteralNames();
+	private static String[] makeSymbolicNames() {
+		return new String[] {
+			null, null, null, null, null, null, null, null, null, null, null, null, 
+			null, null, null, null, null, null, null, null, null, null, null, null, 
+			null, null, null, null, null, null, null, null, null, null, null, null, 
+			null, null, null, null, null, null, null, null, null, null, null, null, 
+			null, null, null, null, null, null, null, null, null, null, null, null, 
+			null, null, null, null, null, null, null, null, null, null, null, null, 
+			null, null, null, "NAME", "INT", "FLOAT", "STRING", "COMMENT", "SINGLE_COMMENT", 
+			"WS"
+		};
+	}
+	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
 	/**
@@ -120,13 +133,16 @@ public class SQLLexer extends Lexer {
 	public String getSerializedATN() { return _serializedATN; }
 
 	@Override
+	public String[] getChannelNames() { return channelNames; }
+
+	@Override
 	public String[] getModeNames() { return modeNames; }
 
 	@Override
 	public ATN getATN() { return _ATN; }
 
 	public static final String _serializedATN =
-		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\2S\u02d8\b\1\4\2\t"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\2S\u02d8\b\1\4\2\t"+
 		"\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13"+
 		"\t\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
 		"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31\t\31"+
@@ -173,9 +189,9 @@ public class SQLLexer extends Lexer {
 		"\34\67\359\36;\37= ?!A\"C#E$G%I&K\'M(O)Q*S+U,W-Y.[/]\60_\61a\62c\63e\64"+
 		"g\65i\66k\67m8o9q:s;u<w=y>{?}@\177A\u0081B\u0083C\u0085D\u0087E\u0089"+
 		"F\u008bG\u008dH\u008fI\u0091J\u0093K\u0095L\u0097M\u0099N\u009bO\u009d"+
-		"P\u009fQ\u00a1R\u00a3S\3\2\13\5\2C\\aac|\b\2\60\60\62;C\\^^aac|\3\2\62"+
-		";\4\2))^^\b\2$$))^^ppttvv\4\2$$^^\7\2$$))^^pptt\4\2\f\f\17\17\5\2\13\f"+
-		"\17\17\"\"\u02e3\2\3\3\2\2\2\2\5\3\2\2\2\2\7\3\2\2\2\2\t\3\2\2\2\2\13"+
+		"P\u009fQ\u00a1R\u00a3S\3\2\13\5\2C\\aac|\7\2\60\60\62;C\\aac|\3\2\62;"+
+		"\4\2))^^\b\2$$))^^ppttvv\4\2$$^^\7\2$$))^^pptt\4\2\f\f\17\17\5\2\13\f"+
+		"\17\17\"\"\2\u02e3\2\3\3\2\2\2\2\5\3\2\2\2\2\7\3\2\2\2\2\t\3\2\2\2\2\13"+
 		"\3\2\2\2\2\r\3\2\2\2\2\17\3\2\2\2\2\21\3\2\2\2\2\23\3\2\2\2\2\25\3\2\2"+
 		"\2\2\27\3\2\2\2\2\31\3\2\2\2\2\33\3\2\2\2\2\35\3\2\2\2\2\37\3\2\2\2\2"+
 		"!\3\2\2\2\2#\3\2\2\2\2%\3\2\2\2\2\'\3\2\2\2\2)\3\2\2\2\2+\3\2\2\2\2-\3"+

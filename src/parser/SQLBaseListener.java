@@ -1,4 +1,4 @@
-// Generated from .\src\parser\SQL.g4 by ANTLR 4.5.3
+// Generated from ./src/parser/SQL.g4 by ANTLR 4.7.2
 package parser;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -371,6 +371,30 @@ public class SQLBaseListener implements SQLListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitReferenceDefinition(SQLParser.ReferenceDefinitionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterReferenceDeleteOption(SQLParser.ReferenceDeleteOptionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitReferenceDeleteOption(SQLParser.ReferenceDeleteOptionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterReferenceUpdateOption(SQLParser.ReferenceUpdateOptionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitReferenceUpdateOption(SQLParser.ReferenceUpdateOptionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

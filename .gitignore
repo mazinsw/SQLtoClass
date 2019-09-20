@@ -44,3 +44,5 @@ outdir/*
 config.properties
 /out
 /bin
+.metadata/
+target/generated-sources/

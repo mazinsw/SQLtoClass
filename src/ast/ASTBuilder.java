@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -38,7 +39,9 @@ import parser.SQLParser.IndexColNameContext;
 import parser.SQLParser.IndexStmtContext;
 import parser.SQLParser.PrimaryKeyStmtContext;
 import parser.SQLParser.ReferenceDefinitionContext;
+import parser.SQLParser.ReferenceDeleteOptionContext;
 import parser.SQLParser.ReferenceTableContext;
+import parser.SQLParser.ReferenceUpdateOptionContext;
 import parser.SQLParser.SetDefaultValueContext;
 import parser.SQLParser.StringItemContext;
 import parser.SQLParser.TableCommentContext;
@@ -81,11 +84,11 @@ public class ASTBuilder extends SQLBaseListener {
 	}
 
 	public boolean build(String fileName) {
-		ANTLRInputStream input;
+		CharStream input;
 		InputStreamReader fr;
 		try {
 			fr = new InputStreamReader(new FileInputStream(fileName), StandardCharsets.UTF_8);
-			input = new ANTLRInputStream(fr);
+			input = CharStreams.fromReader(fr);
 		} catch (IOException e) {
 			errors.add("can't load SQL source file");
 			return false;
@@ -256,7 +259,8 @@ public class ASTBuilder extends SQLBaseListener {
 	public void enterTypeVarCharStmt(TypeVarCharStmtContext ctx) {
 		super.enterTypeVarCharStmt(ctx);
 		Field field = (Field) stack.peek();
-		DataType type = new DataType(DataType.STRING);
+		StringType type = new StringType(DataType.STRING);
+		type.setLength(Long.valueOf(ctx.INT().getText()));
 		field.setType(type);
 	}
 
@@ -280,7 +284,8 @@ public class ASTBuilder extends SQLBaseListener {
 	public void enterTypeTextStmt(TypeTextStmtContext ctx) {
 		super.enterTypeTextStmt(ctx);
 		Field field = (Field) stack.peek();
-		DataType type = new DataType(DataType.TEXT);
+		StringType type = new StringType(DataType.TEXT);
+		type.setLength(65535);
 		field.setType(type);
 	}
 	
@@ -288,7 +293,8 @@ public class ASTBuilder extends SQLBaseListener {
 	public void enterTypeLongTextStmt(TypeLongTextStmtContext ctx) {
 		super.enterTypeLongTextStmt(ctx);
 		Field field = (Field) stack.peek();
-		DataType type = new DataType(DataType.TEXT);
+		StringType type = new StringType(DataType.TEXT);
+		type.setLength(4294967295L);
 		field.setType(type);
 	}
 	
@@ -296,7 +302,8 @@ public class ASTBuilder extends SQLBaseListener {
 	public void enterTypeMediumTextStmt(TypeMediumTextStmtContext ctx) {
 		super.enterTypeMediumTextStmt(ctx);
 		Field field = (Field) stack.peek();
-		DataType type = new DataType(DataType.TEXT);
+		StringType type = new StringType(DataType.TEXT);
+		type.setLength(16777215);
 		field.setType(type);
 	}
 	
@@ -304,7 +311,8 @@ public class ASTBuilder extends SQLBaseListener {
 	public void enterTypeTinyTextStmt(TypeTinyTextStmtContext ctx) {
 		super.enterTypeTinyTextStmt(ctx);
 		Field field = (Field) stack.peek();
-		DataType type = new DataType(DataType.TEXT);
+		StringType type = new StringType(DataType.TEXT);
+		type.setLength(255);
 		field.setType(type);
 	}
 
@@ -467,6 +475,24 @@ public class ASTBuilder extends SQLBaseListener {
 	public void exitReferenceDefinition(ReferenceDefinitionContext ctx) {
 		super.exitReferenceDefinition(ctx);
 		stack.pop();
+	}
+	
+	@Override
+	public void enterReferenceUpdateOption(ReferenceUpdateOptionContext ctx) {
+		super.enterReferenceUpdateOption(ctx);
+		Index index = (Index) stack.pop();
+		ForeignKey fk = (ForeignKey) stack.peek();
+		fk.setUpdateAction(ctx.getText());
+		stack.push(index);
+	}
+	
+	@Override
+	public void enterReferenceDeleteOption(ReferenceDeleteOptionContext ctx) {
+		super.enterReferenceDeleteOption(ctx);
+		Index index = (Index) stack.pop();
+		ForeignKey fk = (ForeignKey) stack.peek();
+		fk.setDeleteAction(ctx.getText());
+		stack.push(index);
 	}
 
 	@Override

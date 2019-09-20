@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS `TDispositivos` (
   CONSTRAINT `FK_Dispositivo_Empresa`
     FOREIGN KEY (`EmpresaID`)
     REFERENCES `TEmpresas` (`ID`)
-    ON DELETE RESTRICT
+    ON DELETE SET NULL
     ON UPDATE CASCADE)
 ENGINE = InnoDB
 COMMENT = '[N:Device|Devices][G:o]';

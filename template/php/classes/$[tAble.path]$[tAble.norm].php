@@ -237,6 +237,8 @@ $[field.end]
     protected function translate($e)
     {
 $[table.each(unique)]
+$[unique.if(primary)]
+$[unique.else]
         if (stripos($e->getMessage(), '$[uNique.name]') !== false) {
             return new \ValidationException(array(
 $[unique.each(all)]
@@ -244,6 +246,7 @@ $[unique.each(all)]
 $[unique.end]
             ));
         }
+$[unique.end]
 $[table.end]
 $[table.if(inherited)]
         return parent::translate($e);
