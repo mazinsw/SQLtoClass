@@ -12,25 +12,12 @@ table.name = Beautiful name of table
 table.name.plural = Beautiful name of table on plural
 table.info = Describe the table functionality
 table.comment = Comment of table or each comment line wrapped when in loop
-table.pk = [deprecated, use primary instead]primary key field name
-table.pk.unix = [deprecated]primary key field name as unix name
-table.pk.norm = [deprecated]primary key field name normalized
-table.pk.gender = [deprecated]primary key gender
-table.pk.get = [deprecated]generate a call to a get function that return primary key of table
-table.pk.set = [deprecated]generate a call to a set function that adjust primary key of table, need to append ")" at end
-	example: $[table.pk.set]value)
-table.desc = [deprecated, use descriptor instead]representable field name
-table.desc.get = [deprecated]generate a call to a get function that return representable value
 table.gender = table gender
 table.chars = all word first characters of table name
 table.letter = first char of table name
 table.package =  defined package for table
 table.inherited =  defined package for table
 table.path =  defined path for class file
-table.class = [deprecated]class name for the table
-table.class.get = [deprecated]generate a call to a static get function to retrieve a instance of class
-table.class.get.all = [deprecated]generate a call to a static get function in the selected language to retrieve all rows of table
-table.class.file = [deprecated]file name of class
 table.if(attribute) = table condition, attributes: comment, inherited, package, path
 table.exists(type|attribute) = check if the table contains a field with matching type or attribute
 	example: $[table.exists(comment)] = check if table has commentary
@@ -65,9 +52,6 @@ table.norm.singular = Table name normalized on singular
 field.name = Beautiful name of table field
 field.info = Describe the field functionality
 field.comment = Comment of the field or each comment line wrapped when in loop
-field.get = [deprecated]generate a call to a get function in the selected language for the field
-field.set = [deprecated]generate a call to a set function that adjust field of table, need to append ")" at end
-	example: $[field.set]value)
 field.content = fill with each field template generated
 field.mask = mask informed on model for the field
 field.style = css style of field
@@ -110,9 +94,6 @@ field.image.height = recommended image height
 field.image.folder = image folder to upload
 field.image.default = default image url
 class = class name for the table
-class.get = [deprecated]generate a call to a static get function to retrieve a instance of class
-class.get.all = [deprecated]generate a call to a static get function in the selected language to retrieve all rows of table
-class.file = [deprecated]file name of class
 
 Tip: all command allow case formatting
 example: for table category, $[Table.name] outputs: Category

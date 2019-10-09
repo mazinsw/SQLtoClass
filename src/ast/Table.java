@@ -73,12 +73,12 @@ public class Table extends CommentedNode {
 	}
 
 	public Index getUniqueIndex(Field field) {
-		for (Index index : getIndexes()) {
-			if(!(index instanceof UniqueKey))
+		for (Constraint constraint : constraints) {
+			if(!(constraint instanceof UniqueKey))
 				continue;
-			for (OrderField oField : index.getFields()) {
+			for (OrderField oField : constraint.getFields()) {
 				if(oField.getName().equalsIgnoreCase(field.getName()))
-					return index;
+					return constraint;
 			}
 		}
 		return null;
