@@ -72,7 +72,7 @@ field.each = for each field process content
 	example: field.each(all), for each all table field
 field.end = end each loop
 field.if(type|attribute) = test if field type or has attributes
-	types: reference, primary, repeated, null, default, info, descriptor, searchable, comment, unique, radio, masked, array, image, integer, bigint, string, text, boolean, currency, double, float, date, datetime, time, enum, blob
+	types: reference, primary, repeated, null, default, info, descriptor, searchable, comment, description, unique, radio, masked, array, image, integer, bigint, string, text, boolean, currency, double, float, date, datetime, time, enum, blob
 	example: field.if(reference)
 field.else = when if condition is false (must be the last before field.end)
 field.else.if(type|attribute) = when if condition is false and make a test if field type or has attributes

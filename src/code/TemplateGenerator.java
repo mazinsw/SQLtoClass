@@ -324,7 +324,7 @@ public class TemplateGenerator extends CodeGenerator {
 										replace += applyTemplate(eachContent, table, indexedFields, field, index, constraint, values, j, tableIndex);
 									}
 								}
-							} else if (filter.equals("comment")) { // field.each(comment) or table.each(comment)
+							} else if (filter.equals("comment") || filter.equals("description")) { // field.each(comment|description) or table.each(comment|description)
 								List<String> commentLines;
 								if (command.equalsIgnoreCase("field") && field == null)
 									commentLines = splitComment("", 72); // command outside field loop
@@ -332,9 +332,14 @@ public class TemplateGenerator extends CodeGenerator {
 									commentLines = splitComment(TemplateLoader.extractComment(field.getComment()), 72);
 								else
 									commentLines = splitComment(TemplateLoader.extractComment(table.getComment()), 72);
+								int j = 0;
 								for (String line: commentLines) {
-									String replContent = eachContent.replaceAll("(?i)\\$\\[" + command + "\\.comment\\]", Matcher.quoteReplacement(line));
-									replace += applyTemplate(replContent, table, indexedFields, field, index, constraint, values, fieldIndex, tableIndex);
+									if (filter.equals("description")) {
+										line  = line.replace("'", "\\'");
+									}
+									String replContent = eachContent.replaceAll("(?i)\\$\\[" + command + "\\." + filter + "\\]", Matcher.quoteReplacement(line));
+									replace += applyTemplate(replContent, table, indexedFields, field, index, constraint, values, j, tableIndex);
+									j++;
 								}
 							} else if (command.equalsIgnoreCase("field")) { // field.each[(filter)]
 								int j = 0;
@@ -491,11 +496,13 @@ public class TemplateGenerator extends CodeGenerator {
 								value = foreignKey.getUpdateActionText();
 							}
 							replace = getTemplateLoader().recase(command, value);								
-						} else if (option.equals("comment")) {
+						} else if (option.equals("description")) {
 							replace = TemplateLoader.extractComment(field.getComment());
 							if (replace != null) {
 								replace  = replace.replace("'", "\\'");
 							}
+						} else if (option.equals("comment")) {
+							replace = TemplateLoader.extractComment(field.getComment());
 						} else if (option.equals("name")) {
 							replace = getTemplateLoader().recase(command,
 									TemplateLoader.getValueByIndex(values.get("F.N"), 0, field.getName()), true);
@@ -595,11 +602,13 @@ public class TemplateGenerator extends CodeGenerator {
 							replace = getTemplateLoader().recase(command, nameDefault, true);
 						} else if (option.equals("chars")) {
 							replace = firstLetters(name);
-						} else if (option.equals("comment")) {
+						} else if (option.equals("description")) {
 							replace = TemplateLoader.extractComment(table.getComment());
 							if (replace != null) {
 								replace  = replace.replace("'", "\\'");
 							}
+						} else if (option.equals("comment")) {
+							replace = TemplateLoader.extractComment(table.getComment());
 						} else if (option.equals("unix.plural")) {
 							replace = getTemplateLoader().recase(command, TemplateLoader
 									.getValueByIndex(values.get("T.U"), 1,
@@ -683,6 +692,7 @@ public class TemplateGenerator extends CodeGenerator {
 			case "path":
 				return values.containsKey("T.K") && values.get("F.S").split("|").length > 1;
 			case "comment":
+			case "description":
 				String comment = TemplateLoader.extractComment(table.getComment());
 				return comment != null && !comment.isEmpty();
 			}
@@ -735,6 +745,7 @@ public class TemplateGenerator extends CodeGenerator {
 		case "first":
 			return eachIndex == 0;
 		case "comment":
+		case "description":
 			String comment = TemplateLoader.extractComment(field.getComment());
 			return comment != null && !comment.isEmpty() && !command.equalsIgnoreCase("table");
 		case "repeated":
