@@ -16,6 +16,7 @@ import org.apache.commons.io.FileUtils;
 import org.mozilla.universalchardet.UniversalDetector;
 
 import ast.Constraint;
+import ast.DataType;
 import ast.EnumType;
 import ast.Field;
 import ast.ForeignKey;
@@ -268,7 +269,7 @@ public class TemplateGenerator extends CodeGenerator {
 														break;
 													}
 													if (hasAttribute(command, table, indexedFields, afield, uFilter, newValues,
-															fieldIndex, true)) {
+															fieldIndex, index, true)) {
 														doReplace = true;
 														break;
 													}
@@ -276,7 +277,7 @@ public class TemplateGenerator extends CodeGenerator {
 											} else if (testField != null && uFilter
 													.equals(TemplateLoader.getTypeNameFromType(table, testField))) {
 												doReplace = true;
-											} else if (hasAttribute(command, table, indexedFields, testField, uFilter, values, fieldIndex, false)) {
+											} else if (hasAttribute(command, table, indexedFields, testField, uFilter, values, fieldIndex, index, false)) {
 												doReplace = true;
 											}
 											if (doReplace) {
@@ -352,7 +353,7 @@ public class TemplateGenerator extends CodeGenerator {
 										continue;
 
 									if (!filter.equals("all") && !hasAttribute(command, table, indexedFields, afield, filter, newValues,
-											j, true)) {
+											j, index, true)) {
 										if (!filter.equals(TemplateLoader.getTypeNameFromType(table, afield))) {
 											continue;
 										}
@@ -386,12 +387,13 @@ public class TemplateGenerator extends CodeGenerator {
 										if (filter.equals("primary") && !(aconstraint instanceof PrimaryKey)) {
 											continue;
 										}
-										replace += applyTemplate(eachContent, table, indexedFields, field, null, aconstraint, values, j, tableIndex);
+										replace += applyTemplate(eachContent, table, indexedFields, field, aconstraint, aconstraint, values, j, tableIndex);
 										j++;
 									}
 								} else {
 									for (Index aindex : table.getIndexes()) {
-										replace += applyTemplate(eachContent, table, indexedFields, field, aindex, null, values, fieldIndex, tableIndex);
+										replace += applyTemplate(eachContent, table, indexedFields, field, aindex, null, values, j, tableIndex);
+										j++;
 									}
 								}
 							} else if (command.equalsIgnoreCase("index") || command.equalsIgnoreCase("unique") || 
@@ -678,7 +680,7 @@ public class TemplateGenerator extends CodeGenerator {
 	}
 
 	private boolean hasAttribute(String command, Table table, Hashtable<String, CommonField> indexedFields, Field field, String filter,
-			Hashtable<String, String> values, int eachIndex, boolean optional) {
+			Hashtable<String, String> values, int eachIndex, Index index, boolean optional) {
 		if (command.equalsIgnoreCase("table")) {
 			switch (filter) {
 			case "first":
@@ -706,6 +708,14 @@ public class TemplateGenerator extends CodeGenerator {
 			switch (filter) {
 			case "primary":
 				return table.getConstraints().get(eachIndex) instanceof PrimaryKey;
+			case "few_fields":
+				return index != null && index.getFields().size() < 5;
+			}
+		}
+		if (command.equalsIgnoreCase("index")) {
+			switch (filter) {
+			case "few_fields":
+				return index != null && index.getFields().size() < 5;
 			}
 		}
 		if(field == null)
@@ -744,6 +754,8 @@ public class TemplateGenerator extends CodeGenerator {
 			return values.containsKey("F.F");
 		case "first":
 			return eachIndex == 0;
+		case "few_fields":
+			return field.getType().getType() != DataType.ENUM || ((EnumType)field.getType()).getElements().size() < 5;
 		case "comment":
 		case "description":
 			String comment = TemplateLoader.extractComment(field.getComment());
