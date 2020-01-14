@@ -497,12 +497,19 @@ public class TemplateGenerator extends CodeGenerator {
 							if (foreignKey != null) {
 								value = foreignKey.getUpdateActionText();
 							}
-							replace = getTemplateLoader().recase(command, value);								
+							replace = getTemplateLoader().recase(command, value);
 						} else if (option.equals("description")) {
 							replace = TemplateLoader.extractComment(field.getComment());
 							if (replace != null) {
 								replace  = replace.replace("'", "\\'");
 							}
+						} else if (option.matches("(?i)^replace\\(\\S+(?:,\\S+)?\\)$")) {
+							String pattern = "(?i)^replace\\((\\S+)(?:,(\\S+))?\\)$";
+							String target = capture(pattern, option, 1);
+							String replacement = capture(pattern, option, 2);
+							replacement = replacement == null ? "" : replacement;
+							String value = field.getName().replace(target, replacement);
+							replace = getTemplateLoader().recase(command, value);
 						} else if (option.equals("comment")) {
 							replace = TemplateLoader.extractComment(field.getComment());
 						} else if (option.equals("name")) {
@@ -734,6 +741,8 @@ public class TemplateGenerator extends CodeGenerator {
 			return values.containsKey("F.S") && values.get("F.S").isEmpty();
 		case "searchable":
 			return values.containsKey("F.S");
+		case "ignored":
+			return values.containsKey("F.D");
 		case "unique":
 			return table.isUnique(field);
 		case "reference":
