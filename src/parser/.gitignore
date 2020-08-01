@@ -4,5 +4,3 @@
 /SQLLexer.tokens
 /SQLListener.java
 /SQLParser.java
-/SQL.interp
-/SQLLexer.interp

@@ -6,6 +6,6 @@
 	<classpathentry kind="lib" path="lib/juniversalchardet-1.0.3.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/antlr-runtime-4.7.2.jar" sourcepath="lib/antlr-4.7.2-complete.jar"/>
+	<classpathentry kind="lib" path="lib/antlr-runtime-4.8.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

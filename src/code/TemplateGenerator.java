@@ -692,8 +692,9 @@ public class TemplateGenerator extends CodeGenerator {
 			switch (filter) {
 			case "first":
 				return eachIndex == 0;
-			case "reference":
-				return !table.getConstraints().isEmpty();
+			case "constraint":
+				boolean primaryKey = getPrimaryKey(table) != null;
+				return (table.getConstraints().size() > 1 && primaryKey) || (table.getConstraints().size() > 0 && !primaryKey);
 			case "inherited":
 				return values.containsKey("T.H");
 			case "package":
