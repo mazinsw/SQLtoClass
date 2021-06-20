@@ -22,12 +22,12 @@ import parser.SQLParser.CharsetNameContext;
 import parser.SQLParser.CollateNameContext;
 import parser.SQLParser.ColumnDefaultValueContext;
 import parser.SQLParser.ColumnNameContext;
+import parser.SQLParser.ColumnNotNullContext;
+import parser.SQLParser.ColumnNullContext;
 import parser.SQLParser.ConstraintNameContext;
 import parser.SQLParser.ConstraintTableContext;
 import parser.SQLParser.CreateSchemaContext;
 import parser.SQLParser.CreateTableContext;
-import parser.SQLParser.DefaultNotNullContext;
-import parser.SQLParser.DefaultNullContext;
 import parser.SQLParser.DefaultValueContext;
 import parser.SQLParser.DropSchemaContext;
 import parser.SQLParser.DropTableNameContext;
@@ -48,6 +48,7 @@ import parser.SQLParser.TableCommentContext;
 import parser.SQLParser.TableNameContext;
 import parser.SQLParser.TypeBigIntStmtContext;
 import parser.SQLParser.TypeBlobStmtContext;
+import parser.SQLParser.TypeBooleanStmtContext;
 import parser.SQLParser.TypeCharStmtContext;
 import parser.SQLParser.TypeDateStmtContext;
 import parser.SQLParser.TypeDateTimeStmtContext;
@@ -238,6 +239,14 @@ public class ASTBuilder extends SQLBaseListener {
 		DataType type = new DataType(DataType.DATETIME);
 		field.setType(type);
 	}
+	
+	@Override
+	public void enterTypeBooleanStmt(TypeBooleanStmtContext ctx) {
+		super.enterTypeBooleanStmt(ctx);
+		Field field = (Field) stack.peek();
+		DataType type = new DataType(DataType.BOOLEAN);
+		field.setType(type);
+	}
 
 	@Override
 	public void enterTypeDateStmt(TypeDateStmtContext ctx) {
@@ -333,15 +342,15 @@ public class ASTBuilder extends SQLBaseListener {
 	}
 
 	@Override
-	public void enterDefaultNotNull(DefaultNotNullContext ctx) {
-		super.enterDefaultNotNull(ctx);
+	public void enterColumnNotNull(ColumnNotNullContext ctx) {
+		super.enterColumnNotNull(ctx);
 		Field field = (Field) stack.peek();
 		field.setNotNull(true);
 	}
 
 	@Override
-	public void enterDefaultNull(DefaultNullContext ctx) {
-		super.enterDefaultNull(ctx);
+	public void enterColumnNull(ColumnNullContext ctx) {
+		super.enterColumnNull(ctx);
 		Field field = (Field) stack.peek();
 		field.setNotNull(false);
 	}
@@ -356,6 +365,8 @@ public class ASTBuilder extends SQLBaseListener {
 			value = new IntegerValue(ctx.INT().getText());
 		else if (ctx.FLOAT() != null)
 			value = new FloatValue(ctx.FLOAT().getText());
+		else if (ctx.BOOL() != null)
+			value = new BooleanValue(ctx.BOOL().getText());
 		stack.push(value);
 	}
 	

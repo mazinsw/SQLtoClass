@@ -1,4 +1,4 @@
-// Generated from SQL.g4 by ANTLR 4.8
+// Generated from /home/mazinsw/Development/SQLtoClass/src/parser/SQL.g4 by ANTLR 4.8
 package parser;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -328,25 +328,25 @@ public class SQLBaseListener implements SQLListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterDefaultNull(SQLParser.DefaultNullContext ctx) { }
+	@Override public void enterColumnNull(SQLParser.ColumnNullContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitDefaultNull(SQLParser.DefaultNullContext ctx) { }
+	@Override public void exitColumnNull(SQLParser.ColumnNullContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterDefaultNotNull(SQLParser.DefaultNotNullContext ctx) { }
+	@Override public void enterColumnNotNull(SQLParser.ColumnNotNullContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitDefaultNotNull(SQLParser.DefaultNotNullContext ctx) { }
+	@Override public void exitColumnNotNull(SQLParser.ColumnNotNullContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -563,6 +563,18 @@ public class SQLBaseListener implements SQLListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitTypeNumericStmt(SQLParser.TypeNumericStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTypeBooleanStmt(SQLParser.TypeBooleanStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTypeBooleanStmt(SQLParser.TypeBooleanStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

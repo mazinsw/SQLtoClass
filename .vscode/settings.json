@@ -1,0 +1,11 @@
+{
+    "antlr4.generation": {
+        "mode": "external",
+        "language": "Java",
+        "listeners": true,
+        "visitors": false,
+        "package": "parser",
+        "outputDir": ".",
+        "alternativeJar": "../../lib/antlr-4.8-complete.jar"
+    }
+}

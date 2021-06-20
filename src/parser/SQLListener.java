@@ -1,4 +1,4 @@
-// Generated from SQL.g4 by ANTLR 4.8
+// Generated from /home/mazinsw/Development/SQLtoClass/src/parser/SQL.g4 by ANTLR 4.8
 package parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -278,25 +278,25 @@ public interface SQLListener extends ParseTreeListener {
 	 */
 	void exitColumnDefaultValue(SQLParser.ColumnDefaultValueContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link SQLParser#defaultNull}.
+	 * Enter a parse tree produced by {@link SQLParser#columnNull}.
 	 * @param ctx the parse tree
 	 */
-	void enterDefaultNull(SQLParser.DefaultNullContext ctx);
+	void enterColumnNull(SQLParser.ColumnNullContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link SQLParser#defaultNull}.
+	 * Exit a parse tree produced by {@link SQLParser#columnNull}.
 	 * @param ctx the parse tree
 	 */
-	void exitDefaultNull(SQLParser.DefaultNullContext ctx);
+	void exitColumnNull(SQLParser.ColumnNullContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link SQLParser#defaultNotNull}.
+	 * Enter a parse tree produced by {@link SQLParser#columnNotNull}.
 	 * @param ctx the parse tree
 	 */
-	void enterDefaultNotNull(SQLParser.DefaultNotNullContext ctx);
+	void enterColumnNotNull(SQLParser.ColumnNotNullContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link SQLParser#defaultNotNull}.
+	 * Exit a parse tree produced by {@link SQLParser#columnNotNull}.
 	 * @param ctx the parse tree
 	 */
-	void exitDefaultNotNull(SQLParser.DefaultNotNullContext ctx);
+	void exitColumnNotNull(SQLParser.ColumnNotNullContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SQLParser#fieldComment}.
 	 * @param ctx the parse tree
@@ -501,6 +501,18 @@ public interface SQLListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTypeNumericStmt(SQLParser.TypeNumericStmtContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code typeBooleanStmt}
+	 * labeled alternative in {@link SQLParser#dataType}.
+	 * @param ctx the parse tree
+	 */
+	void enterTypeBooleanStmt(SQLParser.TypeBooleanStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code typeBooleanStmt}
+	 * labeled alternative in {@link SQLParser#dataType}.
+	 * @param ctx the parse tree
+	 */
+	void exitTypeBooleanStmt(SQLParser.TypeBooleanStmtContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code typeDateStmt}
 	 * labeled alternative in {@link SQLParser#dataType}.
