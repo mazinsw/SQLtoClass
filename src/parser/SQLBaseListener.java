@@ -736,6 +736,18 @@ public class SQLBaseListener implements SQLListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterTypeJsonStmt(SQLParser.TypeJsonStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTypeJsonStmt(SQLParser.TypeJsonStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterTypeTinyTextStmt(SQLParser.TypeTinyTextStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}

@@ -58,6 +58,7 @@ import parser.SQLParser.TypeEnumStmtContext;
 import parser.SQLParser.TypeFloatStmtContext;
 import parser.SQLParser.TypeIntStmtContext;
 import parser.SQLParser.TypeIntegerStmtContext;
+import parser.SQLParser.TypeJsonStmtContext;
 import parser.SQLParser.TypeLongBlobStmtContext;
 import parser.SQLParser.TypeLongTextStmtContext;
 import parser.SQLParser.TypeMediumBlobStmtContext;
@@ -278,6 +279,15 @@ public class ASTBuilder extends SQLBaseListener {
 		super.enterTypeBigIntStmt(ctx);
 		Field field = (Field) stack.peek();
 		DataType type = new DataType(DataType.BIGINT);
+		field.setType(type);
+	}
+	
+	@Override
+	public void enterTypeJsonStmt(TypeJsonStmtContext ctx) {
+		super.enterTypeJsonStmt(ctx);
+		Field field = (Field) stack.peek();
+		StringType type = new StringType(DataType.JSON);
+		type.setLength(4294967295L);
 		field.setType(type);
 	}
 

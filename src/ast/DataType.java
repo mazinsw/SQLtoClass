@@ -16,6 +16,8 @@ public class DataType extends Node {
 	public static final int TINYINT = 12;
 	public static final int BLOB = 13;
 	public static final int DECIMAL = 14;
+	public static final int JSON = 15;
+
 	private int type;
 	
 	public DataType(int type) {
@@ -40,7 +42,7 @@ public class DataType extends Node {
 	}
 
 	public boolean isString() {
-		return getType() == STRING || getType() == TEXT || getType() == CHAR;
+		return getType() == STRING || getType() == TEXT || getType() == CHAR || getType() == JSON;
 	}
 
 	public int getSize() {

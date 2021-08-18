@@ -670,6 +670,18 @@ public interface SQLListener extends ParseTreeListener {
 	 */
 	void exitTypeLongBlobStmt(SQLParser.TypeLongBlobStmtContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code typeJsonStmt}
+	 * labeled alternative in {@link SQLParser#dataType}.
+	 * @param ctx the parse tree
+	 */
+	void enterTypeJsonStmt(SQLParser.TypeJsonStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code typeJsonStmt}
+	 * labeled alternative in {@link SQLParser#dataType}.
+	 * @param ctx the parse tree
+	 */
+	void exitTypeJsonStmt(SQLParser.TypeJsonStmtContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code typeTinyTextStmt}
 	 * labeled alternative in {@link SQLParser#dataType}.
 	 * @param ctx the parse tree

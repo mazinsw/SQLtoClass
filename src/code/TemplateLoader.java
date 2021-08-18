@@ -118,6 +118,8 @@ public class TemplateLoader {
 			return "string";
 		case DataType.TEXT:
 			return "text";
+		case DataType.JSON:
+			return "json";
 		case DataType.TIME:
 			return "time";
 		default:

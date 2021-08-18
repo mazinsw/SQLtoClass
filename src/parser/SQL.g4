@@ -112,6 +112,7 @@ dataType:
   | K_BLOB #typeBlobStmt
   | K_MEDIUMBLOB #typeMediumBlobStmt
   | K_LONGBLOB #typeLongBlobStmt
+  | K_JSON #typeJsonStmt
   | K_TINYTEXT K_BINARY?
       (K_CHARACTER K_SET charsetName)? (K_COLLATE collateName)? #typeTinyTextStmt
   | K_TEXT K_BINARY?
@@ -203,6 +204,7 @@ K_TINYBLOB: T I N Y B L O B;
 K_BLOB: B L O B;
 K_MEDIUMBLOB: M E D I U M B L O B;
 K_LONGBLOB: L O N G B L O B;
+K_JSON: J S O N;
 K_TINYTEXT: T I N Y T E X T;
 K_TEXT: T E X T;
 K_MEDIUMTEXT: M E D I U M T E X T;
@@ -217,7 +219,9 @@ K_TRUE: T R U E;
 NAME: [A-Za-z_][0-9A-Za-z_.]*;
 INT: [0-9]+;
 FLOAT: [0-9]* '.' [0-9]+;
-STRING: ('\'' (~('\'' | '\\') | '\\' ('\'' | '"' | '\\' | 'r' | 'n' | 't'))* '\'') | ('"' (~('"' | '\\') | '\\' ('\'' | '"' | '\\' | 'r' | 'n'))* '"');
+STRING:
+    ('\'' (~('\'' | '\\') | '\\' ('\'' | '"' | '\\' | 'r' | 'n' | 't'))* '\'')
+    | ('"' (~('"' | '\\') | '\\' ('\'' | '"' | '\\' | 'r' | 'n'))* '"');
 
 /* comments, spaces and line ending */
 COMMENT: '/*' .*? ( '*/' | EOF ) -> skip;
