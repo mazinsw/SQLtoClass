@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import code.CodeGenerator;
 import code.TemplateLoader;
 import util.Configuration;
 

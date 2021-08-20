@@ -105,7 +105,7 @@ public class Configuration {
 			templatePath = props.getProperty("templatePath");
 		lang = props.getProperty("lang", "pt-BR");
 		String defaultDict = "oes|aes/3/ao;is/2/l/4;res|ses/2/;es|as|os|ds/1/;ns/2/m";
-		if (lang == "en" || lang == "en-US") {
+		if (lang.equalsIgnoreCase("en") || lang.equalsIgnoreCase("en-US")) {
 			defaultDict = "ies/3/y;s/1/";
 		}
 		dictionary = props.getProperty("dict." + lang, defaultDict);
