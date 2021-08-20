@@ -14,7 +14,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
-import parser.SQLBaseListener;
+import parser.SQLParserBaseListener;
 import parser.SQLLexer;
 import parser.SQLParser;
 import parser.SQLParser.AutoIncrementContext;
@@ -74,7 +74,7 @@ import parser.SQLParser.UniqueStmtContext;
 import parser.SQLParser.UseStmtContext;
 import util.ParseComment;
 
-public class ASTBuilder extends SQLBaseListener {
+public class ASTBuilder extends SQLParserBaseListener {
 	private Stack<Node> stack;
 	private ScriptNode script;
 	private List<String> errors;
@@ -607,7 +607,13 @@ public class ASTBuilder extends SQLBaseListener {
 	@Override
 	public void enterIdName(IdNameContext ctx) {
 		super.enterIdName(ctx);
-		stack.push(new NamedNode(ctx.NAME().getText()));
+		if (ctx.ID() != null) {
+			String name = ctx.ID().getText();
+			stack.push(new NamedNode(name.substring(1, name.length() - 1)));
+		} else {
+			stack.push(new NamedNode(ctx.NAME().getText()));
+		
+		}
 	}
 
 	public ScriptNode getScript() {

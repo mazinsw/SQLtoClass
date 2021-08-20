@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS `TDispositivos` (
   `DeviceID` VARCHAR(15) NOT NULL,
   `Type` ENUM('Computer', 'Tablet') NOT NULL COMMENT 'Tipo de dispositivo[N:Type of device][E:Personal computer|Portable tablet]',
   `Descricao` VARCHAR(45) NOT NULL COMMENT '[N:Descrição][S]',
-  `Modelo` VARCHAR(45) NOT NULL,
+  `Key` VARCHAR(45) NOT NULL,
   `Ativo` BOOLEAN NOT NULL DEFAULT FALSE,
   `DataCadastro` DATETIME NOT NULL,
   `DataAtualizacao` DATETIME NULL DEFAULT NULL,

@@ -1,4 +1,4 @@
-// Generated from /home/mazinsw/Development/SQLtoClass/src/parser/SQL.g4 by ANTLR 4.8
+// Generated from /home/mazinsw/Development/SQLtoClass/src/parser/SQLParser.g4 by ANTLR 4.8
 package parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  * This interface defines a complete listener for a parse tree produced by
  * {@link SQLParser}.
  */
-public interface SQLListener extends ParseTreeListener {
+public interface SQLParserListener extends ParseTreeListener {
 	/**
 	 * Enter a parse tree produced by {@link SQLParser#script}.
 	 * @param ctx the parse tree

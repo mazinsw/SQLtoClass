@@ -237,6 +237,33 @@ public class TemplateLoader {
 	}
 
 	public static String despluralize(String word) {
+		List<String> list = new ArrayList();
+		for (String rule : list) {
+			String[] parts = rule.split("/");
+			String[] subsjects = parts[0].split("\\|"); 
+			int cut = Integer.parseInt(parts[1]);
+			String replacement = parts[2];
+			int minLength = 0;
+			if (parts.length >= 4) {
+				minLength = Integer.parseInt(parts[3]);
+			}
+			if (word.length() <= minLength) {
+				continue;
+			}
+			boolean test = false;
+			for (String endsWith: subsjects) {
+				test = test || word.endsWith(endsWith);
+			}
+			if (!test) {
+				continue;
+			}
+			word = word.substring(0, word.length() - cut) + replacement;
+			break;
+		}
+		return word;
+	}
+
+	public static String despluralizeOld(String word) {
 		if (word.endsWith("oes") || word.endsWith("aes"))
 			word = word.substring(0, word.length() - 3) + "ao";
 		else if (word.endsWith("is") && word.length() > 4)
