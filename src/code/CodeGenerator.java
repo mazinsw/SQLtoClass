@@ -199,8 +199,8 @@ public abstract class CodeGenerator implements LogListener {
 		return getTemplateLoader().upperFix(word);
 	}
 
-	public static String despluralize(String word) {
-		return TemplateLoader.despluralize(word);
+	public String despluralize(String word) {
+		return getTemplateLoader().despluralize(word);
 	}
 
 	public static String unixTransform(String word) {

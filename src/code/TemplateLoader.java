@@ -21,11 +21,13 @@ public class TemplateLoader {
 	private File templateDirectory;
 	private File ouputDirectory;
 	private String upperWords;
+	private String[] dictionaryList;
 
 	public TemplateLoader(Configuration config) {
 		files = new ArrayList<>();
 		this.templateDirectory = new File(config.getTemplatePath());
 		this.ouputDirectory = new File(config.getOutputPath());
+		this.dictionaryList = config.getDictionaryList();
 		this.setUpperWords(config.getUpperWords());
 	}
 
@@ -236,14 +238,17 @@ public class TemplateLoader {
 		return word;
 	}
 
-	public static String despluralize(String word) {
-		List<String> list = new ArrayList();
-		for (String rule : list) {
+	public String despluralize(String word) {
+		for (String rule : dictionaryList) {
 			String[] parts = rule.split("/");
 			String[] subsjects = parts[0].split("\\|"); 
 			int cut = Integer.parseInt(parts[1]);
-			String replacement = parts[2];
+			String replacement = "";
 			int minLength = 0;
+			
+			if (parts.length >= 3) {
+				replacement = parts[2];
+			}
 			if (parts.length >= 4) {
 				minLength = Integer.parseInt(parts[3]);
 			}
@@ -260,21 +265,6 @@ public class TemplateLoader {
 			word = word.substring(0, word.length() - cut) + replacement;
 			break;
 		}
-		return word;
-	}
-
-	public static String despluralizeOld(String word) {
-		if (word.endsWith("oes") || word.endsWith("aes"))
-			word = word.substring(0, word.length() - 3) + "ao";
-		else if (word.endsWith("is") && word.length() > 4)
-			word = word.substring(0, word.length() - 2) + "l";
-		else if (word.endsWith("res") || word.endsWith("ses"))
-			word = word.substring(0, word.length() - 2);
-		else if (word.endsWith("es") || word.endsWith("as")
-				|| word.endsWith("os") || word.endsWith("ds"))
-			word = word.substring(0, word.length() - 1);
-		else if (word.endsWith("ns"))
-			word = word.substring(0, word.length() - 2) + "m";
 		return word;
 	}
 	
