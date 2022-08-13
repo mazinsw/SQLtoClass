@@ -1,4 +1,4 @@
-// Generated from SQLtoClass/src/parser/SQL.g4 by ANTLR 4.8
+// Generated from /home/mazinsw/Development/SQLtoClass/src/parser/SQLParser.g4 by ANTLR 4.8
 package parser;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -6,11 +6,11 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 /**
- * This class provides an empty implementation of {@link SQLListener},
+ * This class provides an empty implementation of {@link SQLParserListener},
  * which can be extended to create a listener which only needs to handle a subset
  * of the available methods.
  */
-public class SQLBaseListener implements SQLListener {
+public class SQLParserBaseListener implements SQLParserListener {
 	/**
 	 * {@inheritDoc}
 	 *
@@ -731,6 +731,18 @@ public class SQLBaseListener implements SQLListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitTypeLongBlobStmt(SQLParser.TypeLongBlobStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTypeJsonStmt(SQLParser.TypeJsonStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTypeJsonStmt(SQLParser.TypeJsonStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

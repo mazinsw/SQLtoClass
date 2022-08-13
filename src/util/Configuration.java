@@ -18,6 +18,8 @@ public class Configuration {
 	private String outputPath;
 	private String upperWords;
 	private String templatePath;
+	private String lang;
+	private String dictionary;
 
 	public Configuration() {
 		setProjectFile("config.properties");
@@ -64,6 +66,26 @@ public class Configuration {
 		this.upperWords = upperWords;
 	}
 
+	public String getLang() {
+		return lang;
+	}
+
+	public void setLang(String lang) {
+		this.lang = lang;
+	}
+
+	public String getDictionary() {
+		return dictionary;
+	}
+
+	public String[] getDictionaryList() {
+		return dictionary.split(";");
+	}
+
+	public void setDictionary(String dictionary) {
+		this.dictionary = dictionary;
+	}
+
 	public void load() throws IOException {
 		File configFile = new File(projectFile);
 
@@ -81,6 +103,12 @@ public class Configuration {
 			outputPath = props.getProperty("outputPath");
 		if (props.containsKey("templatePath"))
 			templatePath = props.getProperty("templatePath");
+		lang = props.getProperty("lang", "pt-BR");
+		String defaultDict = "oes|aes/3/ao;is/2/l/4;res|ses/2/;es|as|os|ds/1/;ns/2/m";
+		if (lang.equalsIgnoreCase("en") || lang.equalsIgnoreCase("en-US")) {
+			defaultDict = "ies/3/y;s/1/";
+		}
+		dictionary = props.getProperty("dict." + lang, defaultDict);
 		setUpperWords(props.getProperty("upperWords"));
 		reader.close();
 	}
