@@ -1,4 +1,4 @@
-// Generated from /home/mazinsw/Development/SQLtoClass/src/parser/SQLParser.g4 by ANTLR 4.8
+// Generated from src/parser/SQLParser.g4 by ANTLR 4.8
 package parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 

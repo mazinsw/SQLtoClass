@@ -6,7 +6,13 @@
 
 lexer grammar TemplateLexer;
 
-OPEN: '[' -> pushMode(INSIDE) ;
+OPEN: '$[' -> pushMode(INSIDE);
+
+TEXT: ( ~[$] | '\\$[' | '$' ~('[') )+;
+
+mode INSIDE;
+
+CLOSE: ']' -> popMode ;
 
 K_ALL: A L L;
 K_ARRAY: A R R A Y;
@@ -71,20 +77,23 @@ K_TIME: T I M E;
 K_UNIQUE: U N I Q U E;
 K_UNIX: U N I X;
 K_WIDTH: W I D T H;
+K_FIRST: F I R S T;
+K_FEW_FIELDS: F E W '_' F I E L D S;
+K_ELSE: E L S E;
+K_ON: O N;
+K_DELETE: D E L E T E;
+K_UPDATE: U P D A T E;
+K_INSERT: I N S E R T;
+K_NOID: N O I D;
 
-TEXT: ~('[' | ']')+;
-
-mode INSIDE;
-
-CLOSE: ']' -> popMode ;
+MATCH_OPEN: K_MATCH LPAR -> pushMode(REGEX_MODE);
 
 DOT: '.';
-
 LPAR: '(';
 RPAR: ')';
+OR: '|';
 
-CHARS: [A-Za-z0-9_]+;
-REGEXS: ~[()]+;
+WORD: [A-Za-z0-9_]+;
 
 fragment A : [aA];
 fragment B : [bB];
@@ -112,3 +121,9 @@ fragment W : [wW];
 fragment X : [xX];
 fragment Y : [yY];
 fragment Z : [zZ];
+
+mode REGEX_MODE;
+
+MATCH_CLOSE: ')' -> popMode;
+
+REGEX: [A-Za-z0-9_*.+^$| ]+;
