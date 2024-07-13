@@ -302,6 +302,13 @@ public abstract class CodeGenerator implements LogListener {
 		return null;
 	}
 
+	protected boolean isPrimaryKeyField(Table table, Field field) {
+		PrimaryKey primaryKey = getPrimaryKey(table);
+		if(primaryKey == null)
+			return false;
+		return primaryKey.exists(field.getName());
+	}
+
 	protected Field getPrimary(Table table) {
 		Constraint constraint = getPrimaryKey(table);
 		if(constraint != null && constraint.getFields().size() == 1)

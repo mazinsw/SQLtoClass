@@ -19,4 +19,16 @@ public class Index extends NamedNode {
 	public void addField(OrderField field) {
 		fields.add(field);
 	}
+
+	public OrderField find(String name) {
+		for (OrderField orderField : getFields()) {
+			if(orderField.getName().equals(name))
+				return orderField;
+		}
+		return null;
+	}
+
+	public boolean exists(String name) {
+		return find(name) != null;
+	}
 }

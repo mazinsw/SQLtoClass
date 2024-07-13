@@ -74,19 +74,19 @@ $[field.else.if(enum)]
     /// <summary>
     ///   Converte uma string para o tipo T$[Table.norm]$[Field.norm]
     /// </summary>
-    /// <param name="Value">Texto que será convertido
+    /// <param name="Value">Texto que serï¿½ convertido
     /// </param>
     /// <returns>T$[Table.norm]$[Field.norm] se conseguir;
-    /// caso contrário uma Exception será lançada.
+    /// caso contrï¿½rio uma Exception serï¿½ lanï¿½ada.
     /// </returns>
     class function StringTo$[Table.norm]$[Field.norm](const Value: string): T$[Table.norm]$[Field.norm];
 $[field.end]
 $[field.end]
 
     /// <summary>
-    ///   Atribui todos os valores do parâmetro Source para a instância própria
+    ///   Atribui todos os valores do parï¿½metro Source para a instï¿½ncia prï¿½pria
     /// </summary>
-    /// <param name="Source">Instância de onde os valores serão copiados
+    /// <param name="Source">Instï¿½ncia de onde os valores serï¿½o copiados
     /// </param>
     procedure Assign(Source: T$[Table.norm]Base); virtual;
 $[field.each(all)]
@@ -212,7 +212,7 @@ begin
     if $[Table.norm]$[Field.norm]ToString[Result] = Value then
       Exit;
   end;
-  raise Exception.CreateFmt('Não foi possível converter de "%s" para T$[Table.norm]$[Field.norm]', [Value]);
+  raise Exception.CreateFmt('Nï¿½o foi possï¿½vel converter de "%s" para T$[Table.norm]$[Field.norm]', [Value]);
 end;
 $[field.end]
 $[field.end]
@@ -270,14 +270,14 @@ $[field.else.if(array)]
 function T$[Table.norm]Base.Get$[Field.norm](Index: Integer): $[field.if(integer)]Integer$[field.else.if(bigint)]Int64$[field.else.if(date|time|datetime)]TDateTime$[field.else.if(float)]Single$[field.else.if(double)]Double$[field.else.if(currency)]Boolean$[field.else.if(boolean)]$[field.else]string$[field.end];
 begin
   if (Index < 1) or (Index > $[field.array.count]) then
-    raise Exception.CreateFmt('Índice %d inválido, mínimo %d, máximo %d', [Index, 1, $[field.array.count]]);
+    raise Exception.CreateFmt('ï¿½ndice %d invï¿½lido, mï¿½nimo %d, mï¿½ximo %d', [Index, 1, $[field.array.count]]);
   Result := F$[Field.norm][Index];
 end;
 
 procedure T$[Table.norm]Base.Set$[Field.norm](Index: Integer; const Value: $[field.if(integer)]Integer$[field.else.if(bigint)]Int64$[field.else.if(date|time|datetime)]TDateTime$[field.else.if(float)]Single$[field.else.if(double)]Double$[field.else.if(currency)]Boolean$[field.else.if(boolean)]$[field.else]string$[field.end]);
 begin
   if (Index < 1) or (Index > $[field.array.count]) then
-    raise Exception.CreateFmt('Índice %d inválido, mínimo %d, máximo %d', [Index, 1, $[field.array.count]]);
+    raise Exception.CreateFmt('ï¿½ndice %d invï¿½lido, mï¿½nimo %d, mï¿½ximo %d', [Index, 1, $[field.array.count]]);
   F$[Field.norm][Index] := Value;
 end;
 $[field.end]

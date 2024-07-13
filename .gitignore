@@ -46,3 +46,5 @@ config.properties
 /bin
 .metadata/
 target/generated-sources/
+node_modules/
+coverage/

@@ -248,7 +248,8 @@ public class TemplateGenerator extends CodeGenerator {
 											doReplace = field.getName().toLowerCase().contains(filter.toLowerCase());
 										}
 									} else {
-										String[] filters = filter.split("\\|");
+										boolean andFilter = filter.contains("&");
+										String[] filters = andFilter ? filter.split("&") : filter.split("\\|");
 										Field testField = field;
 										if (command.equalsIgnoreCase("descriptor")) {
 											testField = getDescriptor(table);
@@ -280,9 +281,10 @@ public class TemplateGenerator extends CodeGenerator {
 											} else if (hasAttribute(command, table, indexedFields, testField, uFilter, values, fieldIndex, index, false)) {
 												doReplace = true;
 											}
-											if (doReplace) {
+											if ((doReplace && !andFilter) || (!doReplace && andFilter)){
 												break;
 											}
+											doReplace = false;
 										}
 									}
 								}
@@ -342,23 +344,26 @@ public class TemplateGenerator extends CodeGenerator {
 									replace += applyTemplate(replContent, table, indexedFields, field, index, constraint, values, j, tableIndex);
 									j++;
 								}
-							} else if (command.equalsIgnoreCase("field")) { // field.each[(filter)]
+							} else if (command.equalsIgnoreCase("field") || command.equalsIgnoreCase("reference")) { // field.each[(filter)]
 								int j = 0;
-								Field pkField = getPrimary(table);
-								for (Field afield : table.getFields()) {
+								Table refTable = table;
+								if (command.equalsIgnoreCase("reference") && field != null) {
+									refTable = findTable(table.getReference(field.getName()));	
+								}
+								for (Field afield : refTable.getFields()) {
 									Hashtable<String, String> newValues = new Hashtable<>();
-									TemplateLoader.extractComment(table.getComment(), newValues, "T.");
+									TemplateLoader.extractComment(refTable.getComment(), newValues, "T.");
 									TemplateLoader.extractComment(afield.getComment(), newValues, "F.");
-									if (!filter.equals("all") && (afield == pkField || newValues.containsKey("F.D")))
+									if (!filter.equals("all") && ((afield.getName().equalsIgnoreCase("id") && !filter.equals("primary")) || newValues.containsKey("F.D")))
 										continue;
 
-									if (!filter.equals("all") && !hasAttribute(command, table, indexedFields, afield, filter, newValues,
+									if (!filter.equals("all") && !hasAttribute(command, refTable, indexedFields, afield, filter, newValues,
 											j, index, true)) {
-										if (!filter.equals(TemplateLoader.getTypeNameFromType(table, afield))) {
+										if (!filter.equals(TemplateLoader.getTypeNameFromType(refTable, afield))) {
 											continue;
 										}
 									}
-									replace += applyTemplate(eachContent, table, indexedFields, afield, index, constraint, newValues, j, tableIndex);
+									replace += applyTemplate(eachContent, refTable, indexedFields, afield, index, constraint, newValues, j, tableIndex);
 									j++;
 								}
 							} else if (command.equalsIgnoreCase("table")) { // table.each[(filter)]
@@ -407,6 +412,17 @@ public class TemplateGenerator extends CodeGenerator {
 								}
 								if (command.equalsIgnoreCase("primarykey")) {
 									sourceIndex = getPrimaryKey(table);
+								}
+								if (sourceIndex == null && field != null) {
+									if (command.equalsIgnoreCase("foreign")) {
+										sourceIndex = table.findForeignKey(field.getName());
+									} else if (command.equalsIgnoreCase("constraint")) {
+										sourceIndex = table.findConstraint(field.getName());
+									} else if (command.equalsIgnoreCase("index")) {
+										sourceIndex = table.findIndex(field);
+									} else {
+										sourceIndex = table.getUniqueIndex(field);
+									}
 								}
 								if (sourceIndex != null) {
 									for (OrderField ofield : sourceIndex.getFields()) {
@@ -721,16 +737,30 @@ public class TemplateGenerator extends CodeGenerator {
 		if (
 			command.equalsIgnoreCase("index") ||
 			command.equalsIgnoreCase("unique") ||
+			command.equalsIgnoreCase("foreign") ||
+			command.equalsIgnoreCase("constraint") ||
 			command.equalsIgnoreCase("reference") ||
 			command.equalsIgnoreCase("primary")
 		) {
+			Index selectedIndex = index;
+			if (selectedIndex == null && field != null) {
+				if (command.equalsIgnoreCase("foreign")) {
+					selectedIndex = table.findForeignKey(field.getName());
+				} else if (command.equalsIgnoreCase("constraint")) {
+					selectedIndex = table.findConstraint(field.getName());
+				} else if (command.equalsIgnoreCase("index")) {
+					selectedIndex = table.findIndex(field);
+				} else {
+					selectedIndex = table.getUniqueIndex(field);
+				}
+			}
 			switch (filter) {
 			case "few_fields":
-				return index != null && index.getFields().size() < 5;
+				return selectedIndex != null && selectedIndex.getFields().size() < 5;
 			case "many":
-				return index != null && index.getFields().size() >= 2;
+				return selectedIndex != null && selectedIndex.getFields().size() >= 2;
 			case "single":
-				return index != null && index.getFields().size() == 1;
+				return selectedIndex != null && selectedIndex.getFields().size() == 1;
 			}
 		}
 		if(field == null)
@@ -743,8 +773,7 @@ public class TemplateGenerator extends CodeGenerator {
 		case "default":
 			return field.getValue() != null;
 		case "primary":
-			Field pkField = getPrimary(table);
-			return pkField != null && field.equals(pkField);
+			return isPrimaryKeyField(table, field);
 		case "descriptor":
 			return values.containsKey("F.S") && values.get("F.S").isEmpty();
 		case "searchable":

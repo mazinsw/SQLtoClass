@@ -80,14 +80,6 @@ public class ForeignKey extends Constraint {
 		}
 	}
 
-	public boolean find(String name) {
-		for (OrderField orderField : getFields()) {
-			if(orderField.getName().equals(name))
-				return true;
-		}
-		return false;
-	}
-
 	public String getDeleteActionText() {
 		switch (deleteAction) {
 		case CASCADE:

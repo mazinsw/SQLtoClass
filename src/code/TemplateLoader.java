@@ -240,6 +240,9 @@ public class TemplateLoader {
 
 	public String despluralize(String word) {
 		for (String rule : dictionaryList) {
+			if (rule.isEmpty()) {
+				continue;
+			}
 			String[] parts = rule.split("/");
 			String[] subsjects = parts[0].split("\\|"); 
 			int cut = Integer.parseInt(parts[1]);

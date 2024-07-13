@@ -24,6 +24,7 @@ public class Configuration {
 	public Configuration() {
 		setProjectFile("config.properties");
 		setTemplatePath("template/");
+		setDictionary("");
 	}
 	
 	public String getProjectFile() {

@@ -54,7 +54,7 @@ public class Table extends CommentedNode {
 		for (Constraint constraint : constraints) {
 			if(constraint instanceof ForeignKey) {
 				ForeignKey foreign = (ForeignKey)constraint;
-				if(foreign.find(fieldName))
+				if(foreign.exists(fieldName))
 					return foreign;
 			}
 		}
@@ -83,5 +83,24 @@ public class Table extends CommentedNode {
 		}
 		return null;
 	}
-	
+
+	public Index findIndex(Field field) {
+		for (Index index : indexes) {
+			for (OrderField oField : index.getFields()) {
+				if(oField.getName().equalsIgnoreCase(field.getName()))
+					return index;
+			}
+		}
+		return null;
+	}
+
+	public Constraint findConstraint(String fieldName) {
+		for (Constraint constraint : constraints) {
+			for (OrderField oField : constraint.getFields()) {
+				if(oField.getName().equalsIgnoreCase(fieldName))
+					return constraint;
+			}
+		}
+		return null;
+	}
 }
