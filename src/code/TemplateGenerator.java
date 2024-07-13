@@ -257,6 +257,7 @@ public class TemplateGenerator extends CodeGenerator {
 											testField = getPrimary(table);
 										}
 										for (String uFilter : filters) {
+											doReplace = false;
 											if (stmt.equals("exists")) {
 												Hashtable<String, String> tableValues = new Hashtable<>();
 												Hashtable<String, String> newValues = new Hashtable<>();
@@ -284,7 +285,6 @@ public class TemplateGenerator extends CodeGenerator {
 											if ((doReplace && !andFilter) || (!doReplace && andFilter)){
 												break;
 											}
-											doReplace = false;
 										}
 									}
 								}
