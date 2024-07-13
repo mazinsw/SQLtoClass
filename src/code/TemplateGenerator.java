@@ -716,14 +716,21 @@ public class TemplateGenerator extends CodeGenerator {
 			switch (filter) {
 			case "primary":
 				return table.getConstraints().get(eachIndex) instanceof PrimaryKey;
-			case "few_fields":
-				return index != null && index.getFields().size() < 5;
 			}
 		}
-		if (command.equalsIgnoreCase("index")) {
+		if (
+			command.equalsIgnoreCase("index") ||
+			command.equalsIgnoreCase("unique") ||
+			command.equalsIgnoreCase("reference") ||
+			command.equalsIgnoreCase("primary")
+		) {
 			switch (filter) {
 			case "few_fields":
 				return index != null && index.getFields().size() < 5;
+			case "many":
+				return index != null && index.getFields().size() >= 2;
+			case "single":
+				return index != null && index.getFields().size() == 1;
 			}
 		}
 		if(field == null)
@@ -766,6 +773,10 @@ public class TemplateGenerator extends CodeGenerator {
 			return eachIndex == 0;
 		case "few_fields":
 			return field.getType().getType() != DataType.ENUM || ((EnumType)field.getType()).getElements().size() < 5;
+		case "many":
+			return field.getType().getType() != DataType.ENUM || ((EnumType)field.getType()).getElements().size() >= 2;
+		case "single":
+			return field.getType().getType() != DataType.ENUM || ((EnumType)field.getType()).getElements().size() == 1;
 		case "comment":
 		case "description":
 			String comment = TemplateLoader.extractComment(field.getComment());
