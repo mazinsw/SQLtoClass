@@ -646,7 +646,7 @@ public class TemplateGenerator extends CodeGenerator {
 						} else if (option.equals("id")) {
 							replace = TemplateLoader.getValueByIndex(values.get("T.ID"), 0, "");
 						} else {
-							replace = table.getName();
+							replace = getTemplateLoader().recase(command, table.getName());
 						}
 					} else if (command.equalsIgnoreCase("reference")) {
 						if (field != null) {
