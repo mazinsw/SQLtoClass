@@ -1,4 +1,4 @@
-// Generated from /home/mazinsw/Development/SQLtoClass/src/parser/SQLParser.g4 by ANTLR 4.8
+// Generated from /home/mazinsw/Development/SQLtoClass/src/parser/SQLParser.g4 by ANTLR 4.13.2
 package parser;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -227,6 +227,18 @@ public class SQLParserBaseListener implements SQLParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitIndexStmt(SQLParser.IndexStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFulltextStmt(SQLParser.FulltextStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFulltextStmt(SQLParser.FulltextStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

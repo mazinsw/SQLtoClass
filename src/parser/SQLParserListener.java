@@ -1,4 +1,4 @@
-// Generated from /home/mazinsw/Development/SQLtoClass/src/parser/SQLParser.g4 by ANTLR 4.8
+// Generated from /home/mazinsw/Development/SQLtoClass/src/parser/SQLParser.g4 by ANTLR 4.13.2
 package parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -193,6 +193,18 @@ public interface SQLParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitIndexStmt(SQLParser.IndexStmtContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code fulltextStmt}
+	 * labeled alternative in {@link SQLParser#createDefinition}.
+	 * @param ctx the parse tree
+	 */
+	void enterFulltextStmt(SQLParser.FulltextStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code fulltextStmt}
+	 * labeled alternative in {@link SQLParser#createDefinition}.
+	 * @param ctx the parse tree
+	 */
+	void exitFulltextStmt(SQLParser.FulltextStmtContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code uniqueStmt}
 	 * labeled alternative in {@link SQLParser#createDefinition}.

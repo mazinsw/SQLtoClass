@@ -51,6 +51,7 @@ fieldList: (createDefinition ',')* createDefinition;
 createDefinition: columnName columnDefinition #fieldStmt
     | (K_CONSTRAINT constraintName?)? K_PRIMARY K_KEY '(' (indexColName ',')* indexColName ')' #primaryKeyStmt
     | (K_INDEX|K_KEY) constraintName? '(' (indexColName ',')* indexColName ')' #indexStmt
+    | K_FULLTEXT (K_INDEX|K_KEY) constraintName? '(' (indexColName ',')* indexColName ')' #fulltextStmt
     | (K_CONSTRAINT constraintName?)? K_UNIQUE (K_INDEX|K_KEY)?
         constraintTable? '(' (indexColName ',')* indexColName ')' #uniqueStmt
     | (K_CONSTRAINT constraintName?)? K_FOREIGN K_KEY

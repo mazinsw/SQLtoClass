@@ -6,6 +6,6 @@
         "visitors": false,
         "package": "parser",
         "outputDir": ".",
-        "alternativeJar": "../../lib/antlr-4.8-complete.jar"
+        "alternativeJar": "../../lib/antlr-4.13.2-complete.jar"
     }
 }

@@ -34,6 +34,7 @@ import parser.SQLParser.DropTableNameContext;
 import parser.SQLParser.FieldCommentContext;
 import parser.SQLParser.FieldStmtContext;
 import parser.SQLParser.ForeignStmtContext;
+import parser.SQLParser.FulltextStmtContext;
 import parser.SQLParser.IdNameContext;
 import parser.SQLParser.IndexColNameContext;
 import parser.SQLParser.IndexStmtContext;
@@ -377,6 +378,8 @@ public class ASTBuilder extends SQLParserBaseListener {
 			value = new FloatValue(ctx.FLOAT().getText());
 		else if (ctx.BOOL() != null)
 			value = new BooleanValue(ctx.BOOL().getText());
+		else if (ctx.K_NULL() != null)
+			value = new StringValue("null");
 		stack.push(value);
 	}
 	
@@ -434,6 +437,27 @@ public class ASTBuilder extends SQLParserBaseListener {
 		table.addIndex(index);
 		stack.push(index);
 	}
+
+	@Override
+	public void exitIndexStmt(IndexStmtContext ctx) {
+		super.exitIndexStmt(ctx);
+		stack.pop();
+	}
+	
+	@Override
+	public void enterFulltextStmt(FulltextStmtContext ctx) {
+		super.enterFulltextStmt(ctx);
+		FulltextIndex fi = new FulltextIndex();
+		Table table = (Table) stack.peek();
+		table.addIndex(fi);
+		stack.push(fi);
+	}
+	
+	@Override
+	public void exitFulltextStmt(FulltextStmtContext ctx) {
+		super.exitFulltextStmt(ctx);
+		stack.pop();
+	}
 	
 	@Override
 	public void enterAutoIncrement(AutoIncrementContext ctx) {
@@ -447,12 +471,6 @@ public class ASTBuilder extends SQLParserBaseListener {
 		super.enterFieldComment(ctx);
 		Field field = (Field) stack.peek();
 		field.setComment(ParseComment.parse(ctx.STRING().getText()));
-	}
-
-	@Override
-	public void exitIndexStmt(IndexStmtContext ctx) {
-		super.exitIndexStmt(ctx);
-		stack.pop();
 	}
 
 	@Override

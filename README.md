@@ -78,6 +78,8 @@ table.norm = Table name normalized and despluralized
 table.norm.default = Table name normalized without despluralize
 table.name = Beautiful name of table
 table.name.plural = Beautiful name of table on plural
+table.style = css style of table
+table.style.extra = css extra style of table
 table.info = Describe the table functionality
 table.comment = Comment of table or each comment line wrapped when in loop
 table.gender = table gender
@@ -86,9 +88,12 @@ table.letter = first char of table name
 table.package =  defined package for table
 table.inherited =  defined package for table
 table.path =  defined path for class file
-table.if(attribute) = table condition, attributes: comment, inherited, package, path
+table.order = left zero padded table order
+table.if(attribute) = table condition, attributes: comment, inherited, package, path, unpluralizable, pluralizable, index, unique
 table.exists(type|attribute) = check if the table contains a field with matching type or attribute
 	example: $[table.exists(comment)] = check if table has commentary
+table.finds(column_name) = check if the table contains a field called column_name
+	example: $[table.finds(.*_at)] = check if table has field name as date
 table.each = for each all tables
 	example: table.each(index), for each all index
 	example: table.each(unique), for each unique index including primary
@@ -96,8 +101,10 @@ table.each = for each all tables
 	example: table.each(constraint), for each all constraint including primary and unique index
 	example: table.each(foreign), for each all foreign key
 	example: table.each(comment), for each comment line wrapped
+table.end = end table exists condition or each loop
 index.name = index name
 index.each(type|attribute) = for each field of index
+index.if(attribute) = few_fields, fulltext
 unique.name = unique index name
 unique.each(type|attribute) = for each field of unique index
 primarykey.name = primary key index
@@ -109,14 +116,12 @@ foreign.each(type|attribute) = for each field of foreign key
 inherited =  inherited table
 primary = primary key field have all field properties, when primary key have only one field
 descriptor = main field of table, have all field properties
-table.end = end table exists condition or each loop
-table.style = css style of table
 reference = referenced table by field or constraint, have all table commands
-*reference.each(type|attribute) = for each field of referenced constraint table
+*reference.each(type|attribute&all) = for each field of referenced constraint table
 field = name of table field
 field.unix = name of field in unix format
 field.norm = name of field normalized
-table.norm.singular = Table name normalized on singular
+field.norm.singular = Table name normalized on singular
 field.name = Beautiful name of table field
 field.info = Describe the field functionality
 field.comment = Comment of the field or each comment line wrapped when in loop
@@ -133,14 +138,14 @@ field.size = Size of the field in bytes
 *field.length = Length of the string field
 field.each = for each field process content
 *	example: field.each(primary), for each primary key fields
-	example: field.each(reference)
+	example: field.each(reference & required)
 	example: field.each(comment), for each comment line wrapped
 	example: field.each(search)
 	example: field.each(option), for each option of field(enum items)
 	example: field.each(all), for each all table field
 field.end = end each loop
 field.if(type|attribute) = test if field type or has attributes
-	types: reference, primary, repeated, few_fields, many, single, null, default, info, descriptor, searchable, comment, description, unique, radio, masked, array, image, integer, bigint, string, text, boolean, currency, double, float, date, datetime, time, enum, blob
+	types: reference, primary, repeated, few_fields, many, single, first, non_first, null, optional, non_null, not_null, required, default, info, descriptor, searchable, comment, description, unique, radio, masked, array, image, integer, bigint, string, text, boolean, currency, double, float, date, datetime, time, enum, blob
 	example: field.if(reference)
 field.else = when if condition is false (must be the last before field.end)
 field.else.if(type|attribute) = when if condition is false and make a test if field type or has attributes

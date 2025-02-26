@@ -103,4 +103,17 @@ public class Table extends CommentedNode {
 		}
 		return null;
 	}
+
+	public int getUniqueIndexCount() {
+		int count = 0;
+		for (Constraint constraint : constraints) {
+			if (constraint instanceof PrimaryKey) {
+				continue;
+			}
+			if (constraint instanceof UniqueKey) {
+				count++;
+			}
+		}
+		return count;
+	}
 }
