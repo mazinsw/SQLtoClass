@@ -102,6 +102,8 @@ public class TemplateLoader {
 			return "date";
 		case DataType.DATETIME:
 			return "datetime";
+		case DataType.TIMESTAMP:
+			return "timestamp";
 		case DataType.ENUM:
 			return "enum";
 		case DataType.FLOAT:

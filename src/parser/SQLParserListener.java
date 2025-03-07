@@ -1,4 +1,4 @@
-// Generated from /home/mazinsw/Development/SQLtoClass/src/parser/SQLParser.g4 by ANTLR 4.13.2
+// Generated from /Users/mazinsw/Development/github/sqltoclass/src/parser/SQLParser.g4 by ANTLR 4.13.2
 package parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -319,6 +319,16 @@ public interface SQLParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitFieldComment(SQLParser.FieldCommentContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#autoIncrementValue}.
+	 * @param ctx the parse tree
+	 */
+	void enterAutoIncrementValue(SQLParser.AutoIncrementValueContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#autoIncrementValue}.
+	 * @param ctx the parse tree
+	 */
+	void exitAutoIncrementValue(SQLParser.AutoIncrementValueContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SQLParser#referenceDefinition}.
 	 * @param ctx the parse tree

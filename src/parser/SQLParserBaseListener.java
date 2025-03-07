@@ -1,4 +1,4 @@
-// Generated from /home/mazinsw/Development/SQLtoClass/src/parser/SQLParser.g4 by ANTLR 4.13.2
+// Generated from /Users/mazinsw/Development/github/sqltoclass/src/parser/SQLParser.g4 by ANTLR 4.13.2
 package parser;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -371,6 +371,18 @@ public class SQLParserBaseListener implements SQLParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitFieldComment(SQLParser.FieldCommentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAutoIncrementValue(SQLParser.AutoIncrementValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAutoIncrementValue(SQLParser.AutoIncrementValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

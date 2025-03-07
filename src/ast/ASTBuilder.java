@@ -66,6 +66,7 @@ import parser.SQLParser.TypeMediumBlobStmtContext;
 import parser.SQLParser.TypeMediumTextStmtContext;
 import parser.SQLParser.TypeNumericStmtContext;
 import parser.SQLParser.TypeTextStmtContext;
+import parser.SQLParser.TypeTimeStampStmtContext;
 import parser.SQLParser.TypeTimeStmtContext;
 import parser.SQLParser.TypeTinyBlobStmtContext;
 import parser.SQLParser.TypeTinyIntStmtContext;
@@ -241,7 +242,15 @@ public class ASTBuilder extends SQLParserBaseListener {
 		DataType type = new DataType(DataType.DATETIME);
 		field.setType(type);
 	}
-	
+
+	@Override
+	public void enterTypeTimeStampStmt(TypeTimeStampStmtContext ctx) {
+		super.enterTypeTimeStampStmt(ctx);
+		Field field = (Field) stack.peek();
+		DataType type = new DataType(DataType.TIMESTAMP);
+		field.setType(type);
+	}
+
 	@Override
 	public void enterTypeBooleanStmt(TypeBooleanStmtContext ctx) {
 		super.enterTypeBooleanStmt(ctx);
@@ -378,6 +387,8 @@ public class ASTBuilder extends SQLParserBaseListener {
 			value = new FloatValue(ctx.FLOAT().getText());
 		else if (ctx.BOOL() != null)
 			value = new BooleanValue(ctx.BOOL().getText());
+		else if (ctx.K_CURRENT_TIMESTAMP() != null)
+			value = new LiteralValue(ctx.K_CURRENT_TIMESTAMP().getText());
 		else if (ctx.K_NULL() != null)
 			value = new StringValue("null");
 		stack.push(value);

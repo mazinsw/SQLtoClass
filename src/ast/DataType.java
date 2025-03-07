@@ -17,6 +17,7 @@ public class DataType extends Node {
 	public static final int BLOB = 13;
 	public static final int DECIMAL = 14;
 	public static final int JSON = 15;
+	public static final int TIMESTAMP = 16;
 
 	private int type;
 	
@@ -50,6 +51,7 @@ public class DataType extends Node {
 		case DOUBLE:
 		case BIGINT:
 		case DATETIME:
+		case TIMESTAMP:
 			return 8;
 		case INTEGER:
 		case FLOAT:

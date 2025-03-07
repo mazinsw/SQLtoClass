@@ -27,6 +27,7 @@ createSchema: K_CREATE (K_DATABASE | K_SCHEMA) (K_IF K_NOT K_EXISTS)? idName
 createSpecification:
     K_DEFAULT? K_CHARACTER K_SET '='? charsetName
   | K_DEFAULT? K_COLLATE '='? collateName
+  | K_AUTO_INCREMENT '=' autoIncrementValue
   | K_COMMENT '=' tableComment;
 
 tableComment: STRING;
@@ -72,6 +73,7 @@ columnDefaultValue: defaultValue;
 columnNull: K_NULL;
 columnNotNull: K_NOT K_NULL;
 fieldComment: STRING;
+autoIncrementValue: INT;
 
 referenceDefinition:
       K_REFERENCES referenceTable '(' (indexColName ',')* indexColName ')'
@@ -136,7 +138,7 @@ collateName: idName;
 referenceOption:
    K_RESTRICT | K_CASCADE | (K_SET K_NULL) | (K_NO K_ACTION);
 
-defaultValue: INT | STRING | FLOAT | BOOL | K_NULL;
+defaultValue: INT | STRING | FLOAT | BOOL | K_NULL | K_CURRENT_TIMESTAMP;
 tableOptions: option*;
 
 option: NAME '=' NAME | createSpecification;
